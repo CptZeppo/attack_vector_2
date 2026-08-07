@@ -9,13 +9,14 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.iam.user.UserEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
 import org.n1.av2.run.terminal.inside.CommandMoveService
 import org.n1.av2.run.terminal.inside.InsideTerminalHelper
 import org.springframework.stereotype.Service
 
 
-const val USER_NOT_FOUND_IN_RUN = "[error]User not found in this run.[/] "
+const val USER_NOT_FOUND_IN_RUN = "command.jumpToHacker.error.userNotInRun"
 @Service
 class CommandJumpToHackerService(
     private val connectionService: ConnectionService,
@@ -26,11 +27,12 @@ class CommandJumpToHackerService(
     private val hackerStateEntityService: HackerStateEntityService,
     private val hackerStateRepo: HackerStateRepo,
     private val currentUserService: CurrentUserService,
+    private val messageService: MessageService,
 ) {
 
     fun processCommand(arguments: List<String>, hackerState: HackerStateRunning) {
         if (!skillService.currentUserHasSkill(SkillType.JUMP_TO_HACKER)) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(MISSING_SKILL_RESPONSE))
             return
         }
 
@@ -38,25 +40,25 @@ class CommandJumpToHackerService(
         requireNotNull(hackerState.currentNodeId)
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing [info]<user name>[/], for example: [b]slide[info] angler[/].")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.jumpToHacker.missing"))
             return
         }
         val userName = arguments.first()
 
         val targetUser = userService.findByNameIgnoreCase(userName)
         if (targetUser == null) {
-            connectionService.replyTerminalReceive(USER_NOT_FOUND_IN_RUN)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(USER_NOT_FOUND_IN_RUN))
             return
         }
 
         val hackerStateForTarget = hackerStateEntityService.retrieveForUserId(targetUser.id)
         if (hackerStateForTarget.runId != hackerState.runId) {
-            connectionService.replyTerminalReceive(USER_NOT_FOUND_IN_RUN)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(USER_NOT_FOUND_IN_RUN))
             return
         }
 
         if (hackerStateForTarget.activity != HackerActivity.INSIDE) {
-            connectionService.replyTerminalReceive("[error]User is not inside the site.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.jumpToHacker.error.userNotInside"))
             return
         }
 
@@ -64,11 +66,11 @@ class CommandJumpToHackerService(
         requireNotNull(targetNodeId)
 
         if (hackerState.currentNodeId == targetNodeId) {
-            connectionService.replyTerminalReceive("[error]You are already at the same node.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.jumpToHacker.error.sameNode"))
             return
         }
 
-        connectionService.replyTerminalReceive("Jumping to ${targetUser.name}.")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.jumpToHacker.jump", targetUser.name))
 
         val newPosition = hackerState.toState().copy( currentNodeId = targetNodeId)
         hackerStateRepo.save(newPosition)

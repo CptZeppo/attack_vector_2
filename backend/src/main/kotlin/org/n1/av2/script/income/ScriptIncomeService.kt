@@ -9,6 +9,7 @@ import org.n1.av2.platform.iam.user.SCRIPT_INCOME_USER
 import org.n1.av2.platform.iam.user.UserEntityService
 import org.n1.av2.platform.util.TimeService
 import org.n1.av2.platform.util.createId
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.credittransaction.CreditTransactionService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -22,21 +23,22 @@ class ScriptIncomeService(
     private val userEntityService: UserEntityService,
     private val currentUserService: CurrentUserService,
     private val creditTransactionService: CreditTransactionService,
+    private val messageService: MessageService
     ) {
 
 
     fun collect() {
         val allIncomeDates = scriptIncomeDateRepository.findAll()
-        val incomeDateToday = allIncomeDates.find { timeService.currentPayoutDate() == it.date} ?: error("No income date for today found.")
+        val incomeDateToday = allIncomeDates.find { timeService.currentPayoutDate() == it.date} ?: error(messageService.getMessage("income.collect.today.no"))
 
-        if (incomeDateToday.collectedByUserIds.contains(currentUserService.userId)) error("You have already collected your script credits for today.")
+        if (incomeDateToday.collectedByUserIds.contains(currentUserService.userId)) error(messageService.getMessage("income.collect.today.already"))
 
         val incomeSkill =
-            hackerSkillRepo.findByUserId(currentUserService.userId).find { it.type == SkillType.SCRIPT_CREDITS } ?: error("You don't access to script credits")
+            hackerSkillRepo.findByUserId(currentUserService.userId).find { it.type == SkillType.SCRIPT_CREDITS } ?: error(messageService.getMessage("income.collect.credit.noAcces"))
         val incomeValue = incomeSkill.value?.toIntOrNull() ?: 0
-        if (incomeValue <= 0) error("You don't access to script credits income")
+        if (incomeValue <= 0) error(messageService.getMessage("income.collect.noAcces"))
 
-        creditTransactionService.transferCredits(SCRIPT_INCOME_USER.id, incomeSkill.userId, incomeValue, "Income")
+        creditTransactionService.transferCredits(SCRIPT_INCOME_USER.id, incomeSkill.userId, incomeValue, messageService.getMessage("income.collect.description"))
         creditTransactionService.sendTransactionsForUser(incomeSkill.userId)
 
         val updatedIncomeDate = incomeDateToday.copy(
@@ -80,13 +82,13 @@ class ScriptIncomeService(
     }
 
     fun addIncomeDateRange(start: LocalDate, end: LocalDate) {
-        if (end.isBefore(start)) error("end date must be after start date")
+        if (end.isBefore(start)) error(messageService.getMessage("income.date.after"))
         start.datesUntil(end.plusDays(1)).forEach { date -> addIncomeDate(date) }
     }
 
     private fun addIncomeDate(date: LocalDate) {
         if (scriptIncomeDateRepository.findAll().any { it.date == date }) {
-            error("Income date for $date already exists")
+            error(messageService.getMessage("income.date.alreadyExists", date))
         }
         val id = createId("incomeDate", scriptIncomeDateRepository::findById)
         val newIncomeDate = ScriptIncomeDate(id, date, emptyList())

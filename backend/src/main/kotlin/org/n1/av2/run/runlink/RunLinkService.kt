@@ -9,6 +9,7 @@ import org.n1.av2.platform.iam.user.UserEntity
 import org.n1.av2.run.entity.NodeScanStatus
 import org.n1.av2.run.entity.Run
 import org.n1.av2.run.entity.RunEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.site.entity.SitePropertiesEntityService
 import org.springframework.stereotype.Service
@@ -20,6 +21,7 @@ class RunLinkService(
     private val currentUserService: CurrentUserService,
     private val connectionService: ConnectionService,
     private val runLinkEntityService: RunLinkEntityService,
+    private val messageService: MessageService,
 ) {
 
     fun deleteRunLink(runId: String) {
@@ -41,11 +43,11 @@ class RunLinkService(
 
     fun shareRun(runId: String, userEntity: UserEntity, sendFeedback: Boolean) {
         if (runLinkEntityService.hasUserRunLink(userEntity, runId)) {
-            if (sendFeedback) connectionService.replyTerminalReceive("[info]${userEntity.name}[/] already has this run.")
+            if (sendFeedback) connectionService.replyTerminalReceive(messageService.getMessageAsLines("run.link.already", userEntity.name))
             return
         }
         runLinkEntityService.createRunLink(runId, userEntity)
-        if (sendFeedback) connectionService.replyTerminalReceive("Shared run with [info]${userEntity.name}[/].")
+        if (sendFeedback) connectionService.replyTerminalReceive(messageService.getMessageAsLines("run.link.shared", userEntity.name))
 
         val myUserName = currentUserService.userEntity.name
 
@@ -53,11 +55,11 @@ class RunLinkService(
         val siteProperties = sitePropertiesEntityService.getBySiteId(scan.siteId)
 
         if (sendFeedback) {
-            connectionService.toUser(userEntity.id, SERVER_NOTIFICATION, NotyMessage(NotyType.NEUTRAL, myUserName, "Scan shared for: ${siteProperties.name}"))
+            connectionService.toUser(userEntity.id, SERVER_NOTIFICATION, NotyMessage(NotyType.NEUTRAL, myUserName, messageService.getMessage("run.link.scan.shared", siteProperties.name)))
             connectionService.toUser(
                 userEntity.id,
                 SERVER_TERMINAL_RECEIVE,
-                ConnectionService.TerminalReceive(TERMINAL_MAIN, arrayOf("[warn]${myUserName}[/] shared scan: [info]${siteProperties.name}[/]"))
+                ConnectionService.TerminalReceive(TERMINAL_MAIN, messageService.getMessageAsLines("run.link.scan.shared.info", myUserName, siteProperties.name).toTypedArray())
             )
 
             sendRunInfosToUser(userEntity.id)

@@ -5,6 +5,7 @@ import org.n1.av2.hacker.hackerstate.HackerState
 import org.n1.av2.hacker.hackerstate.HackerStateRepo
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.iam.user.UserEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.generic.SocialTerminalService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
@@ -23,6 +24,7 @@ class JumpToHackerEffectService(
     private val hackerStateRepo: HackerStateRepo,
     private val userEntityService: UserEntityService,
     private val jumpEffectHelper: JumpEffectHelper,
+    private val messageService: MessageService
     ) : ScriptEffectInterface {
 
     override val name = "Jump to hacker"
@@ -42,7 +44,7 @@ class JumpToHackerEffectService(
 
         val user = userEntityService.findByNameIgnoreCase(userName)
         if (user == null) {
-            return ScriptExecution(SocialTerminalService.hackerNotFound(userName))
+            return ScriptExecution(SocialTerminalService.hackerNotFound(userName, messageService))
         }
 
         val targetHackerRunState: HackerState = hackerStateRepo.findById(user.id).orElse(null) ?: return ScriptExecution("${userName} is not in this run.")

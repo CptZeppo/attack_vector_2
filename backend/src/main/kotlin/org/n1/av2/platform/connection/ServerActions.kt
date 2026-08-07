@@ -25,7 +25,7 @@ enum class ServerActions {
     SERVER_UPDATE_NETWORK_ID,
     SERVER_UPDATE_LAYER,
 
-    SERVER_UPDATE_SITE_STATE,       // Report errors messages
+    SERVER_UPDATE_SITE_STATE,       // Report errors messages.properties
 
     SERVER_ADD_LAYER,
     SERVER_NODE_UPDATED,
@@ -53,7 +53,7 @@ enum class ServerActions {
     SERVER_UPDATE_RUN_INFO,         // Scan info has changed (as displayed on home screen)
     SERVER_SITE_DISCOVERED,         // Result of scan site for name
     SERVER_ENTERING_RUN,            // Step 1 of entering a run: frontend can subscribe to topics and wait for SERVER_ENTERED_RUN
-    SERVER_ENTERED_RUN,             // Step 2 of entering a run: frontend can now start processing messages for this run
+    SERVER_ENTERED_RUN,             // Step 2 of entering a run: frontend can now start processing messages.properties for this run
     SERVER_RUN_TIMER,               // Optional resending of timer info for a site (at request of client)
 
     SERVER_RESET_ICE,               // Sent to ICE when site is reset and hacking stops. Also triggered by RotateIceEffectService

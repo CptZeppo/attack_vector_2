@@ -14,6 +14,7 @@ import org.n1.av2.script.type.ScriptTypeService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import jakarta.annotation.PostConstruct
+import org.n1.av2.run.local.MessageService
 
 @Configuration
 class ScriptAccessServiceInit(
@@ -37,6 +38,7 @@ class ScriptAccessService(
     private val scriptEffectTypeLookup: ScriptEffectTypeLookup,
     private val timeService: TimeService,
     private val userEntityService: UserEntityService,
+    private val messageService: MessageService,
 ) {
 
     lateinit var userAndHackerService: UserAndHackerService
@@ -174,9 +176,9 @@ class ScriptAccessService(
         copyScriptAccess(from, to)
 
         if (existingAccess.isNotEmpty()) {
-            connectionService.replyNotificationError("${to.name} already has some script access, nothing was overwritten.")
+            connectionService.replyNotificationError(messageService.getMessage("script.access.already", to.name))
         }
-        connectionService.replyNotificationNeutral("Copied script access from ${from.name} to ${to.name}.")
+        connectionService.replyNotificationNeutral(messageService.getMessage("script.access.copy",from.name, to.name))
     }
 
 

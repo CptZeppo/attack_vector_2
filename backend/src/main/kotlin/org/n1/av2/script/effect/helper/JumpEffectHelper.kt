@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRepo
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.iam.user.CurrentUserService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.scanning.BlockedPathException
 import org.n1.av2.run.scanning.TraverseNode
 import org.n1.av2.run.scanning.TraverseNodeService
@@ -28,6 +29,7 @@ class JumpEffectHelper(
     private val commandMoveService: CommandMoveService,
     private val currentUserService: CurrentUserService,
     private val hackerStateRepo: HackerStateRepo,
+    private val messageService: MessageService
 ) {
 
     fun jump(effect: ScriptEffect, siteId: String, currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
@@ -39,10 +41,10 @@ class JumpEffectHelper(
     }
 
     private fun jumpIgnoringIce(currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
-        if (targetNodeId == currentNodeId) return ScriptExecution("Cannot jump to the current node.")
+        if (targetNodeId == currentNodeId) return ScriptExecution(messageService.getMessage("script.effect.jump.currentNode"))
 
         return ScriptExecution(TerminalState.KEEP_LOCKED) {
-            connectionService.replyTerminalReceive("Jumping to ${targetDescription}.")
+            connectionService.replyTerminalReceive(messageService.getMessage("script.effect.jump.to"))
             setPreviousNode(hackerState, targetNodeId)
             commandMoveService.moveArrive(targetNodeId, currentUserService.userId, hackerState.runId)
         }
@@ -56,13 +58,13 @@ class JumpEffectHelper(
     }
 
     private fun jumpBlockedByIce(siteId: String, currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
-        if (targetNodeId == currentNodeId) return ScriptExecution("Cannot jump to the current node.")
+        if (targetNodeId == currentNodeId) return ScriptExecution(messageService.getMessage("script.effect.jump.currentNode"))
 
         val nodes: List<Node> = nodeEntityService.findBySiteId(siteId)
 
 
         val currentNode = nodeEntityService.findById(currentNodeId)
-        if (currentNode.unhackedIce) return ScriptExecution("Cannot jump from a node with unhacked ICE.")
+        if (currentNode.unhackedIce) return ScriptExecution(messageService.getMessage("script.effect.jump.toIce"))
 
         val (start, traverseNodesById) = traverseNodeService.createTraverseNodesWithDistance(siteId, currentNodeId, nodes, targetNodeId)
         val targetTraverseNode = traverseNodesById[targetNodeId] ?: error("Target node not found in traverse nodes.")
@@ -71,10 +73,10 @@ class JumpEffectHelper(
             TraverseNode.createPath(start, targetTraverseNode)
         }
         catch (_: BlockedPathException) {
-            return ScriptExecution("Cannot jump to that node, ICE blocks the path.")
+            return ScriptExecution(messageService.getMessage("script.effect.jump.pathBlocked"))
         }
         return ScriptExecution(TerminalState.KEEP_LOCKED) {
-            connectionService.replyTerminalReceiveAndLocked(true, "Jumping to ${targetDescription}.")
+            connectionService.replyTerminalReceiveAndLocked(true, messageService.getMessage("script.effect.jump.to", targetDescription))
 
             setPreviousNodeToPreviousInPath(path, hackerState)
             commandMoveService.moveArrive(targetNodeId, currentUserService.userId, hackerState.runId)

@@ -115,7 +115,7 @@ fun String.validateDuration(): String? {
     return null
 }
 
-fun toHumanTime(durationString: String): String? {
+fun toHumanTime(durationString: String): String {
     return durationString.toDuration().toHumanTime()
 }
 

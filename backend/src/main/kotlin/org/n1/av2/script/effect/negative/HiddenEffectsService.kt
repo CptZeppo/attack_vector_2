@@ -1,6 +1,7 @@
 package org.n1.av2.script.effect.negative
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.type.ScriptEffect
@@ -12,13 +13,14 @@ import org.springframework.stereotype.Service
  */
 @Service
 class HiddenEffectsService(
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Drawback: other effects are hidden"
+    override val name = messageService.getMessage("script.effect.hidden.name")
     override val defaultValue = ""
-    override val gmDescription = "Drawback: the hackers will not see any effects to the right of this one. This one will show as a (*)"
+    override val gmDescription = messageService.getMessage("script.effect.hidden.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Unknown effect(s)"
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.hidden.description.player")
 
     override fun validate(effect: ScriptEffect) = null
 

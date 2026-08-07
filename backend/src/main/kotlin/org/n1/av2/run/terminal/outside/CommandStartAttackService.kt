@@ -11,6 +11,7 @@ import org.n1.av2.platform.engine.ScheduledTask
 import org.n1.av2.platform.engine.UserTaskRunner
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.run.entity.RunEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.SyntaxHighlightingService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.run.terminal.inside.CommandMoveService
@@ -34,6 +35,7 @@ class CommandStartAttackService(
     private val configService: ConfigService,
     private val runEntityService: RunEntityService,
     private val outsideTerminalHelper: OutsideTerminalHelper,
+    private val messageService: MessageService
 ) {
 
     fun startAttack(hackerState: HackerStateRunning) {
@@ -42,7 +44,7 @@ class CommandStartAttackService(
 
     fun startQuickAttack(hackerState: HackerStateRunning) {
         if (!configService.getAsBoolean(ConfigItem.DEV_HACKER_USE_DEV_COMMANDS)) {
-            connectionService.replyTerminalReceive("QuickAttack is disabled.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.attack.dev"))
             return
         }
         startAttack(hackerState, true)

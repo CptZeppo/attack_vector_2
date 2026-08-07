@@ -8,6 +8,7 @@ import org.n1.av2.run.entity.NodeScanStatus
 import org.n1.av2.run.entity.NodeScanStatus.*
 import org.n1.av2.run.entity.Run
 import org.n1.av2.run.entity.RunEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.runlink.RunLinkService
 import org.n1.av2.site.SiteService
 import org.n1.av2.site.entity.Node
@@ -24,6 +25,7 @@ class ScanService(
     private val traverseNodeService: TraverseNodeService,
     private val siteService: SiteService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
+    private val messageService: MessageService
 ) {
 
     @ScheduledTask
@@ -48,7 +50,7 @@ class ScanService(
             return
         }
         if (scanNode.unhackedIce && !ignoreIceAtScanNode) {
-            connectionService.replyTerminalReceive("Scan blocked by ICE at [ok]${scanNode.networkId}")
+            connectionService.replyTerminalReceive(messageService.getMessage("command.scan.blocked", scanNode.networkId))
         }
 
         val traverseNodesById = traverseNodeService.createTraverseNodes(run.siteId, nodes)
@@ -71,7 +73,7 @@ class ScanService(
         connectionService.toRun(run.runId, ServerActions.SERVER_DISCOVER_NODES, "nodeStatusById" to nodeStatusById)
         runLinkService.sendUpdatedRunInfoToHackers(run)
 
-        connectionService.replyTerminalReceive("New nodes discovered: ${newNodesDiscoveredCount}")
+        connectionService.replyTerminalReceive(messageService.getMessage("command.scan.newNodes", newNodesDiscoveredCount))
     }
 
     class Discovery(val nodeId: String, val scanStatus: NodeScanStatus)

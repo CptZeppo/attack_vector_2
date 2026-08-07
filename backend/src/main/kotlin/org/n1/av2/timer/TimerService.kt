@@ -15,6 +15,7 @@ import org.n1.av2.platform.engine.TaskEngine
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.util.TimeService
 import org.n1.av2.platform.util.toHumanTime
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.site.SiteResetService
 import org.n1.av2.site.entity.SitePropertiesEntityService
@@ -39,6 +40,7 @@ class TimerService(
     private val currentUserService: CurrentUserService,
     private val skillService: SkillService,
     private val taskEngine: TaskEngine,
+    private val messageService: MessageService
 ) {
 
     private val MINIMUM_TIMER_DURATION = Duration.ofSeconds(10)
@@ -89,7 +91,16 @@ class TimerService(
         val durations = calculateEffectiveDuration(baseTimerDuration, stealthApplies, timerSiteId)
         val shutdownAt = timeService.now().plus(durations.effective)
 
-        val timer = timerEntityService.create(layer?.id, currentUserService.userId, shutdownAt, timerSiteId, targetSiteId, TimerEffect.SHUTDOWN_START, shutdownDuration, timerLabel)
+        val timer = timerEntityService.create(
+            layer?.id,
+            currentUserService.userId,
+            shutdownAt,
+            timerSiteId,
+            targetSiteId,
+            TimerEffect.SHUTDOWN_START,
+            shutdownDuration,
+            timerLabel
+        )
 
         informClientsOfTimer(ServerActions.SERVER_START_TIMER, timer)
 
@@ -102,9 +113,9 @@ class TimerService(
             )
         }
 
-        connectionService.replyTerminalReceive("${timerSourceMessage} triggered [warn]site reset[/] in ${durations.effective.toHumanTime()}[/].")
-        reportAdjustment("Stealth skill", "Low stealth skill", durations.stealthAdjustment)
-        reportAdjustment("Decreased site alertness", "Increased site alertness", durations.alertnessAdjustment)
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.trigger", timerSourceMessage, durations.effective.toHumanTime()))
+        reportAdjustment(messageService.getMessage("layer.timerAdjuster.source.positive.stealth"), messageService.getMessage("layer.timerAdjuster.source.negative.stealth"), durations.stealthAdjustment)
+        reportAdjustment(messageService.getMessage("layer.timerAdjuster.source.positive.alertness"), messageService.getMessage("layer.timerAdjuster.source.negative.alertness"), durations.alertnessAdjustment)
     }
 
     private fun informClientsOfTimer(action: ServerActions, timer: Timer) {
@@ -117,9 +128,9 @@ class TimerService(
     private fun reportAdjustment(sourcePositive: String, sourceNegative: String, adjustment: Duration) {
         if (adjustment != Duration.ZERO) {
             val message = if (adjustment.isPositive)
-                "> ${sourcePositive} increased the duration by ${adjustment.toHumanTime()}."
+                messageService.getMessageAsLines("timer.adjustment.increase", sourcePositive, adjustment.toHumanTime())
             else
-                "> ${sourceNegative} decreased the duration by ${adjustment.multipliedBy(-1).toHumanTime()}."
+                messageService.getMessageAsLines("timer.adjustment.decrease", sourceNegative, adjustment.multipliedBy(-1).toHumanTime())
             connectionService.replyTerminalReceive(message)
         }
     }
@@ -214,8 +225,8 @@ class TimerService(
 
     private fun determineEffect(type: TimerEffect, duration: Duration): String {
         return when (type) {
-            TimerEffect.SHUTDOWN_START -> "shutdown for ${duration.toHumanTime()}"
-            TimerEffect.SHUTDOWN_FINISH -> "site available"
+            TimerEffect.SHUTDOWN_START -> messageService.getMessage("timer.shutdown.start", duration.toHumanTime())
+            TimerEffect.SHUTDOWN_FINISH -> messageService.getMessage("timer.shutdown.finish")
         }
     }
 
@@ -223,13 +234,13 @@ class TimerService(
         val updatedTimer = timer.copy(finishAt = timer.finishAt.plus(duration))
         timerEntityService.update(updatedTimer)
 
-        connectionService.replyTerminalReceive("Tripwire countdown delayed by ${duration.toHumanTime()}")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.delay", duration.toHumanTime()))
         informClientsOfTimer(ServerActions.SERVER_CHANGE_TIMER, updatedTimer)
 
         alterTimerTask(updatedTimer, duration)
     }
 
-    fun alterTimerTask(timer: Timer, delta: Duration,) {
+    fun alterTimerTask(timer: Timer, delta: Duration) {
         val taskIdentifiers = when (timer.label ?: TimerLabel.TRIPWIRE_SITE_SHUTDOWN) {
             TimerLabel.TRIPWIRE_SITE_SHUTDOWN -> createTimerIdentifiers(timer.siteId, timer.layerId)
             TimerLabel.SCRIPT_SITE_SHUTDOWN -> createTimerIdentifiers(timer.siteId, null)
@@ -246,7 +257,7 @@ class TimerService(
             return // no timers yet.
         }
         if (timers.size > 1) {
-            connectionService.replyTerminalReceive("The script encountered an error: multiple script shutdown timers found.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.speedUp.multy"))
             return
         }
 
@@ -266,7 +277,7 @@ class TimerService(
         val updatedTimer = timer.copy(finishAt = adjustedFinishAt)
         timerEntityService.update(updatedTimer)
 
-        connectionService.replyTerminalReceive("Countdown accelerated by ${duration.toHumanTime()}")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.speedUp.info", duration.toHumanTime()))
         informClientsOfTimer(ServerActions.SERVER_CHANGE_TIMER, updatedTimer)
 
         alterTimerTask(updatedTimer, duration.negated())

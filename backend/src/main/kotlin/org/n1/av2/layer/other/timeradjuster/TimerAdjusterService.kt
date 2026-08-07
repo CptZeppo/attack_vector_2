@@ -6,6 +6,7 @@ import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.util.createId
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.timer.TimerEntityService
 import org.n1.av2.timer.TimerLabel
 import org.n1.av2.timer.TimerService
@@ -19,20 +20,21 @@ class TimerAdjusterService(
     private val timerEntityService: TimerEntityService,
     private val timerAdjusterStatusRepository: TimerAdjusterStatusRepository,
     private val currentUserService: CurrentUserService,
+    private val messageService: MessageService,
 ) {
 
     fun hack(layer: TimerAdjusterLayer) {
-        connectionService.replyTerminalReceive("Hacking ${layer.name} reveals that this layer:")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.timerAdjuster.hack", layer.name))
         val timeAdjustmentText = when (layer.adjustmentType) {
-            TimerAdjustmentType.SPEED_UP -> "- speeds up shutdown timers by ${layer.amount.toDuration().toHumanTime()}"
-            TimerAdjustmentType.SLOW_DOWN -> "- slows down shutdown timers by ${layer.amount.toDuration().toHumanTime()}"
+            TimerAdjustmentType.SPEED_UP -> messageService.getMessageAsLines("layer.timerAdjuster.hack.speedUp", layer.amount.toDuration().toHumanTime())
+            TimerAdjustmentType.SLOW_DOWN -> messageService.getMessageAsLines("layer.timerAdjuster.hack.slowDown", layer.amount.toDuration().toHumanTime())
         }
         connectionService.replyTerminalReceive(timeAdjustmentText)
 
         val recurringText = when (layer.recurring) {
-            TimerAdjustmentRecurring.FIRST_ENTRY_ONLY -> "- only triggers once"
-            TimerAdjustmentRecurring.EACH_HACKER_ONCE -> "- triggers on the first entry of each hacker"
-            TimerAdjustmentRecurring.EVERY_ENTRY -> "- triggers on every entry of any hacker"
+            TimerAdjustmentRecurring.FIRST_ENTRY_ONLY -> messageService.getMessageAsLines("layer.timerAdjuster.hack.once")
+            TimerAdjustmentRecurring.EACH_HACKER_ONCE -> messageService.getMessageAsLines("layer.timerAdjuster.hack.onceEach")
+            TimerAdjustmentRecurring.EVERY_ENTRY -> messageService.getMessageAsLines("layer.timerAdjuster.hack.everyEntry")
         }
         connectionService.replyTerminalReceive(recurringText)
     }
@@ -81,13 +83,13 @@ class TimerAdjusterService(
         if (timers.isNotEmpty()) {
 
             if (layer.adjustmentType == TimerAdjustmentType.SPEED_UP) {
-                connectionService.replyTerminalReceive("${layer.name} speeds up existing shutdown timers.")
+                connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.timerAdjuster.speedUp", layer.name))
                 timers.forEach { timer ->
                     timerService.speedUpTimer(timer, layer.amount.toDuration())
                 }
             }
             else {
-                connectionService.replyTerminalReceive("${layer.name} slows down existing shutdown timers.")
+                connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.timerAdjuster.slowDown", layer.name))
                 timers.forEach { timer ->
                     timerService.delayTripwireTimer(timer, layer.amount.toDuration())
                 }

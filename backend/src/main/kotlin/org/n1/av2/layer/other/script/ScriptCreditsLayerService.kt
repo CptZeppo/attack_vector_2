@@ -6,6 +6,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.iam.user.DATA_FENCE_USER
 import org.n1.av2.platform.iam.user.UserAndHackerService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.credittransaction.CreditTransactionService
 import org.n1.av2.site.entity.NodeEntityService
 import org.springframework.stereotype.Service
@@ -17,31 +18,29 @@ class ScriptCreditsLayerService(
     private val skillService: SkillService,
     private val userAndHackerService: UserAndHackerService,
     private val creditTransactionService: CreditTransactionService,
-) {
+    private val messageService: MessageService,
+    ) {
 
     fun hack(layer: ScriptCreditsLayer, hackerState: HackerStateRunning) {
         if (layer.stolen) {
-            connectionService.replyTerminalReceive("No data of value found.")
-            connectionService.replyTerminalReceive("Logs indicate data has recently been deleted.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.script.credit.noData"))
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.script.credit.deleted"))
             return
         }
 
         if (layer.amount == 0) {
-            connectionService.replyTerminalReceive("No data of value found.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.script.credit.noData"))
             return
         }
 
         if (!skillService.currentUserHasSkill(SkillType.SCRIPT_CREDITS)) {
-            connectionService.replyTerminalReceive("Valuable data found.")
-            connectionService.replyTerminalReceive("Unknown encryption detected.[/] [mute](Missing skill)")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.script.credit.noSkill"))
             return
         }
 
-        connectionService.replyTerminalReceive("Valuable data found, worth ${layer.amount}⚡. Sending to data broker.")
-        connectionService.replyTerminalReceive("Clearing data from layer...")
-        connectionService.replyTerminalReceive("Done.")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.script.credit", layer.amount))
 
-        creditTransactionService.transferCredits(DATA_FENCE_USER.id, hackerState.userId, layer.amount, "Data sale")
+        creditTransactionService.transferCredits(DATA_FENCE_USER.id, hackerState.userId, layer.amount, messageService.getMessage("layer.script.credit.sale"))
         creditTransactionService.sendTransactionsForUser(hackerState.userId)
         userAndHackerService.sendDetailsOfCurrentUser()
 

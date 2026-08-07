@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.util.toDuration
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.site.entity.NodeEntityService
 import org.n1.av2.site.entity.SitePropertiesEntityService
 import org.n1.av2.timer.TimerEntityService
@@ -17,21 +18,22 @@ class TripwireLayerService(
     private val nodeEntityService: NodeEntityService,
     private val timerService: TimerService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
+    private val messageService: MessageService,
 ) {
 
     fun hack(layer: TripwireLayer, hackerState: HackerStateRunning) {
         if (layer.coreLayerId == null) {
-            connectionService.replyTerminalReceive("This tripwire is irreversible.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.tripWire.hack.irreversible"))
             return
         }
         val node = nodeEntityService.findByLayerId(layer.coreLayerId!!)
         val coreSiteId =  layer.coreSiteId ?: hackerState.siteId
         if (coreSiteId == hackerState.siteId) {
-            connectionService.replyTerminalReceive("This tripwire is managed by core in node [ok]${node.networkId}")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.tripWire.hack.sameNode", node.networkId))
         }
         else {
             val siteName = sitePropertiesEntityService.getBySiteId(coreSiteId).name
-            connectionService.replyTerminalReceive("This tripwire is managed by remote core in node [ok]${node.networkId}[/] in site: [info]${siteName}")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.tripWire.hack.remoteNode", node.networkId, siteName))
         }
     }
 
@@ -51,9 +53,9 @@ class TripwireLayerService(
         val timerTargetSiteId = siteId
         val timerSiteId = if (remote) layer.coreSiteId!! else siteId
 
-        timerService.startShutdownTimer(timerSiteId, timerTargetSiteId, layer, baseDuration, true, shutdownDuration, "Layer [pri]${layer.level}[/]", null)
+        timerService.startShutdownTimer(timerSiteId, timerTargetSiteId, layer, baseDuration, true, shutdownDuration, messageService.getMessage("layer.tripWire.hack.timerMessage",layer.level), null)
         if (remote) {
-            connectionService.replyTerminalReceive(" ...timer managed in remote site. Hack layer [pri]${layer.level}[/] to trace site name.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("layer.tripWire.hack.trigger", layer.level))
         }
 
         connectionService.toRun(runId, ServerActions.SERVER_FLASH_PATROLLER, "nodeId" to nodeId)

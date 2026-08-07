@@ -3,6 +3,7 @@ package org.n1.av2.script.effect.negative
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.ScriptEffectHelper
@@ -18,18 +19,14 @@ import org.springframework.stereotype.Service
 class SpeedUpResetTimerEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val timerService: TimerService,
-
+    private val messageService: MessageService
     ) : ScriptEffectInterface {
 
-    override val name = "Drawback: speed up reset timer"
+    override val name = messageService.getMessage("script.effect.speedUp.name")
     override val defaultValue = "00:05:00"
-    override val gmDescription = "Drawback: when running this script, an existing countdown timer " +
-        "(triggered by the 'Start reset timer') effect is sped up. This prevents players from running multiple " +
-        "versions of the 'Start reset timer' without any consequences. " +
-        "NOTE: always set this effect higher than the effect to trigger the reset, otherwise this effect will apply when the script is first run."
+    override val gmDescription = messageService.getMessage("script.effect.speedUp.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) =
-        "If there already was a reset countdown triggered by another script, it is sped up by ${toHumanTime(effect.value!!)}."
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.speedUp.description.player", toHumanTime(effect.value!!))
 
     override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(effect)
 

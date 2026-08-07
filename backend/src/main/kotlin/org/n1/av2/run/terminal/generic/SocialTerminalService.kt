@@ -7,6 +7,7 @@ import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.iam.user.UserEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.runlink.RunLinkService
 import org.springframework.stereotype.Service
 
@@ -17,11 +18,12 @@ class SocialTerminalService(
     private val runLinkService: RunLinkService,
     private val configService: ConfigService,
     private val lolaService: LolaService,
+    private val messageService: MessageService,
 ) {
 
     fun processShare(arguments: List<String>, hackerState: HackerStateRunning) {
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing one more more user names. For example /share [info]<username1> <username2>[/].")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.social.missing"))
             return
         }
 
@@ -36,7 +38,7 @@ class SocialTerminalService(
     private fun shareWithUser(userName: String, runId: String) {
         val user = userEntityService.findByNameIgnoreCase(userName)
         if (user == null) {
-            connectionService.replyTerminalReceive(hackerNotFound(userName))
+            connectionService.replyTerminalReceive(hackerNotFound(userName, messageService))
             return
         }
 
@@ -48,7 +50,7 @@ class SocialTerminalService(
     }
 
     companion object {
-        fun hackerNotFound(userName: String) = "[warn]not found[/] - user [info]${userName}[/] not found."
-    }
+        fun hackerNotFound(userName: String, messageService: MessageService) = messageService.getMessage("command.social.notFound", userName)
+  }
 
 }

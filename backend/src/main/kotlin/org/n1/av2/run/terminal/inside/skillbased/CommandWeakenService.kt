@@ -7,6 +7,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.layer.ice.common.IceService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
 import org.n1.av2.run.terminal.inside.InsideTerminalHelper
 import org.n1.av2.site.entity.NodeEntityService
@@ -20,6 +21,7 @@ class CommandWeakenService(
     private val insideTerminalHelper: InsideTerminalHelper,
     private val nodeEntityService: NodeEntityService,
     private val skillService: SkillService,
+    private val messageService: MessageService
 ) {
 
     fun processWeaken(arguments: List<String>, hackerState: HackerStateRunning) {
@@ -29,7 +31,7 @@ class CommandWeakenService(
         val weakenSkills = skills.filter { it.type == SkillType.WEAKEN }
 
         if (weakenSkills.isEmpty()) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(MISSING_SKILL_RESPONSE))
             return
         }
 
@@ -44,11 +46,11 @@ class CommandWeakenService(
     }
 
     fun processWeakenStatus(weakenSkills: List<Skill>, hackerState: HackerStateRunning) {
-        connectionService.replyTerminalReceive("Overview of uses of weaken:")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.status"))
         weakenSkills.forEach { skill ->
             val usedOnThisSite = skill.usedOnSiteIds.contains(hackerState.siteId)
-            val siteText = if (usedOnThisSite) "[warn]already used on this site" else "[ok]can be used on this site"
-            connectionService.replyTerminalReceive("- ${skill.value} - $siteText")
+            val siteText = if (usedOnThisSite) "command.weaken.alreadyUsed" else "command.weaken.canBeUsed"
+            connectionService.replyTerminalReceive("- ${skill.value} - ${messageService.getMessageAsLines(siteText)}")
         }
     }
 
@@ -60,11 +62,11 @@ class CommandWeakenService(
     ): Pair<IceLayer, Skill>? {
         val layer = insideTerminalHelper.verifyCanAccessLayer(arguments.first(), hackerState, "weaken") ?: return null
         if (layer !is IceLayer) {
-            connectionService.replyTerminalReceive("Layer [primary]${layer.level}[/] is not an ICE layer.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.notIce", layer.level))
             return null
         }
         if (layer.strength == IceStrength.VERY_WEAK) {
-            connectionService.replyTerminalReceive("Cannot decrease the strength of this ICE layer, strength is already [info]Very weak")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.veryWeak"))
             return null
         }
 
@@ -80,14 +82,14 @@ class CommandWeakenService(
         }
 
         if (weakenSkillsThatWorkOnThisIce.isEmpty()) {
-            connectionService.replyTerminalReceive("Weaken not compatible with ICE type. [mute](Skill does not support this)")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.notWorking"))
             return null
         }
 
         val availableWeakenSkills =
             weakenSkillsThatWorkOnThisIce.filter { skill -> !skill.usedOnSiteIds.contains(hackerState.siteId) }
         if (availableWeakenSkills.isEmpty()) {
-            connectionService.replyTerminalReceive("Tamper attempt blocked. [mute](Skill already used on this site)")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.blocked"))
             return null
         }
 
@@ -104,6 +106,6 @@ class CommandWeakenService(
         iceService.changeIce(node, layer, newIceLayer)
         skillService.useSkillOnSite(skill.id, hackerState.siteId)
 
-        connectionService.replyTerminalReceive("ICE weakened. New strength: [info]${newStrength.description}")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.weaken.info", newStrength.description))
     }
 }

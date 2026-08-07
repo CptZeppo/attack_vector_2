@@ -6,6 +6,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.layer.other.tripwire.TripwireLayer
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.util.pluralS
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
 import org.n1.av2.run.terminal.inside.CommandMoveService
 import org.n1.av2.run.terminal.inside.InsideTerminalHelper
@@ -22,26 +23,27 @@ class CommandUndoTripwireService(
     private val skillService: SkillService,
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
-    private val commandMoveService: CommandMoveService
+    private val commandMoveService: CommandMoveService,
+    private val messageService: MessageService,
 ) {
 
     fun processCommand(hackerState: HackerStateRunning) {
         if (!skillService.currentUserHasSkill(SkillType.UNDO_TRIPWIRE)) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(MISSING_SKILL_RESPONSE))
             return
         }
 
         if (!insideTerminalHelper.verifyInside(hackerState)) return
         requireNotNull(hackerState.currentNodeId)
         if (hackerState.previousNodeId == null || hackerState.previousNodeId == hackerState.currentNodeId) {
-            connectionService.replyTerminalReceive("[error]No node to go back to.[/]")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.undoTripwire.error.noNode"))
             return
         }
 
         val currentNode = nodeEntityService.findById(hackerState.currentNodeId)
         val tripwireLayers: List<TripwireLayer> = currentNode.layers.filterIsInstance<TripwireLayer>()
         if (tripwireLayers.isEmpty()) {
-            connectionService.replyTerminalReceive("[error]No tripwires in current node.[/]")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.undoTripwire.error.noTripwire"))
             return
         }
 
@@ -49,7 +51,7 @@ class CommandUndoTripwireService(
             .mapNotNull { timerEntityService.findByLayer(it.id) }
             .filter { it.userId == hackerState.userId }
         if (timers.isEmpty()) {
-            connectionService.replyTerminalReceive("[error]No tripwires in this node that have been triggered by you.[/]")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.undoTripwire.error.notTriggered"))
             return
         }
 
@@ -60,7 +62,7 @@ class CommandUndoTripwireService(
             }
         }
 
-        connectionService.replyTerminalReceive("[i]Forced local state rollback, timer${pluralS(timers)} canceled.")
+        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.undoTripwire.rollback", pluralS(timers)))
 
         requireNotNull(hackerState.previousNodeId)
         val previousNode = nodeEntityService.getById(hackerState.previousNodeId)

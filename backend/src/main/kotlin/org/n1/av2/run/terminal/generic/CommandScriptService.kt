@@ -6,6 +6,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
 import org.n1.av2.script.Script
 import org.n1.av2.script.ScriptService
@@ -26,17 +27,18 @@ class CommandScriptService(
     private val ramService: RamService,
     private val skillService: SkillService,
     private val configService: ConfigService,
+    private val messageService: MessageService
 ) {
 
     fun processDownloadScript(arguments: List<String>) {
         if (!configService.getAsBoolean(ConfigItem.HACKER_SCRIPT_LOAD_DURING_RUN)) {
-            connectionService.replyTerminalReceive("Downloading scripts during a run is not supported.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.script.download.notSupported"))
             return
         }
         if (!checkHasScriptsSkill()) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing [primary]<script code>[/] for example /download-script [primary]1234-abcd[/].")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.script.download.missing"))
             return
         }
         val scriptCode = arguments.first()
@@ -47,7 +49,7 @@ class CommandScriptService(
         if (!checkHasScriptsSkill()) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("[b]run[/] [primary]<script code>[/]      -- for example: [b]run[primary] 1234-abcd")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.script.empty"))
             return
         }
         val scriptCode = arguments.first()
@@ -59,7 +61,7 @@ class CommandScriptService(
     private fun checkHasScriptsSkill(): Boolean {
         val hasScriptSkill = skillService.currentUserHasSkill(SkillType.SCRIPT_RAM)
         if (!hasScriptSkill) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines(MISSING_SKILL_RESPONSE))
             return false
         }
         return true
@@ -73,7 +75,7 @@ class CommandScriptService(
         if (processErrors(executions)) return
 
         if (executions.isEmpty()) {
-            connectionService.replyTerminalReceive("Script executed successfully, but it has no effects.")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.script.success"))
         } else {
             executions.forEach { it.executionMethod() }
 

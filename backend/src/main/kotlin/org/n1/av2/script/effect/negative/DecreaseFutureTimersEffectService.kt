@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.ScriptEffectHelper
@@ -21,13 +22,14 @@ class DecreaseFutureTimersEffectService(
     private val sitePropertiesEntityService: SitePropertiesEntityService,
     private val connectionService: ConnectionService,
     private val scriptEffectHelper: ScriptEffectHelper,
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Drawback: Decrease future timers"
+    override val name = messageService.getMessage("script.effect.decreaseTimer.name")
     override val defaultValue = "00:01:00"
-    override val gmDescription = "Drawback: when running this script, future timers (tripwire or otherwise) will be shorter."
+    override val gmDescription = messageService.getMessage("script.effect.decreaseTimer.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Decrease future timers by ${toHumanTime(effect.value!!)}."
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.decreaseTimer.description.player", toHumanTime(effect.value!!))
 
     override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(effect)
 
@@ -46,7 +48,7 @@ class DecreaseFutureTimersEffectService(
                     alertnessTimerAdjustment = newAdjustment
                 )
             )
-            connectionService.replyTerminalReceive("System alertness increased,  future timers will be decreased by ${toHumanTime(effect.value)}.")
+            connectionService.replyTerminalReceive( messageService.getMessageAsLines("script.effect.decreaseTimer.alertness", toHumanTime(effect.value)))
         }
     }
 }

@@ -11,6 +11,7 @@ import org.n1.av2.run.entity.NodeScan
 import org.n1.av2.run.entity.NodeScanStatus
 import org.n1.av2.run.entity.Run
 import org.n1.av2.run.entity.RunEntityService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.runlink.RunLinkService
 import org.n1.av2.run.scanning.NodeScanType.OUTSIDE_SCAN
 import org.n1.av2.run.terminal.outside.CONNECTION_REFUSED_DURING_SITE_RESET
@@ -37,12 +38,13 @@ class InitiateScanService(
     private val timingsService: TimingsService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
     private val skillService: SkillService,
+    private val messageService: MessageService
 ) {
 
     fun scanIgnoringIceAtTargetNode(run: Run, startNode: Node?, targetNode: Node) {
         val siteProperties = sitePropertiesEntityService.getBySiteId(run.siteId)
         if (siteProperties.shutdownEnd != null) {
-            connectionService.replyTerminalReceive(CONNECTION_REFUSED_DURING_SITE_RESET)
+            connectionService.replyTerminalReceive(messageService.getMessage(CONNECTION_REFUSED_DURING_SITE_RESET))
             return
         }
 
@@ -62,7 +64,7 @@ class InitiateScanService(
     fun scanFromOutside(run: Run, startNode: Node) {
         val siteProperties = sitePropertiesEntityService.getBySiteId(run.siteId)
         if (siteProperties.shutdownEnd != null) {
-            connectionService.replyTerminalReceive(CONNECTION_REFUSED_DURING_SITE_RESET)
+            connectionService.replyTerminalReceive(messageService.getMessage(CONNECTION_REFUSED_DURING_SITE_RESET))
             connectionService.replyTerminalSetLocked(false)
             return
         }

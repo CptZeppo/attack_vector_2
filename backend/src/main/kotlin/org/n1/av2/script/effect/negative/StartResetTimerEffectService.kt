@@ -3,6 +3,7 @@ package org.n1.av2.script.effect.negative
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.ScriptEffectHelper
@@ -22,13 +23,14 @@ class StartResetTimerEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
+    private val messageService: MessageService,
 ) : ScriptEffectInterface {
 
-    override val name = "Drawback: Start reset timer"
+    override val name = messageService.getMessage("script.effect.startReset.name")
     override val defaultValue = "00:15:00"
-    override val gmDescription = "Drawback: when running this script, a countdown timer will start to reset the site. "
+    override val gmDescription = messageService.getMessage("script.effect.startReset.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Start a countdown of ${toHumanTime(effect.value!!)} to reset the site."
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.startReset.description.player", toHumanTime(effect.value!!))
 
     override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(effect)
 

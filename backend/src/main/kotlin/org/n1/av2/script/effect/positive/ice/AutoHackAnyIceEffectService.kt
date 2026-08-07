@@ -2,6 +2,7 @@ package org.n1.av2.script.effect.positive.ice
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.ice.common.IceLayer
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -15,20 +16,22 @@ import org.springframework.stereotype.Service
 @Service
 class AutoHackAnyIceEffectService(
     private val iceEffectHelper: IceEffectHelper,
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Automatically hack any ICE"
+    override val name = messageService.getMessage("script.effect.ice.any.name")
     override val defaultValue = null
-    override val gmDescription = "Automatically hack any ICE."
+    override val gmDescription = messageService.getMessage("script.effect.ice.any.description")
 
     override fun playerDescription(effect: ScriptEffect): String {
-        return "Automatically hack any layer of ICE."
+        return messageService.getMessage("script.effect.ice.any.description")
     }
 
     override fun validate(effect: ScriptEffect) = null
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
-        return iceEffectHelper.runForIceType(IceLayer::class, "ICE layers", argumentTokens, hackerState) { layer: IceLayer ->
+        val layerDescription = messageService.getMessage("script.effect.ice.any.execution")
+        return iceEffectHelper.runForIceType(IceLayer::class, layerDescription, argumentTokens, hackerState) { layer: IceLayer ->
             iceEffectHelper.autoHack(layer, hackerState)
         }
     }

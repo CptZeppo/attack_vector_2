@@ -3,6 +3,7 @@ package org.n1.av2.script.effect.positive.ice
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.platform.inputvalidation.ValidationException
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -23,20 +24,21 @@ class AutoHackIceByStrengthEffectService(
     private val iceEffectHelper: IceEffectHelper,
     private val scriptEffectHelper: ScriptEffectHelper,
     private val themeService: ThemeService,
-
+    private val messageService: MessageService
     ) : ScriptEffectInterface {
 
-    override val name = "Automatically hack ICE by strength"
+    override val name = messageService.getMessage("script.effect.ice.strength.name")
     override val defaultValue = "${IceStrength.WEAK.name}:${LayerType.PASSWORD_ICE},${LayerType.TAR_ICE}"
-    override val gmDescription = "Automatically hack ICE with low enough strength."
+    override val gmDescription = messageService.getMessage("script.effect.ice.strength.description.gm")
 
     override fun playerDescription(effect: ScriptEffect): String {
         val strength = parseStrength(effect)
         val excludedIceTypes = parseExcludedIceTypes(effect)
 
-        val orWeakerText = if (strength.value > IceStrength.VERY_WEAK.value) " or below" else ""
 
-        return "Automatically hack ICE with strength '${strength.description.lowercase()}'${orWeakerText}. Excluded ICE types: ${excludedIceTypes.joinToString(", ") { themeService.themeName(it) }}."
+        val orWeakerText = if (strength.value > IceStrength.VERY_WEAK.value) messageService.getMessage("script.effect.ice.strength.description.orWeaker") else ""
+
+        return messageService.getMessage("script.effect.ice.strength.description.player", strength.description.lowercase(), orWeakerText, excludedIceTypes.joinToString(", ") { themeService.themeName(it) } )
     }
 
     private fun parseStrength(effect: ScriptEffect): IceStrength {

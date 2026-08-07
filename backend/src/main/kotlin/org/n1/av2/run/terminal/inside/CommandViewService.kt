@@ -5,6 +5,7 @@ import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.layer.other.os.OsLayer
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.site.entity.NodeEntityService
 import org.springframework.stereotype.Service
 
@@ -13,6 +14,7 @@ class CommandViewService(
     private val connectionService: ConnectionService,
     private val nodeEntityService: NodeEntityService,
     private val insideTerminalHelper: InsideTerminalHelper,
+    private val messageService: MessageService,
 ) {
 
     fun process(hackerState: HackerStateRunning) {
@@ -26,21 +28,20 @@ class CommandViewService(
 
         val nodeName = (node.layers.first() as OsLayer).nodeName
         if (nodeName.isNotBlank()) {
-            lines.add("Node name: $nodeName")
-            lines.add("")
+            lines.addAll(messageService.getMessageAsLines("command.view.node"))
         }
 
-        lines.add("Node service layers:")
+        lines.add(messageService.getMessage("command.view.layers"))
         node.layers.forEach { layer ->
             val blocked = (layer.level < blockingIceLevel)
 
-            val hacked = if (layer is IceLayer && layer.hacked) " [mute]hacked[/]" else ""
+            val hacked = if (layer is IceLayer && layer.hacked) messageService.getMessage("command.view.layers.hacked") else ""
             val iceSuffix = if (layer is IceLayer) " ICE" else ""
             if (blocked) {
-                lines.add("[pri]${layer.level}[/] unknown (shielded by ICE)")
+                lines.add(messageService.getMessage("command.view.layers.blocked",layer.level))
             }
             else {
-                lines.add("[pri]${layer.level}[/] ${layer.name}${iceSuffix}${hacked}")
+                lines.add(messageService.getMessage("command.view.layers.info", layer.level, layer.name, iceSuffix, hacked))
             }
         }
 
