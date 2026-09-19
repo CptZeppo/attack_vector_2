@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.Layer
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.inside.CommandHackService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
@@ -21,11 +22,12 @@ class HackBelowNonHackedIceEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val commandHackService: CommandHackService,
     private val connectionService: ConnectionService,
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Hack a layer below non-hacked ICE"
+    override val name = messageService.getMessage("script.effect.ice.below.name")
     override val defaultValue = null
-    override val gmDescription = "Hack a lower layer that is normally shielded by non-hacked ICE in a higher layer ."
+    override val gmDescription = messageService.getMessage("script.effect.ice.below.description")
 
     override fun playerDescription(effect: ScriptEffect) = gmDescription
 
@@ -41,7 +43,7 @@ class HackBelowNonHackedIceEffectService(
         checkIfLayerActuallyBlocked(layer, node)?.let { return ScriptExecution(it) }
 
         return ScriptExecution {
-            connectionService.replyTerminalReceive("Executing hack through ICE.", "")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("script.effect.ice.below.execute"))
             commandHackService.handleHack(layer, hackerState)
         }
     }
@@ -55,7 +57,7 @@ class HackBelowNonHackedIceEffectService(
         if (layersAboveLayerToHack.filterIsInstance<IceLayer>().any { !it.hacked }) {
             return null
         }
-        return "There is no non-hacked ICE above the layer to hack."
+        return messageService.getMessage("script.effect.ice.below.error")
 
     }
 

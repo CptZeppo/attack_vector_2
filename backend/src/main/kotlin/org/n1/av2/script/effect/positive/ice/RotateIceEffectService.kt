@@ -9,6 +9,7 @@ import org.n1.av2.layer.ice.sweeper.SweeperIceLayer
 import org.n1.av2.layer.ice.tangle.TangleIceLayer
 import org.n1.av2.layer.ice.wordsearch.WordSearchIceLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.ScriptEffectHelper
@@ -27,11 +28,12 @@ class RotateIceEffectService(
     private val iceService: IceService,
     private val connectionService: ConnectionService,
     private val themeService: ThemeService,
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Rotate ICE - change ICE type"
+    override val name = messageService.getMessage("script.effect.ice.rotate.name")
     override val defaultValue = null
-    override val gmDescription = "Change ICE type: Word search -> Tangle -> Netwalk -> Minesweeper -> Word search"
+    override val gmDescription = messageService.getMessage("script.effect.ice.rotate.description")
 
     override fun playerDescription(effect: ScriptEffect) = gmDescription
 
@@ -49,7 +51,7 @@ class RotateIceEffectService(
             iceService.changeIce(node, iceLayer, rotatedIceLayer)
 
             val newName = iceService.formalNameFor(rotatedIceLayer.type)
-            connectionService.replyTerminalReceive("ICE type changed to ${newName}.")
+            connectionService.replyTerminalReceive(messageService.getMessage("script.effect.ice.rotate.execute", newName))
         }
     }
 
@@ -60,7 +62,7 @@ class RotateIceEffectService(
             is NetwalkIceLayer -> SWEEPER_ICE
             is SweeperIceLayer -> WORD_SEARCH_ICE
 
-            else -> error("Unsupported ice layer: $layer")
+            else -> error(messageService.getMessage("script.effect.ice.rotate.error.unsuported", layer))
         }
         val newName = themeService.themeName(newType)
 
@@ -69,17 +71,17 @@ class RotateIceEffectService(
     }
 
     private fun checkIceLayer(layer: Layer): String? {
-        if (layer !is IceLayer) return "This script can only be used on ICE layers."
+        if (layer !is IceLayer) return messageService.getMessage("script.effect.ice.rotate.error.layer")
 
         if (layer !is WordSearchIceLayer &&
             layer !is TangleIceLayer &&
             layer !is NetwalkIceLayer &&
             layer !is SweeperIceLayer
         ) {
-            return "This script cannot be used on this type of ICE."
+            return messageService.getMessage("script.effect.ice.rotate.error.type")
         }
 
-        if (layer.hacked) return "This ICE layer is already hacked."
+        if (layer.hacked) return messageService.getMessage("script.effect.ice.rotate.error.hacked")
 
         return null
     }

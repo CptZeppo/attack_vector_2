@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.Layer
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.type.ScriptEffect
@@ -22,11 +23,12 @@ class SiteStatsEffectService(
     private val nodeEntityService: NodeEntityService,
     private val connectionService: ConnectionService,
     private val themeService: ThemeService,
+    private val messageService: MessageService
     ) : ScriptEffectInterface {
 
-    override val name = "Site stats"
+    override val name = messageService.getMessage("script.effect.stats.name")
     override val defaultValue = null
-    override val gmDescription = "Show the number of nodes, cores, tripwires and for each ICE type the number and highest strength."
+    override val gmDescription = messageService.getMessage("script.effect.stats.description")
 
     override fun playerDescription(effect: ScriptEffect) = gmDescription
 
@@ -34,10 +36,10 @@ class SiteStatsEffectService(
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         return ScriptExecution {
-            connectionService.replyTerminalReceive("", "Site stats", "----------")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("script.effect.stats.execute"))
 
             val nodes = nodeEntityService.findBySiteId(hackerState.siteId)
-            connectionService.replyTerminalReceive("Nodes: ${nodes.size}", "")
+            connectionService.replyTerminalReceive(messageService.getMessageAsLines("script.effect.stats.execute.nodes", nodes.size))
 
             reportCountOf(nodes, LayerType.CORE, "", 23)
             reportCountOf(nodes, LayerType.TRIPWIRE, "", 19)
@@ -67,7 +69,7 @@ class SiteStatsEffectService(
                 iceLayer.strength.value
             }
             .let { if (it != null) (it as IceLayer).strength else null}
-        val strengthText = if(maxStrength != null) " (strongest: ${maxStrength.description})" else ""
+        val strengthText = if(maxStrength != null) messageService.getMessageAsLines("script.effect.stats.execute.strongest", maxStrength.description) else ""
 
         connectionService.replyTerminalReceive("${themeService.themeName(type)} ICE ${typeText}${padding}: ${count}${strengthText}")
     }

@@ -2,6 +2,7 @@ package org.n1.av2.script.effect.positive.ice
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.ice.common.IceLayer
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -22,15 +23,15 @@ class AutoHackSpecificIceLayerEffectService(
     private val nodeEffectService: NodeEntityService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
     private val scriptEffectHelper: ScriptEffectHelper,
-
+    private val messageService: MessageService
 ) : ScriptEffectInterface {
 
-    override val name = "Automatically hack a specific ICE layer"
+    override val name = messageService.getMessage("script.effect.ice.layer.name")
     override val defaultValue = "node-1234-5678:layer-1234"
-    override val gmDescription = "Automatically hack one specific ICE layer in a specific site."
+    override val gmDescription = messageService.getMessage("script.effect.ice.layer.description.gm")
 
     override fun playerDescription(effect: ScriptEffect): String {
-        return createPlayerDescription(effect) ?: "Script functionality is broken. Unable to execute script."
+        return createPlayerDescription(effect) ?: messageService.getMessage("script.effect.ice.layer.description.player.broken")
     }
 
     private fun createPlayerDescription(effect: ScriptEffect): String? {
@@ -38,10 +39,10 @@ class AutoHackSpecificIceLayerEffectService(
             val node = nodeEffectService.findByLayerId(effect.value!!)
             val site = sitePropertiesEntityService.getBySiteId(node.siteId)
             val layer = node.getLayerById(effect.value)
-            if (layer !is IceLayer) error("non-ice layer, cannot autohack")
+            if (layer !is IceLayer) error(messageService.getMessage("script.effect.ice.layer.description.player.error"))
             val nodeNetworkId = node.networkId
 
-            return "Automatically hack layer ${layer.level} of node: ${nodeNetworkId} of site: ${site.name}."
+            return messageService.getMessage("script.effect.ice.layer.description.player", layer.level, nodeNetworkId, site.name)
         }
         catch (_: Exception) {
             return null
@@ -50,7 +51,7 @@ class AutoHackSpecificIceLayerEffectService(
 
     override fun validate(effect: ScriptEffect): String? {
         createPlayerDescription(effect)?.let { return null }
-        return "layer id not found. Please copy/paste the layer ID of a layer from the site editor. It should look like: node-1234-5678:layer-1234 ."
+        return messageService.getMessage("script.effect.ice.layer.validate")
     }
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
@@ -59,7 +60,7 @@ class AutoHackSpecificIceLayerEffectService(
 
         val layer = checkNotNull(runOnLayerResult.layer)
         if (layer.id != effect.value || layer !is IceLayer) {
-            return ScriptExecution(scriptCannotInteractWithThisLayer)
+            return ScriptExecution(messageService.getMessage(scriptCannotInteractWithThisLayer))
         }
 
         return iceEffectHelper.autoHack(layer, hackerState)

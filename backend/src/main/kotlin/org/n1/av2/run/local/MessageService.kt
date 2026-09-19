@@ -14,7 +14,7 @@ class MessageService(
     @Value("\${local}")
     private val language: String? = null
 
-    private var local = Locale.ENGLISH;
+    private var local = Locale.ENGLISH
 
     @PostConstruct
     fun init() {

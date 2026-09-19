@@ -27,12 +27,12 @@ class JumpToHackerEffectService(
     private val messageService: MessageService
     ) : ScriptEffectInterface {
 
-    override val name = "Jump to hacker"
+    override val name = messageService.getMessage("script.effect.jump.name")
     override val defaultValue = JumpBlockedType.BLOCKED_BY_ICE.name
-    override val gmDescription = "Jump to another hacker"
+    override val gmDescription = messageService.getMessage("script.effect.jump.description.gm")
 
     override fun playerDescription(effect: ScriptEffect): String{
-        val suffix = if (effect.value == JumpBlockedType.BLOCKED_BY_ICE.name) ", blocked by ICE along the way." else ", not blocked by ICE."
+        val suffix = if (effect.value == JumpBlockedType.BLOCKED_BY_ICE.name) messageService.getMessage("script.effect.jump.description.player.blocked") else messageService.getMessage("script.effect.jump.description.player")
         return gmDescription + suffix
     }
 
@@ -40,19 +40,19 @@ class JumpToHackerEffectService(
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkInNode(hackerState)?.let { return ScriptExecution(it) }
-        val userName = argumentTokens.firstOrNull() ?: return ScriptExecution("Provide the [info]<username>[/] of the hacker to phase to.")
+        val userName = argumentTokens.firstOrNull() ?: return ScriptExecution(messageService.getMessage("script.effect.jump.execute"))
 
         val user = userEntityService.findByNameIgnoreCase(userName)
         if (user == null) {
             return ScriptExecution(SocialTerminalService.hackerNotFound(userName, messageService))
         }
 
-        val targetHackerRunState: HackerState = hackerStateRepo.findById(user.id).orElse(null) ?: return ScriptExecution("${userName} is not in this run.")
-        if (targetHackerRunState.runId != hackerState.runId) return ScriptExecution("${userName} is not in this run.")
-        if (targetHackerRunState.activity != HackerActivity.INSIDE) return ScriptExecution("${userName} is not in the site.")
+        val targetHackerRunState: HackerState = hackerStateRepo.findById(user.id).orElse(null) ?: return ScriptExecution(messageService.getMessage("script.effect.jump.error.notInRun", userName))
+        if (targetHackerRunState.runId != hackerState.runId) return ScriptExecution(messageService.getMessage("script.effect.jump.error.notInRun", userName))
+        if (targetHackerRunState.activity != HackerActivity.INSIDE) return ScriptExecution(messageService.getMessage("script.effect.jump.error.notInSite", userName))
 
-        val currentNodeId = hackerState.currentNodeId ?: error("Current node ID not found.")
-        val targetNodeId = targetHackerRunState.currentNodeId ?: error("Target node ID not found.")
+        val currentNodeId = hackerState.currentNodeId ?: error(messageService.getMessage("script.effect.jump.error.currentNode"))
+        val targetNodeId = targetHackerRunState.currentNodeId ?: error(messageService.getMessage("script.effect.jump.error.targetNode"))
 
         return jumpEffectHelper.jump(effect, hackerState.siteId, currentNodeId, targetNodeId, hackerState, userName)
 

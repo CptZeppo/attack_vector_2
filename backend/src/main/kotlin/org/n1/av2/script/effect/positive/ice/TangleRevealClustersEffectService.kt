@@ -5,6 +5,7 @@ import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.layer.ice.tangle.TangleIceStatusRepo
 import org.n1.av2.layer.ice.tangle.TangleService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -23,23 +24,24 @@ class TangleRevealClustersEffectService(
     private val connectionService: ConnectionService,
     private val tangleIceStatusRepo: TangleIceStatusRepo,
     private val tangleService: TangleService,
+    private val messageService: MessageService,
 ) : ScriptEffectInterface {
 
 
-    override val name = "Tangle reveal clusters"
+    override val name = messageService.getMessage("script.effect.ice.tangle.name")
     override val defaultValue = ""
-    override val gmDescription = "Reveal clusters in Tangle ICE."
+    override val gmDescription = messageService.getMessage("script.effect.ice.tangle.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Reveal clusters in Gaanth ICE (tangle)."
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.ice.tangle.description.player")
 
     override fun validate(effect: ScriptEffect) = null
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         return iceEffectHelper.runForSpecificIceType(LayerType.TANGLE_ICE, argumentTokens, hackerState) { layer: IceLayer ->
             ScriptExecution {
-                val iceStatus = tangleIceStatusRepo.findByLayerId(layer.id) ?: error("Failed to instantiate ICE for: ${layer.id}")
+                val iceStatus = tangleIceStatusRepo.findByLayerId(layer.id) ?: error(messageService.getMessage("script.effect.ice.tangle.error", layer.id))
                 tangleService.revealClusters(iceStatus)
-                connectionService.replyTerminalReceive("Clusters revealed.")
+                connectionService.replyTerminalReceive(messageService.getMessage("script.effect.ice.tangle.execution"))
             }
         }
     }

@@ -42,12 +42,12 @@ class AutoHackIceByStrengthEffectService(
     }
 
     private fun parseStrength(effect: ScriptEffect): IceStrength {
-        val strength = effect.value?.split(":")[0] ?: throw ValidationException("Invalid ICE strength")
+        val strength = effect.value?.split(":")[0] ?: throw ValidationException(messageService.getMessage("script.effect.ice.strength.error.strenght"))
         return IceStrength.valueOf(strength)
     }
 
     private fun parseExcludedIceTypes(effect: ScriptEffect): List<LayerType> {
-        val excludeIceTypes = effect.value?.split(":")[1] ?:  throw ValidationException("Invalid exclusion string")
+        val excludeIceTypes = effect.value?.split(":")[1] ?:  throw ValidationException(messageService.getMessage("script.effect.ice.strength.error.exclusion"))
         return excludeIceTypes.split(",").map {LayerType.valueOf(it)}
     }
 
@@ -58,7 +58,7 @@ class AutoHackIceByStrengthEffectService(
             return null
         }
         catch (_: Exception) {
-            return "Invalid effect value format. Expected format: ICE_STRENGTH:EXCLUDED_ICE_TYPES. Example: WEAK:PASSWORD_ICE,TAR_ICE"
+            return messageService.getMessage("script.effect.ice.strength.error.format")
         }
     }
 
@@ -68,15 +68,15 @@ class AutoHackIceByStrengthEffectService(
 
         val layer = checkNotNull(runOnLayerResult.layer)
         if (layer !is IceLayer ) {
-            return ScriptExecution(scriptCannotInteractWithThisLayer)
+            return ScriptExecution(messageService.getMessage(scriptCannotInteractWithThisLayer))
         }
         val excludedIceTypes = parseExcludedIceTypes(effect)
         if (excludedIceTypes.contains(layer.type)) {
-            return ScriptExecution("Script cannot hack this type of ICE.")
+            return ScriptExecution(messageService.getMessage("script.effect.ice.strength.error.type"))
         }
         val scriptStrength = parseStrength(effect)
         if (scriptStrength.value < layer.strength.value) {
-            return ScriptExecution("Script is too weak to automatically hack ICE of strength: ${layer.strength.description}.")
+            return ScriptExecution(messageService.getMessage("script.effect.ice.strength.error.tooWeak", layer.strength.description))
         }
 
         return iceEffectHelper.autoHack(layer, hackerState)

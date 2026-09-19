@@ -28,7 +28,7 @@ class SpeedUpResetTimerEffectService(
 
     override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.speedUp.description.player", toHumanTime(effect.value!!))
 
-    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(effect)
+    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(messageService, effect)
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkAtNonShutdownSite(hackerState)?.let { return ScriptExecution(it) }

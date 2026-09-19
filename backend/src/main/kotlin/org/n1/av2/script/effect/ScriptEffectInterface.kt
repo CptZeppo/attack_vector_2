@@ -2,10 +2,11 @@ package org.n1.av2.script.effect
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.util.validateDuration
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.TerminalState.UNLOCK_AFTER_SCRIPT
 import org.n1.av2.script.type.ScriptEffect
 
-const val scriptCannotInteractWithThisLayer = "Script cannot interact with this layer."
+const val scriptCannotInteractWithThisLayer = "script.generic.noInteraction"
 
 enum class TerminalState {
     UNLOCK_AFTER_SCRIPT,
@@ -28,25 +29,23 @@ interface ScriptEffectInterface {
 
     companion object {
 
-        fun validateDuration(effect: ScriptEffect): String? {
-            if (effect.value == null) return "Duration is required."
+        fun validateDuration(messageService: MessageService, effect: ScriptEffect): String? {
+            if (effect.value == null) return messageService.getMessage("script.validate.duration")
             return effect.value.validateDuration()
         }
 
-        fun validateIntegerGreaterThanZero(effect: ScriptEffect): String? {
-            if (effect.value == null) return "value is required."
+        fun validateIntegerGreaterThanZero(messageService: MessageService, effect: ScriptEffect): String? {
+            if (effect.value == null) return messageService.getMessage("script.validate.value")
             val value = effect.value.toIntOrNull()
-            if (value == null || value <=0) return "Value must be a number greater than zero."
+            if (value == null || value <=0) return messageService.getMessage("script.validate.greaterThanZero")
             return null
         }
 
-        fun validateNonEmptyText(effect: ScriptEffect): String? {
-            if (effect.value == null) return "Text is required."
-            if (effect.value.isBlank()) return "Text cannot be empty."
+        fun validateNonEmptyText(messageService: MessageService, effect: ScriptEffect): String? {
+            if (effect.value == null) return messageService.getMessage("script.validate.text")
+            if (effect.value.isBlank()) return messageService.getMessage("script.validate.textEmpty")
             return null
         }
-
-
     }
 }
 
