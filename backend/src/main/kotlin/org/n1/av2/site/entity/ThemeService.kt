@@ -22,7 +22,9 @@ class ThemeService(
     fun initIceNames(): Map<LayerType, String> {
         val map = HashMap<LayerType, String>()
         for (layerType in LayerType.entries) {
-            map[layerType] = this.messageService.getMessage("name.ice.$layerType")
+            if(layerType.ice) {
+                map[layerType] = this.messageService.getMessage("name.ice.$layerType")
+            }
         }
         return map
     }
