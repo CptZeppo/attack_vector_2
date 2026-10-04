@@ -1,40 +1,41 @@
 package org.n1.av2.site.entity
 
+import org.n1.av2.run.local.MessageService
 import org.n1.av2.site.entity.enums.LayerType
 import org.springframework.stereotype.Service
 
 @Service
-class ThemeService {
+class ThemeService(
+    private val messageService: MessageService,
+) {
+    private val layerNameMap: Map<LayerType, String> = this.initLayerNames()
+    private val iceNameMap: Map<LayerType, String> = this.initIceNames()
 
-    fun themeName(type: LayerType) = when (type) {
-        LayerType.OS -> "OS"
-        LayerType.TEXT -> "Database"
-        LayerType.KEYSTORE -> "Keystore"
-        LayerType.TRIPWIRE -> "Tripwire"
-        LayerType.TIMER_ADJUSTER -> "Timer accelerator"
-        LayerType.CORE -> "Core"
-        LayerType.SCRIPT_INTERACTION -> "Process"
-        LayerType.SCRIPT_CREDITS -> "Database"
-
-        LayerType.STATUS_LIGHT -> "Status Light"
-        LayerType.LOCK -> "Lock"
-
-        LayerType.PASSWORD_ICE -> "Rahasy" // mystery in Hindi
-        LayerType.TANGLE_ICE -> "Gaanth" // knot in Hindi
-        LayerType.WORD_SEARCH_ICE -> "Jaal" // grid in Hindi
-        LayerType.NETWALK_ICE -> "Sanrachana" // structure in Hindi
-        LayerType.TAR_ICE -> "Tar" // after the substance tar in English
-        LayerType.SWEEPER_ICE -> "Visphotak" // explosive in Hindi
+    fun initLayerNames(): Map<LayerType, String> {
+        val map = HashMap<LayerType, String>()
+        for (layerType in LayerType.entries) {
+            map[layerType] = this.messageService.getMessage("name.layer.$layerType")
+        }
+        return map
     }
 
-    fun iceSimpleName(type: LayerType): String = when (type) {
-        LayerType.PASSWORD_ICE -> "static password"
-        LayerType.TANGLE_ICE -> "tangle"
-        LayerType.WORD_SEARCH_ICE -> "word search"
-        LayerType.NETWALK_ICE -> "netwalk"
-        LayerType.TAR_ICE -> "tar"
-        LayerType.SWEEPER_ICE -> "minesweeper"
-        else -> error("Not ICE: $type")
+    fun initIceNames(): Map<LayerType, String> {
+        val map = HashMap<LayerType, String>()
+        for (layerType in LayerType.entries) {
+            map[layerType] = this.messageService.getMessage("name.ice.$layerType")
+        }
+        return map
+    }
+
+    fun themeName(type: LayerType): String {
+        return this.layerNameMap[type]!!
+    }
+
+    fun iceSimpleName(type: LayerType): String {
+        if (!type.ice) {
+            error("Not ICE: $type")
+        }
+        return this.iceNameMap[type]!!
     }
 
 }

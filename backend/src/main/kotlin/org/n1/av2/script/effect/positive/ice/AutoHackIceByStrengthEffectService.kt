@@ -42,7 +42,7 @@ class AutoHackIceByStrengthEffectService(
     }
 
     private fun parseStrength(effect: ScriptEffect): IceStrength {
-        val strength = effect.value?.split(":")[0] ?: throw ValidationException(messageService.getMessage("script.effect.ice.strength.error.strenght"))
+        val strength = effect.value?.split(":")[0] ?: throw ValidationException(messageService.getMessage("script.effect.ice.strength.error.strength"))
         return IceStrength.valueOf(strength)
     }
 

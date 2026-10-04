@@ -32,7 +32,7 @@ class DelayTripwireCountdownEffectService(
 
     override val gmDescription = messageService.getMessage("script.effect.delay.description.gm")
 
-    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.delay.description.playe", toHumanTime(effect.value!!))
+    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.delay.description.player", toHumanTime(effect.value!!))
 
     override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(messageService, effect)
 

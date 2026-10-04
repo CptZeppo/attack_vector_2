@@ -109,13 +109,13 @@ class ScriptAccessService(
         if (accesses.any { it.typeId == typeId }) {
             val user = userEntityService.getById(userId)
             val scriptType = scriptTypeService.getById(typeId)
-            throw ValidationException("${user.name} already has access to ${scriptType.name}.")
+            throw ValidationException(messageService.getMessage("script.access.already.user", user.name, scriptType.name))
         }
     }
 
     fun deleteAccess(accessId: ScriptAccessId) {
         validateCanManageAccess()
-        val access = scriptAccessRepository.findById(accessId).orElseThrow { error("Access not found with id: $accessId, maybe it was already deleted?") }
+        val access = scriptAccessRepository.findById(accessId).orElseThrow { error(messageService.getMessage("script.access.notFound.deleted", accessId)) }
 
         scriptAccessRepository.delete(access)
         sendScriptAccess(access.ownerUserId)
@@ -124,16 +124,16 @@ class ScriptAccessService(
     private fun validateCanManageAccess() {
         val userManager = currentUserService.userEntity.type.authorities.contains(ROLE_USER_MANAGER)
         if (!userManager) {
-            error("You are not allowed to manage script access.")
+            error(messageService.getMessage("script.access.notAllow"))
         }
     }
 
     fun editAccess(accessId: ScriptAccessId, receiveForFree: Int, priceInput: Int?) {
         validateCanManageAccess()
-        val access = scriptAccessRepository.findById(accessId).orElseThrow { error("Access not found with id: $accessId, maybe it was already deleted?") }
+        val access = scriptAccessRepository.findById(accessId).orElseThrow { error(messageService.getMessage("script.access.notFound.deleted", accessId)) }
 
         if (priceInput != null && priceInput < 0) {
-            connectionService.replyNotificationError("Price cannot be negative.")
+            connectionService.replyNotificationError(messageService.getMessage("script.access.negativePrice"))
             sendScriptAccess(access.ownerUserId)
             return
         }
@@ -159,7 +159,7 @@ class ScriptAccessService(
     }
 
     fun getById(id: ScriptAccessId): ScriptAccess {
-        return scriptAccessRepository.findById(id).orElseThrow { error("Script access not found with id: $id") }
+        return scriptAccessRepository.findById(id).orElseThrow { error(messageService.getMessage("script.access.notFound", id)) }
     }
 
     fun deleteByTypeId(scriptTypeId: ScriptTypeId) {
@@ -176,7 +176,7 @@ class ScriptAccessService(
         copyScriptAccess(from, to)
 
         if (existingAccess.isNotEmpty()) {
-            connectionService.replyNotificationError(messageService.getMessage("script.access.already", to.name))
+            connectionService.replyNotificationError(messageService.getMessage("script.access.copy.already", to.name))
         }
         connectionService.replyNotificationNeutral(messageService.getMessage("script.access.copy",from.name, to.name))
     }
