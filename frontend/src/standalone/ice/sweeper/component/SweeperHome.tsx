@@ -12,6 +12,7 @@ import {webSocketConnection} from "../../../../common/server/WebSocketConnection
 import {ice} from "../../../StandaloneGlobals";
 import {CloseTabButton} from "../../common/CloseTabButton";
 import {currentUser} from "../../../../common/user/CurrentUser";
+import {useTranslate} from "../../../../common/i18n/i18n";
 
 /* eslint jsx-a11y/alt-text: 0*/
 
@@ -20,27 +21,28 @@ export const SweeperHome = () => {
     const uiMode = useSelector((rootState: SweeperRootState) => rootState.ui.mode)
     const strength: IceStrength = useSelector((rootState: SweeperRootState) => rootState.ui.strength)
     const minesLeft = useSelector((rootState: SweeperRootState) => rootState.ui.minesLeft)
+    const t = useTranslate()
 
     const classShowCanvas = (uiMode === HIDDEN) ? " hidden_alpha" : ""
 
 
     return (
-        <div className="row icePanelRow">
+        <div className="icePanelRow iceFitPending">
             <div className="col-lg-12">
-                <div className="row">
-                    <div className="col-lg-3">
+                <div className="row align-items-start iceHeaderRow">
+                    <div className="col-auto">
                         <IceTitle name="Visphotak" strength={strength}/>
                     </div>
-                    <div className="col-lg-1">
+                    <div className="col-auto" style={{width: 150}}>
                         <ResetIce/>
                     </div>
-                    <div className="col-lg-1">
-                        <h4 className="text-center text-success" data-testid="minesLeft">Left:<br/><span className="text-info">{minesLeft}</span></h4>
+                    <div className="col-auto">
+                        <h4 className="text-center text-success" data-testid="minesLeft">{t("ice.sweeper.left")}<br/><span className="text-info">{minesLeft}</span></h4>
                     </div>
-                    <div className="col-lg-6" style={{paddingTop: "4px"}}>
+                    <div className="col iceTerminalCol" style={{paddingTop: "4px"}}>
                         <DisplayTerminal/>
                     </div>
-                    <div className="col-lg-1">
+                    <div className="col-auto">
                         <div className="float-end">
                             <CloseTabButton/>
                         </div>
@@ -97,6 +99,7 @@ let resetTimeoutId: ReturnType<typeof setTimeout> | null = null
 
 const ResetIce = () => {
     const dispatch = useDispatch()
+    const t = useTranslate()
     const resetState = useSelector((rootState: SweeperRootState) => rootState.ui.resetState)
     const resetVisualProgress = useSelector((rootState: SweeperRootState) => rootState.ui.resetProgress)
     const userBlocked = useSelector((rootState: SweeperRootState) => rootState.ui.blockedUserIds.includes(currentUser.idOrEmptyString()))
@@ -126,13 +129,18 @@ const ResetIce = () => {
     }
     const animated = (resetVisualProgress < 40) ? "" : "progress-bar-animated"
 
-    const text = (resetState === SweeperResetState.IDLE) ? "Reset" : ""
+    const text = (resetState === SweeperResetState.IDLE) ? t("ice.sweeper.reset") : ""
     const progressBackgroundColor = (userBlocked && resetState === SweeperResetState.IDLE) ? "#0dcaf0" : ""
 
     return (<div style={{marginTop: "7px"}}>
 
-            <div className="progress" style={{height: 25, cursor: "pointer", position: "relative", top: "-15", backgroundColor: progressBackgroundColor}} onMouseDown={startReset}
-                 onMouseLeave={stopReset} onMouseUp={stopReset}>
+            <div className="progress" style={{height: 25, cursor: "pointer", position: "relative", top: "-15", backgroundColor: progressBackgroundColor,
+                     // Hold-to-reset takes 7s. On touch, a long press would otherwise pop the OS
+                     // text-selection callout / context menu and fire `touchcancel`, aborting the hold.
+                     touchAction: "none", userSelect: "none", WebkitUserSelect: "none", WebkitTouchCallout: "none"}}
+                 onContextMenu={(e) => e.preventDefault()}
+                 onMouseDown={startReset} onMouseLeave={stopReset} onMouseUp={stopReset}
+                 onTouchStart={startReset} onTouchEnd={stopReset} onTouchCancel={stopReset}>
                 <div className={`progress-bar bg-danger progress-bar-striped ${animated} noTransition`}
                      role="progressbar"
                      aria-valuenow={75} aria-valuemin={0}

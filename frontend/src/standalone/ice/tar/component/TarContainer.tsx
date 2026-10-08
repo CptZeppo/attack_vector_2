@@ -1,5 +1,6 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import {TarHome} from "./TarHome";
+import {applyIceMobileClass} from "../../common/iceMobile";
 import {useSelector} from "react-redux";
 import {Page} from "../../../../common/menu/pageReducer";
 import {ForceDisconnected} from "../../../../common/component/ForceDisconnected";
@@ -9,27 +10,24 @@ import {IceHackerPresence} from "../../common/IceHackerPresence";
 
 export const TarContainer = () => {
 
+    const rootRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        const update = () => applyIceMobileClass(rootRef.current)
+        update()
+        window.addEventListener("resize", update)
+        return () => window.removeEventListener("resize", update)
+    }, [])
+
     const currentPage: Page =  useSelector((state: TarRootState) =>  state.currentPage)
     if (currentPage === Page.FORCE_DISCONNECT) return <ForceDisconnected/>
 
     return (
-        <div className="container-fluid" data-bs-theme="dark">
-            <div className="row">
-                <div className="col-lg-2">
-                    <div className="row">
-                        <div className="col-lg-12">
-                            <IceHackerPresence />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col-lg-12">&nbsp;
-                            {/*<Terminal terminalState={messageTerminal} height="300px"/>*/}
-                        </div>
-                    </div>
-                </div>
-                <div className="col-lg-10">
-                    <TarHome/>
-                </div>
+        <div className="container-fluid iceStandalone" data-bs-theme="dark" ref={rootRef}>
+            <div className="iceHackerSidebar">
+                <IceHackerPresence />
+            </div>
+            <div className="iceGameArea">
+                <TarHome/>
             </div>
         </div>
     )

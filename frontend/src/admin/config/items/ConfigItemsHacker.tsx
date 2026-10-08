@@ -143,6 +143,21 @@ export const ConfigItemHackerScriptLoadDuringRun = (props: { value: string }) =>
     )
 }
 
+export const ConfigItemHackerDefaultLanguage = (props: { value: string }) => {
+    return (
+        <>
+            <ConfigItemText name="Hacker: default language" value={props.value} item={ConfigItem.HACKER_DEFAULT_LANGUAGE}/>
+            <div className="form-text text-muted text-size">
+                Default: en<br/><br/>
+                The default language for hacker-facing text (terminal messages and such). Valid values: <code>en</code>, <code>cs</code>.<br/><br/>
+                Each hacker can override this in their own preferences, and a GM can set it per hacker. This value is only the
+                starting default for new hackers.<br/><br/>
+            </div>
+            <br/>
+        </>
+    )
+}
+
 export const ConfigItemHackerDefaultSpeed = (props: { value: string }) => {
     return (
         <>

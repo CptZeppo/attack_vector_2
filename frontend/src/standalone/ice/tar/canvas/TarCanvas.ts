@@ -5,6 +5,7 @@ import {TarBlockDisplay} from "./TarBlockDisplay";
 import {hashCode} from "../../../../common/util/Util";
 import {TarEnter, TarStatusUpdate} from "../TarServerActionProcessor";
 import {ice} from "../../../StandaloneGlobals";
+import {installIceCanvasAutoFit} from "../../common/iceCanvasFit";
 
 export const BLOCK_WIDTH = 90
 export const BLOCK_PADDING_LEFT = 10
@@ -35,6 +36,7 @@ class TarCanvas {
     canvas: Canvas = null as unknown as Canvas
     store: Store = null as unknown as Store
     dispatch: Dispatch = null as unknown as Dispatch
+    autoFitCleanup: (() => void) | null = null
 
     totalUnits: number = 0
     unitsHacked: number = 0
@@ -72,6 +74,9 @@ class TarCanvas {
             height: canvasHeight,
             backgroundColor: "#222",
         });
+
+        if (this.autoFitCleanup) this.autoFitCleanup()
+        this.autoFitCleanup = installIceCanvasAutoFit("tarCanvas")
 
         fabric.Object.prototype.originX = "left";
         fabric.Object.prototype.originY = 'top';

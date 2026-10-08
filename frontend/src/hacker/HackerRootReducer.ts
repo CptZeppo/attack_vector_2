@@ -8,6 +8,7 @@ import {ActiveTerminalId, activeTerminalIdReducer, MAIN_TERMINAL_ID} from "../co
 import {Users, usersReducer} from "../gm/GmRootReducer";
 import {currentUserReducer, GenericUserRootState} from "../common/users/CurrentUserReducer";
 import {hackerRunsReducer, RunInfo} from "./home/HackerRunsReducer";
+import {HackableSite, hackableSitesReducer} from "./home/HackerHackableSitesReducer";
 import {SiteInfo, sitesReducer} from "../common/sites/SitesReducer";
 import {configReducer} from "../admin/config/ConfigReducer";
 import {ScriptAccess, scriptAccessReducer} from "../common/script/access/ScriptAccessReducer";
@@ -17,6 +18,7 @@ import {CreditTransaction, creditTransactionReducer} from "../common/script/cred
 export interface HackerRootState extends GenericUserRootState {
     run: RunState,
     runs: RunInfo[],
+    hackableSites: HackableSite[],
     sites: SiteInfo[],
     hackers: HackerPresence[]
     terminal: TerminalState,
@@ -39,6 +41,7 @@ export const hackerRootReducer = combineReducers({
     // from HackerRootState
     run: runRootReducer,
     runs: hackerRunsReducer,
+    hackableSites: hackableSitesReducer,
     sites: sitesReducer,
     hackers: hackerPresencesReducer,
     terminal: mainTerminalReducer,

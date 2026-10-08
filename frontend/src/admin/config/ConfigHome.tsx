@@ -3,6 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {AdminRootState} from "../AdminRootReducer";
 import {webSocketConnection} from "../../common/server/WebSocketConnection";
 import {
+    ConfigItemHackerDefaultLanguage,
     ConfigItemHackerDefaultSpeed,
     ConfigItemHackerDeleteRunLinks,
     ConfigItemHackerEditCharacterName,
@@ -27,9 +28,9 @@ import {
 import {
     ConfigItemLarpFrontierLolaEnabled,
     ConfigItemLarpFrontierOrthankToken,
+    ConfigItemLarpName,
     ConfigItemLarpOpenIdConnectClientId,
-    ConfigItemLarpOpenIdConnectUrl,
-    ConfigItemLarpName
+    ConfigItemLarpOpenIdConnectUrl
 } from "./items/ConfigItemsLarp";
 
 
@@ -48,20 +49,20 @@ export const ConfigHome = () => {
     }
 
     return (
-        <div className="row">
-            <div className="col-lg-1">
+        <div className="row configHome">
+            <div className="col-lg-1 d-none d-lg-block">
             </div>
-            <div className="col-lg-5">
+            <div className="col-lg-5 configEditorCol">
                 <div>
                     <h3 className="text-info">Configuration</h3><br/>
-                    {configState.currentItem === null ? <div className="text">Select an item on the right, to edit it</div> : <></>}
+                    {configState.currentItem === null ? <div className="text">Select an item from the list to edit it</div> : <></>}
                 </div>
                 <div>
                     <ConfigItemElement item={configState.currentItem} value={configState.currentValue}/>
                 </div>
 
             </div>
-            <div className="col-lg-6 rightPane">
+            <div className="col-lg-6 rightPane configListCol">
                 <div className="rightPanel">
                     <table className="table table-sm text-muted text" id="sitesTable">
                         <thead>
@@ -74,8 +75,10 @@ export const ConfigHome = () => {
                         <tbody>
                         {
                             configState.entries.map((configEntry) => {
-                                const category = ConfigItemCategories[configEntry.item]
-                                const name = ConfigItemNames[configEntry.item]
+                                // Fall back gracefully when the server sends an item the frontend does not know yet,
+                                // so one unknown config item cannot white-screen the whole admin page.
+                                const category = ConfigItemCategories[configEntry.item] ?? "9. Unknown"
+                                const name = ConfigItemNames[configEntry.item] ?? configEntry.item
                                 return (
                                     <tr key={configEntry.item}>
                                         <td className="table-very-condensed">{category.substring(3)}</td>
@@ -126,6 +129,8 @@ const ConfigItemElement = (props: { item: ConfigItem | null, value: string }) =>
             return <ConfigItemHackerScriptLoadDuringRun value={props.value}/>
         case ConfigItem.HACKER_DEFAULT_SPEED:
             return <ConfigItemHackerDefaultSpeed value={props.value}/>
+        case ConfigItem.HACKER_DEFAULT_LANGUAGE:
+            return <ConfigItemHackerDefaultLanguage value={props.value}/>
 
         case ConfigItem.LOGIN_PATH:
             return <ConfigItemLoginPath value={props.value}/>

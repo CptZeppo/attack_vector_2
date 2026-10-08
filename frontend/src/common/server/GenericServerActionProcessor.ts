@@ -4,6 +4,7 @@ import {notify} from "../util/Notification";
 import {ServerNotification} from "../../editor/server/EditorServerActionProcessor";
 import {SERVER_RECEIVE_CURRENT_USER, User} from "../users/CurrentUserReducer";
 import {attachFontChangeListener, setFontSize} from "../util/FontSizeListener";
+import {setStoredLanguage} from "../i18n/i18n";
 
 export const SERVER_NOTIFICATION = "SERVER_NOTIFICATION"
 export const SERVER_ERROR = "SERVER_ERROR"
@@ -20,6 +21,7 @@ export const initGenericServerActions = ({fontSize = "dynamic"}: {fontSize: numb
         webSocketConnection.addAction(SERVER_RECEIVE_CURRENT_USER, (user: User) => {
             setFontSize(user.preferences.fontSize)
             attachFontChangeListener(user.id)
+            setStoredLanguage(user.preferences.language)
         })
     }
     else {

@@ -16,15 +16,9 @@ class WordSearchManager extends GenericIceManager {
         window.onkeydown = (event: KeyboardEvent) => {
             if (event.ctrlKey && event.key === "f") {
                 event.preventDefault();
-                notify({type: "neutral", message: "Please don't use CTRL-F to find letters. It's against the spirit of this game."})
+                notify({type: "neutral", message: this.t("ice.wordsearch.ctrlf")})
             }
         }
-
-        if (data.hacked) {
-            this.enterHacked()
-            return
-        }
-
 
         setTimeout(() => {
             wordSearchCanvas.init(data, this.dispatch, this.store)
@@ -33,26 +27,34 @@ class WordSearchManager extends GenericIceManager {
         this.schedule.clear()
         this.dispatch({type: TERMINAL_CLEAR, terminalId: ICE_DISPLAY_TERMINAL_ID})
 
-        this.displayTerminal(10, "[warn]↼ Connecting to ice, initiating attack.");
+        if (data.hacked) {
+            // Already solved: reveal the grid (found letters are already marked CORRECT by the
+            // enter reducer), then report + auto-advance to the next layer.
+            this.schedule.dispatch(0, {type: WORD_SEARCH_BEGIN})
+            this.enterHacked()
+            return
+        }
+
+        this.displayTerminal(10, this.t("ice.wordsearch.connecting"));
         if (!data.quickPlaying) {
-            this.displayTerminal(10, "⇁ Connection established - authorization handshake started");
-            this.displayTerminal(8, "⇁ G*G Security token not found in request, fallback to rp/inner/program authorization scheme.");
+            this.displayTerminal(10, this.t("ice.wordsearch.handshake"));
+            this.displayTerminal(8, this.t("ice.wordsearch.token-fallback"));
             this.displayTerminal(45, '⇁ Accessing rp/i/p client header: [primary]client_id=386422_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _' +
                 '_inject{@cursor(4block rel#00.18), text("____inject{@authorize(92),@c_override("header/2", "trusted"), @remote_core_dump_analyze()}___"), @marker(0),' +
                 '@allocate_mem(999 4blocks), @jump(#marker(0))} _ _ ');
-            this.displayTerminal(0, "⇁ Memory allocation overflow, core dump");
-            this.displayTerminal(10, "⇁ Core dump analyzer started");
-            this.displayTerminal(10, "⇁ Trigger executable block at #00.22");
-            this.displayTerminal(3, "⇁ authorize [ok]ok");
-            this.displayTerminal(3, "⇁ c_override [ok]authorized");
-            this.displayTerminal(3, "⇁ remote_core_dump_analyze [ok]trusted");
+            this.displayTerminal(0, this.t("ice.wordsearch.mem-overflow"));
+            this.displayTerminal(10, this.t("ice.wordsearch.coredump-started"));
+            this.displayTerminal(10, this.t("ice.wordsearch.trigger-block"));
+            this.displayTerminal(3, this.t("ice.wordsearch.authorize-ok"));
+            this.displayTerminal(3, this.t("ice.wordsearch.coverride"));
+            this.displayTerminal(3, this.t("ice.wordsearch.coredump-trusted"));
             this.displayTerminal(15, " ");
         }
 
         this.schedule.dispatch(0, {type: WORD_SEARCH_BEGIN});
 
 
-        this.displayTerminal(15, "[i primary]↼ Remote core dump analysis session started.");
+        this.displayTerminal(15, this.t("ice.remote-coredump"));
         this.displayTerminal(5, " ");
 
 
@@ -65,7 +67,7 @@ class WordSearchManager extends GenericIceManager {
         if (wordIndex >= rootState.puzzle.words.length ) return // ICE is hacked
         const nextWord = rootState.puzzle.words[wordIndex]
         const index = `${wordIndex + 1}/${rootState.puzzle.words.length}`
-        this.displayTerminal(0, `Search fragment: [info]${nextWord}[/] ${index}`)
+        this.displayTerminal(0, this.t("ice.wordsearch.search-fragment", nextWord, index))
     }
 
     update(data: UpdateAction) {
@@ -94,9 +96,9 @@ class WordSearchManager extends GenericIceManager {
         this.schedule.wait(25)
 
         this.displayTerminal(0, "");
-        this.displayTerminal(20, "Memory analysis complete. Status: [strong ok]success");
+        this.displayTerminal(20, this.t("ice.wordsearch.analysis-complete"));
         this.displayTerminal(0, "");
-        this.displayTerminal(40, "[i primary]↼ Ice restored, access granted.");
+        this.displayTerminal(40, this.t("ice.wordsearch.restored"));
 
         this.processHacked()
     }

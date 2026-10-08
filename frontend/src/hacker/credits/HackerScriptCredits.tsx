@@ -11,6 +11,7 @@ import {InfoBadge} from "../../common/component/ToolTip";
 import {ScriptsTransactionsTable} from "../../common/script/credits/CreditTransactions";
 import {CreditsIcon} from "../../common/component/icon/CreditsIcon";
 import {CreditTransaction} from "../../common/script/credits/CreditTransactionReducer";
+import {useTranslate} from "../../common/i18n/i18n";
 
 export const HackerScriptCredits = () => {
 
@@ -21,6 +22,7 @@ export const HackerScriptCredits = () => {
 
     const transactions = useSelector((state: HackerRootState) => state.creditTransactions) || []
     const currentUserName = useSelector((state: HackerRootState) => state.currentUser).name
+    const t = useTranslate()
 
     return (
         <div className="row content">
@@ -30,7 +32,7 @@ export const HackerScriptCredits = () => {
                 <br/>
                 <strong>🜁 Verdant OS 🜃</strong><br/>
                 <br/>
-                <h3 className="text-info">Credits</h3>
+                <h3 className="text-info">{t("credits.title")}</h3>
                 <br/>
                 <CreditsAndIncome/>
                 <ScriptIncome/>
@@ -48,9 +50,10 @@ export const HackerScriptCredits = () => {
 
 const CreditsAndIncome = () => {
     const credits = useSelector((state: HackerRootState) => state.currentUser.hacker?.scriptCredits) || 0
+    const t = useTranslate()
 
     return <>
-        Script credit balance: <span className="text-info">{credits}<CreditsIcon/></span>
+        {t("credits.balance")} <span className="text-info">{credits}<CreditsIcon/></span>
         <br/>
         <hr/>
     </>
@@ -58,6 +61,7 @@ const CreditsAndIncome = () => {
 
 const ScriptIncome = () => {
     const currentUser = useSelector((state: HackerRootState) => state.currentUser)
+    const t = useTranslate()
     if (!currentUser.hacker) {
         return <></>
     }
@@ -75,8 +79,8 @@ const ScriptIncome = () => {
         webSocketConnection.send("/hacker/scriptCredits/collect", null)
     }
     const collectionLink = (incomeStatus === ScriptIncomeCollectionStatus.AVAILABLE) ?
-        <><br/><br/><ActionButton onClick={collectIncome} text="Collect income"/></> : <></>
-    const incomeInfo = <>Income <span className="text-info">{income}<CreditsIcon/></span></>
+        <><br/><br/><ActionButton onClick={collectIncome} text={t("credits.collect-income")}/></> : <></>
+    const incomeInfo = <>{t("credits.income")} <span className="text-info">{income}<CreditsIcon/></span></>
 
     return <>
         {incomeInfo} <IncomeStatusElement incomeStatus={incomeStatus}/> {collectionLink}
@@ -86,34 +90,36 @@ const ScriptIncome = () => {
 }
 
 const IncomeStatusElement = ({incomeStatus}: { incomeStatus: ScriptIncomeCollectionStatus }) => {
+    const t = useTranslate()
     switch (incomeStatus) {
         case ScriptIncomeCollectionStatus.AVAILABLE:
-            return <span className="badge bg-primary">Available</span>
+            return <span className="badge bg-primary">{t("status.available")}</span>
         case ScriptIncomeCollectionStatus.TODAY_IS_NOT_AN_INCOME_DATE:
             return <>
-                <span className="badge bg-secondary">Today is not an income date</span> &nbsp;
-                <InfoBadge infoText="If you think that you should be getting income today, please contact a GM"/>
+                <span className="badge bg-secondary">{t("credits.not-income-date")}</span> &nbsp;
+                <InfoBadge infoText={t("credits.income-info")}/>
             </>
         case ScriptIncomeCollectionStatus.COLLECTED:
-            return <span className="badge bg-success">Collected</span>
+            return <span className="badge bg-success">{t("credits.collected")}</span>
         default:
-            return <span>You have no script income</span>
+            return <span>{t("credits.no-income")}</span>
     }
 }
 
 const TransferCredits = () => {
+    const t = useTranslate()
     const transfer = (amount: string, receiver: string) => {
         if (!receiver || !amount) {
             return
         }
         if (!isWholePositiveNumber(amount)) {
-            notifySimple("Please enter a positive whole number for the amount.")
+            notifySimple(t("credits.enter-positive"))
         }
         webSocketConnection.send("/hacker/scriptCredits/transfer", {receiver, amount})
     }
     return <>
-        <TwoTextInput label="Transfer credits" save={transfer} clearAfterSubmit={false} buttonLabel="Transfer" buttonClass="btn btn-info"
-                      placeholder1="amount" placeholder2="reciever" autofocus={false} size={3} labelColumns={3}
+        <TwoTextInput label={t("credits.transfer-label")} save={transfer} clearAfterSubmit={false} buttonLabel={t("credits.transfer-button")} buttonClass="btn btn-info"
+                      placeholder1={t("credits.amount")} placeholder2={t("credits.receiver")} autofocus={false} size={3} labelColumns={3}
                       type1="number"/>
     </>
 }
@@ -124,9 +130,10 @@ const isWholePositiveNumber = (amount: string): boolean => {
 }
 
 export const CreditTransactions = ({transactions, viewForUserName}: { transactions: CreditTransaction[], viewForUserName: string }) => {
+    const t = useTranslate()
     return <>
         <h4>
-            Transactions
+            {t("credits.transactions")}
         </h4>
         <hr/>
         <div>

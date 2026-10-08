@@ -8,6 +8,7 @@ import {webSocketConnection} from "../../common/server/WebSocketConnection";
 import {ConfigItem, ConfigRootState, getConfigAsBoolean} from "../../admin/config/ConfigReducer";
 import {hasSkill, User} from "../../common/users/CurrentUserReducer";
 import {HackerSkillType} from "../../common/users/HackerSkills";
+import {useTranslate} from "../../common/i18n/i18n";
 
 /* eslint jsx-a11y/accessible-emoji: 0 */
 /* eslint jsx-a11y/anchor-is-valid: 0*/
@@ -20,6 +21,7 @@ export const HackerHome = () => {
 
     const hackersResetSite = (getConfigAsBoolean(ConfigItem.DEV_HACKER_RESET_SITE, config))
     const hackerDeleteRunLinks = (getConfigAsBoolean(ConfigItem.HACKER_DELETE_RUN_LINKS, config))
+    const t = useTranslate()
 
     return (
         <div className="row content">
@@ -38,9 +40,9 @@ export const HackerHome = () => {
                             <table className="table table-borderless table-sm text-muted text table-very-condensed" id="sitesTable">
                                 <thead>
                                 <tr>
-                                    <td className="strong">Site name</td>
-                                    <td className="strong">Nodes</td>
-                                    <td className="strong">Actions</td>
+                                    <td className="strong">{t("home.col-site-name")}</td>
+                                    <td className="strong">{t("home.col-nodes")}</td>
+                                    <td className="strong">{t("home.col-actions")}</td>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -74,6 +76,7 @@ export const HackerHome = () => {
 
 const SearchSite = ({currentUser}: { currentUser: User }) => {
     const canSearchSite = hasSkill(currentUser, HackerSkillType.SEARCH_SITE)
+    const t = useTranslate()
 
     if (!canSearchSite) {
         return (
@@ -81,7 +84,7 @@ const SearchSite = ({currentUser}: { currentUser: User }) => {
                 <div className="col-lg-12">
                     <div className="text">
                         <br/>
-                        Choose a run on to join, or ask a fellow hacker to /share a run with you.<br/>
+                        {t("home.choose-run-or-share")}<br/>
                     </div>
                 </div>
             </div>
@@ -98,14 +101,14 @@ const SearchSite = ({currentUser}: { currentUser: User }) => {
             <div className="col-lg-12">
                 <div className="text">
                     <br/>
-                    Choose site to investigate or attack<br/>
+                    {t("home.choose-site")}<br/>
                     <br/>
                     <br/>
                 </div>
             </div>
         </div>
-        <TextInput placeholder="Site name"
-                   buttonLabel="Search"
+        <TextInput placeholder={t("home.search-placeholder")}
+                   buttonLabel={t("home.search-button")}
                    buttonClass="btn-info"
                    save={(siteName) => startRunByName(siteName)}
                    clearAfterSubmit={true}
@@ -120,24 +123,26 @@ export const prepareToEnterRun = (runId: string) => {
 }
 
 const DeleteRunLink = (props: { runId: string }) => {
+    const t = useTranslate()
     const deleteScan = () => {
         webSocketConnection.send("/run/deleteRunLink", props.runId)
     }
 
-    return <SilentLink onClick={deleteScan} title="Remove run">
+    return <SilentLink onClick={deleteScan} title={t("home.remove-run")}>
         <span className="glyphicon glyphicon-remove-circle"/>
     </SilentLink>
 }
 
 const ResetIceLink = (props: { siteId: string, siteName: string }) => {
+    const t = useTranslate()
     const resetIce = () => {
-        if (window.confirm(`Confirm that you want to reset "${props.siteName}". This will refresh ICE, reset all timers, ...)`)) {
+        if (window.confirm(t("home.reset-confirm", props.siteName))) {
             webSocketConnection.send("/site/resetSite", props.siteId)
         }
     }
 
     return <>
-        &nbsp;<SilentLink onClick={resetIce} title="Reset site">
+        &nbsp;<SilentLink onClick={resetIce} title={t("home.reset-site")}>
         <span className="glyphicon glyphicon-refresh"/>
     </SilentLink>
     </>

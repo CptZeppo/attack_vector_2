@@ -71,10 +71,10 @@ export const DevLogin = () => {
 
     return (
         <div className="container" data-bs-theme="dark">
-            <Banner/>
+            <Banner hiddenAdminLogin={true}/>
             <div className="row text">
                 <div className="d-flex justify-content-center">
-                    <strong>Login as</strong><br/>
+                    <strong>Log in as</strong><br/>
                 </div>
             </div>
             <br/>

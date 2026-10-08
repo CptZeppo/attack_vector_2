@@ -12,6 +12,7 @@ import {ConfigItem, getConfigAsBoolean} from "../../../../admin/config/ConfigRed
 import {hasSkill} from "../../../../common/users/CurrentUserReducer";
 import {HackerSkillType} from "../../../../common/users/HackerSkills";
 import {CreditsIcon} from "../../../../common/component/icon/CreditsIcon";
+import {useTranslate} from "../../../../common/i18n/i18n";
 
 export const ScriptPanel = () => {
     const [expanded, setExpanded] = React.useState(false)
@@ -70,6 +71,7 @@ interface ScriptMinimizeButtonProps {
 }
 
 const ScriptPanelExpandedHead = ({minimize, onlyShowLoaded, setOnlyShowLoaded, ram}: ScriptMinimizeButtonProps) => {
+    const t = useTranslate()
     const refreshText = ram.nextRefreshSecondsLeft === null ? "" : `(${formatTimeInterval(ram.nextRefreshSecondsLeft)})`
 
     return <>
@@ -82,12 +84,12 @@ const ScriptPanelExpandedHead = ({minimize, onlyShowLoaded, setOnlyShowLoaded, r
                            checked={onlyShowLoaded}
                            onChange={() => setOnlyShowLoaded(!onlyShowLoaded)}
                     />
-                    <label className="form-check-label" htmlFor="flexSwitchCheckDefault">Only show loaded</label>
+                    <label className="form-check-label" htmlFor="flexSwitchCheckDefault">{t("scriptpanel.only-loaded")}</label>
                 </div>
             </div>
             <div className="col-lg-6">
                 <div className="d-flex justify-content-between">
-                    <div>RAM&nbsp;</div>
+                    <div>{t("common.ram")}&nbsp;</div>
                     <RamBar ram={ram} size={368} />
                 </div>
             </div>
@@ -104,6 +106,7 @@ const ScriptPanelExpandedHead = ({minimize, onlyShowLoaded, setOnlyShowLoaded, r
 const ScriptCredits = () => {
     const currentUser = useSelector((state: HackerRootState) => state.currentUser)
     const credits = useSelector((state: HackerRootState) => state.currentUser.hacker?.scriptCredits) || 0
+    const t = useTranslate()
 
     if (!hasSkill(currentUser, HackerSkillType.SCRIPT_CREDITS)) {
         return <></>
@@ -111,7 +114,7 @@ const ScriptCredits = () => {
 
     return <div className="row text">
         <div className="col-lg-12">
-            Script credits: <span className="text-info">{credits}<CreditsIcon/></span><br/>
+            {t("scriptpanel.credits")} <span className="text-info">{credits}<CreditsIcon/></span><br/>
             <br/>
         </div>
     </div>
@@ -126,6 +129,7 @@ interface ScriptsTableProps {
 }
 
 export const ScriptsTable = ({scripts, hr, minimize, ram, showLoadButton}: ScriptsTableProps) => {
+    const t = useTranslate()
     if (!ram) return <></>
 
     const sortedScripts = sortScripts(scripts)
@@ -144,12 +148,12 @@ export const ScriptsTable = ({scripts, hr, minimize, ram, showLoadButton}: Scrip
 
     return <DataTable rows={rows} rowTexts={rowTexts} pageSize={26} hr={hr}>
         <div className="row text strong">
-            <div className="col-lg-2 text-end">Code</div>
-            <div className="col-lg-2">Name</div>
-            <div className="col-lg-1">RAM</div>
-            <div className="col-lg-2">State</div>
-            <div className="col-lg-2">Action</div>
-            <div className="col-lg-1">Effects</div>
+            <div className="col-lg-2 text-end">{t("scriptpanel.col-code")}</div>
+            <div className="col-lg-2">{t("common.name")}</div>
+            <div className="col-lg-1">{t("common.ram")}</div>
+            <div className="col-lg-2">{t("scriptpanel.col-state")}</div>
+            <div className="col-lg-2">{t("common.action")}</div>
+            <div className="col-lg-1">{t("common.effects")}</div>
         </div>
     </DataTable>
 }

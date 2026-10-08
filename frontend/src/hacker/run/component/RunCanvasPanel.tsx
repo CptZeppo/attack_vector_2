@@ -46,11 +46,9 @@ export class RunCanvasPanel extends Component<Props> {
         };
 
         return (
-            <div id="canvas-container" style={{height: "850px"}}>
-                <canvas id="runCanvas" width="1250" height="815" style={{
+            <div id="canvas-container" style={{width: "100%", height: "calc(100vh - 90px)", overflow: "hidden"}}>
+                <canvas id="runCanvas" style={{
                     "borderRadius": "3px 3px 3px 3px",
-                    "marginTop": "10px",
-                    "marginBottom": "10px",
                 }}/>
                 <div className="dontDisplay">
                     <RunNodeImage type={TYPE_SYSCON} onLoad={onLoad}/>

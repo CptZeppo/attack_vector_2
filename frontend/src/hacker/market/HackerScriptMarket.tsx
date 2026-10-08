@@ -11,10 +11,12 @@ import {HackerScriptsPanel} from "../scripts/HackerScriptsPanel";
 import {Pad} from "../../common/component/Pad";
 import {CreditsIcon} from "../../common/component/icon/CreditsIcon";
 import {CurrentCredits} from "../../common/script/credits/CurrentCredits";
+import {useTranslate} from "../../common/i18n/i18n";
 
 
 export const HackerScriptMarket = () => {
     const user = useSelector((state: HackerRootState) => state.currentUser)
+    const t = useTranslate()
 
     return (
         <div className="row content">
@@ -24,7 +26,7 @@ export const HackerScriptMarket = () => {
                 <br/>
                 <strong>🜁 Verdant OS 🜃</strong><br/>
                 <br/>
-                <h3 className="text-info">Script Market</h3>
+                <h3 className="text-info">{t("market.title")}</h3>
                 <hr/>
                 <CurrentCredits user={user}/>
                 <hr/>
@@ -43,9 +45,10 @@ export const MarketScriptsList = () => {
     const accesses = useSelector((state: HackerRootState) => state.scriptAccess).filter((access: ScriptAccess) => access.price !== null && access.price > 0)
     accesses.sort((a, b) => a.type.name.localeCompare(b.type.name))
     const credits = useSelector((state: HackerRootState) => state.currentUser.hacker?.scriptCredits) || 0
+    const t = useTranslate()
 
     if (accesses.length === 0) {
-        return <div className="text">No scripts available in the market</div>
+        return <div className="text">{t("market.none")}</div>
     }
 
     const maxPricePadding = accesses.reduce((max, access) => {
@@ -60,17 +63,17 @@ export const MarketScriptsList = () => {
 
 
     return <>
-        <h4 className="text-muted">Scripts available on the market.</h4>
-        <br/><span className="dark">These scripts will expire the same as other hacker scripts. Buy them if you want to use them today.</span><br/>
+        <h4 className="text-muted">{t("market.subtitle")}</h4>
+        <br/><span className="dark">{t("market.expire-note")}</span><br/>
         <br/>
         <br/>
         <DataTable rows={rows} rowTexts={rowTexts} pageSize={24} hr={<Hr/>}>
             <div className="row text strong">
-                <div className="col-lg-4">Name</div>
-                <div className="col-lg-2">RAM</div>
-                <div className="col-lg-2">Effects</div>
-                <div className="col-lg-2">Price</div>
-                <div className="col-lg-2">Action</div>
+                <div className="col-lg-4">{t("common.name")}</div>
+                <div className="col-lg-2">{t("common.ram")}</div>
+                <div className="col-lg-2">{t("common.effects")}</div>
+                <div className="col-lg-2">{t("market.col-price")}</div>
+                <div className="col-lg-2">{t("common.action")}</div>
             </div>
         </DataTable>
     </>
@@ -102,6 +105,7 @@ const MarketScriptLine = ({scriptAccess, creditsAvailable, maxPricePadding}: Mar
 }
 
 const ActionBuyScript = ({scriptAccess, creditsAvailable}: { scriptAccess: ScriptAccess, creditsAvailable: number }) => {
+    const t = useTranslate()
     if (creditsAvailable < scriptAccess.price!!) {
         return <></>
     }
@@ -109,7 +113,7 @@ const ActionBuyScript = ({scriptAccess, creditsAvailable}: { scriptAccess: Scrip
     const action = () => {
         webSocketConnection.send("/hacker/script/buy", scriptAccess.id)
     }
-    return <SilentLink onClick={action}><>buy</>
+    return <SilentLink onClick={action}><>{t("market.buy")}</>
     </SilentLink>
 }
 

@@ -7,18 +7,20 @@ import {Hr} from "../../common/component/dataTable/Hr";
 import {Script, ScriptState} from "../../common/script/ScriptModel";
 import {webSocketConnection} from "../../common/server/WebSocketConnection";
 import {SilentLink} from "../../common/component/SilentLink";
+import {useTranslate} from "../../common/i18n/i18n";
 
 export const HackerScriptsPanel = () => {
     const scriptStatus = useSelector((state: HackerRootState) => state.scriptStatus)
     const scripts = scriptStatus?.scripts || []
     const ram = scriptStatus?.ram || null
+    const t = useTranslate()
 
     return <>
         <RamDisplay size={509}/>
         <hr style={{color: "black"}}/>
         <div className="row text">
             <div className="col-lg-6">
-                <strong>Scripts</strong>
+                <strong>{t("scripts.title")}</strong>
             </div>
             <div className="col-lg-6">
                 <DeleteUsedAndExpired scripts={scripts}/>
@@ -32,6 +34,7 @@ export const HackerScriptsPanel = () => {
 
 
 const DeleteUsedAndExpired = ({scripts}: { scripts: Script[] }) => {
+    const t = useTranslate()
     const userOrExpired = scripts.filter(script => script.state === ScriptState.USED || script.state === ScriptState.EXPIRED)
     if (userOrExpired.length === 0) {
         return <></>
@@ -40,6 +43,6 @@ const DeleteUsedAndExpired = ({scripts}: { scripts: Script[] }) => {
         webSocketConnection.send("/hacker/script/cleanup", null)
     }
     return <SilentLink onClick={cleanup}>
-        <div className="btn btn-info text-size">Delete used and expired</div>
+        <div className="btn btn-info text-size">{t("scripts.delete-used-expired")}</div>
     </SilentLink>
 }

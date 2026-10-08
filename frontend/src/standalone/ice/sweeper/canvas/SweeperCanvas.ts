@@ -9,6 +9,11 @@ import {shuffleArray} from "../../../../common/util/Util";
 import {IceStrength} from "../../../../common/model/IceStrength";
 import {SweeperCellModifier, SweeperCellType, SweeperGameState} from "../logic/SweeperLogic";
 import {currentUser} from "../../../../common/user/CurrentUser";
+import {installIceCanvasAutoFit} from "../../common/iceCanvasFit";
+import {isIceMobile} from "../../common/iceMobile";
+
+// Press-and-hold duration (ms) that turns a touch into a "flag" instead of a "reveal".
+const LONG_PRESS_MS = 450
 
 type CellById = { [id: string]: SweeperCellDisplay }
 
@@ -17,6 +22,7 @@ class SweeperCanvas {
     canvas: Canvas = null as unknown as Canvas
     store: Store = null as unknown as Store
     dispatch: Dispatch = null as unknown as Dispatch
+    autoFitCleanup: (() => void) | null = null
 
     cellDisplayByLocation: CellById = {}
 
@@ -28,6 +34,14 @@ class SweeperCanvas {
     allImagesLoaded = false
 
     userBlocked = false;
+
+    // Touch interaction state (mobile only): a short tap reveals, a long press flags. We can't tell
+    // tap from long-press at mouse:down, so we start a timer and decide at mouse:up / timeout.
+    longPressTimer: ReturnType<typeof setTimeout> | null = null
+    pendingCell: SweeperCellDisplay | null = null
+    longPressFired = false
+    touchMoved = false
+    downPointer: { x: number, y: number } | null = null
 
     imageLoaded(totalImages: number) {
         this.imagesLoaded++
@@ -53,6 +67,9 @@ class SweeperCanvas {
 
         this.canvas = this.createCanvas()
 
+        if (this.autoFitCleanup) this.autoFitCleanup()
+        this.autoFitCleanup = installIceCanvasAutoFit("netwalkCanvas")
+
         fabric.Object.prototype.originX = "center";
         fabric.Object.prototype.originY = 'center';
 
@@ -63,9 +80,14 @@ class SweeperCanvas {
 
         this.canvas.on('mouse:down', (event: fabric.IEvent<MouseEvent>) => {
             this.mouseDown(event);
-                // const x = event.e.pageX
-                // const y = event.e.pageY
-                // console.log("(" + x + "," + y + ")")
+        })
+        // On touch we can't use mouse buttons (tap has no `button`), so distinguish tap (reveal) from
+        // long-press (flag) using down/move/up. Fabric maps touch events onto these mouse: events.
+        this.canvas.on('mouse:up', (event: fabric.IEvent<MouseEvent>) => {
+            this.mouseUp(event);
+        })
+        this.canvas.on('mouse:move', (event: fabric.IEvent<MouseEvent>) => {
+            this.touchMove(event);
         })
 
         data.cells.forEach((row: SweeperCellType[], y: number) => {
@@ -95,12 +117,65 @@ class SweeperCanvas {
     }
 
     mouseDown(event:fabric.IEvent<MouseEvent>) {
-        if (event?.target?.data instanceof SweeperCellDisplay) {
-            const cell: SweeperCellDisplay = event.target.data
-            const leftClick = event.e.button === 0
+        if (!(event?.target?.data instanceof SweeperCellDisplay)) return
+        const cell: SweeperCellDisplay = event.target.data
 
-            sweeperIceManager.click(cell.x, cell.y, leftClick)
+        if (!isIceMobile()) {
+            // Desktop: left button reveals, right button (fireRightClick) flags.
+            sweeperIceManager.click(cell.x, cell.y, event.e.button === 0)
+            return
         }
+
+        // Touch: start a press. A quick release reveals (handled in mouseUp); holding past
+        // LONG_PRESS_MS flags the cell here. A drag beyond a cell cancels both (handled in touchMove).
+        this.cancelTouchPress()
+        this.pendingCell = cell
+        this.longPressFired = false
+        this.touchMoved = false
+        this.downPointer = event.pointer ? {x: event.pointer.x, y: event.pointer.y} : null
+        this.longPressTimer = setTimeout(() => {
+            this.longPressTimer = null
+            if (this.touchMoved) return
+            this.longPressFired = true
+            if (navigator.vibrate) navigator.vibrate(35) // subtle haptic confirm for the flag
+            sweeperIceManager.click(cell.x, cell.y, false) // flag / unflag
+        }, LONG_PRESS_MS)
+    }
+
+    touchMove(event: fabric.IEvent<MouseEvent>) {
+        if (!this.pendingCell || !this.downPointer || !event.pointer) return
+        const dx = event.pointer.x - this.downPointer.x
+        const dy = event.pointer.y - this.downPointer.y
+        // Cancel once the finger leaves roughly the original cell, so a drag neither flags nor reveals.
+        if (Math.hypot(dx, dy) > this.cellSize * 0.5) {
+            this.touchMoved = true
+            this.clearLongPressTimer()
+        }
+    }
+
+    mouseUp(_event: fabric.IEvent<MouseEvent>) {
+        if (!isIceMobile()) return
+        this.clearLongPressTimer()
+        const cell = this.pendingCell
+        if (cell && !this.longPressFired && !this.touchMoved) {
+            sweeperIceManager.click(cell.x, cell.y, true) // reveal
+        }
+        this.cancelTouchPress()
+    }
+
+    private clearLongPressTimer() {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer)
+            this.longPressTimer = null
+        }
+    }
+
+    private cancelTouchPress() {
+        this.clearLongPressTimer()
+        this.pendingCell = null
+        this.longPressFired = false
+        this.touchMoved = false
+        this.downPointer = null
     }
 
     createCell(x: number, y: number, cellType: SweeperCellType, modifier: SweeperCellModifier) {

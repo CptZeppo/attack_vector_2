@@ -14,10 +14,12 @@ import {hasSkill} from "../../common/users/CurrentUserReducer";
 import {NavigateButton} from "../../common/component/NavigateButton";
 import {CreditsIcon} from "../../common/component/icon/CreditsIcon";
 import {DataTable} from "../../common/component/dataTable/DataTable";
+import {useTranslate} from "../../common/i18n/i18n";
 
 
 export const HackerScriptsHome = () => {
     const accesses = useSelector((state: HackerRootState) => state.scriptAccess)
+    const t = useTranslate()
 
     return (
         <div className="row content">
@@ -27,10 +29,9 @@ export const HackerScriptsHome = () => {
                 <br/>
                 <strong>🜁 Verdant OS 🜃</strong><br/>
                 <br/>
-                <h3 className="text-info">Scripts</h3>
+                <h3 className="text-info">{t("scripts.title")}</h3>
                 <br/>
-                Scripts exploit security flaws. Those flaws will be patched automatically by security systems after use,
-                so all script can only be used once. The flaws are also patched daily at 06:00, so scripts can only be used on the day they are created.<br/>
+                {t("scripts.intro")}<br/>
                 <MarketSection/>
                 <DownloadScript/>
                 <FreeReceive accesses={accesses}/>
@@ -47,6 +48,7 @@ export const HackerScriptsHome = () => {
 const MarketSection = () => {
     const currentUser = useSelector((state: HackerRootState) => state.currentUser)
     const credits = useSelector((state: HackerRootState) => state.currentUser.hacker?.scriptCredits) || 0
+    const t = useTranslate()
 
     if (!hasSkill(currentUser, HackerSkillType.SCRIPT_CREDITS)) {
         return <></>
@@ -56,10 +58,10 @@ const MarketSection = () => {
         <hr/>
         <div className="row">
             <div className="col-lg-7 text">
-                Script credit balance: <span className="text-info">{credits}<CreditsIcon/></span>
+                {t("credits.balance")} <span className="text-info">{credits}<CreditsIcon/></span>
             </div>
             <div className="col-lg-5 text">
-                <NavigateButton label="Market" page={Page.SCRIPTS_MARKET}/>
+                <NavigateButton label={t("nav.market")} page={Page.SCRIPTS_MARKET}/>
             </div>
         </div>
     </>
@@ -68,6 +70,7 @@ const MarketSection = () => {
 
 const FreeReceive = ({accesses}: { accesses: ScriptAccess[] }) => {
     const accessWithFreeReceive = accesses.filter(access => access.receiveForFree > 0)
+    const t = useTranslate()
 
     const retrieve = () => {
         webSocketConnection.send("/hacker/script/freeReceive", null)
@@ -85,17 +88,17 @@ const FreeReceive = ({accesses}: { accesses: ScriptAccess[] }) => {
 
     return (<>
             <hr/>
-            You have access to the following scripts for free:<br/><br/>
+            {t("scripts.free-access")}<br/><br/>
             <DataTable rows={rows} rowTexts={rowTexts} pageSize={18} hr={hr}>
                 <div className="row">
-                    <div className="col-lg-offset-2 col-lg-4">Script</div>
-                    <div className="col-lg-4">Effects</div>
-                    <div className="col-lg-2">Status</div>
+                    <div className="col-lg-offset-2 col-lg-4">{t("scripts.col-script")}</div>
+                    <div className="col-lg-4">{t("common.effects")}</div>
+                    <div className="col-lg-2">{t("scripts.col-status")}</div>
                 </div>
             </DataTable>
             <br/>
             <SilentLink onClick={retrieve}>
-                <div className="btn btn-info text-size">Retrieve scripts</div>
+                <div className="btn btn-info text-size">{t("scripts.retrieve")}</div>
             </SilentLink>
             <br/>
         </>
@@ -120,10 +123,11 @@ const ScriptAccessLine = ({access}: { access: ScriptAccess }) => {
 }
 
 const ScriptAccessStatus = ({access}: { access: ScriptAccess }) => {
+    const t = useTranslate()
     if (access.used) {
-        return <span className="badge bg-secondary">Received today</span>
+        return <span className="badge bg-secondary">{t("status.received-today")}</span>
     }
-    return <span className="badge bg-primary">Available</span>
+    return <span className="badge bg-primary">{t("status.available")}</span>
 
 }
 
@@ -132,16 +136,17 @@ const downloadScript = (code: string) => {
 }
 
 const DownloadScript = () => {
+    const t = useTranslate()
     return <>
         <hr/>
         <TextInput placeholder="1234-abcd"
-                   buttonLabel="Download"
+                   buttonLabel={t("scripts.download-button")}
                    buttonClass="btn-info"
                    save={(code) => downloadScript(code)}
                    clearAfterSubmit={true}
                    autofocus={true}
                    size={3}
-                   label="Download script from external source"
+                   label={t("scripts.download-label")}
                    labelColumns={4}
         />
     </>

@@ -31,7 +31,7 @@ const TerminalPreviewContent = ({text}: { text: string }) => {
         <div className="layerLabel" style={{textAlign: "left", paddingTop: 0}}>Preview</div>
         <div className="terminalPreview" >
             <div className="terminalPanel" style={{paddingLeft: "0px", paddingRight: "0px", width: "616px", fontSize: "14px" }}>
-                {terminalLines.map((line: TerminalLineData) => <TerminalLine line={line} key={line.key}/>)}
+                {terminalLines.map((line: TerminalLineData) => <TerminalLine line={line} preview={true} key={line.key}/>)}
             </div>
         </div>
     </div>

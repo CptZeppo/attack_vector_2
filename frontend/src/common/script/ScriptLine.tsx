@@ -7,6 +7,7 @@ import {ScriptEffects} from "./type/ScriptEffects";
 import {Ram} from "./ScriptStatusReducer";
 import {serverTime} from "../server/ServerTime";
 import {formatTimeInterval} from "../util/Util";
+import {useTranslate} from "../i18n/i18n";
 
 export enum ScriptLineUseCase {
     GM,
@@ -57,22 +58,23 @@ const truncateScriptName = (name: string) => {
 
 const CodeElement = ({script, minimize}: { script: Script, minimize?: () => void
 }) => {
+    const t = useTranslate()
     if (script.state === ScriptState.EXPIRED || script.state === ScriptState.USED) {
         return <span className="text" style={{color: "#666"}} data-element="code">{script.code}</span>
     }
 
     return (
         <SilentLink onClick={() => {
-            copyScript(script.code)
+            copyScript(script.code, t("scriptline.copied"))
             if (minimize) minimize()
         }}><span data-element="code">{script.code}</span>
         </SilentLink>
     )}
 
-const copyScript = (code: string) => {
+const copyScript = (code: string, copiedText: string) => {
     navigator.clipboard.writeText(code).then(
         () => {
-            createNotification("", "copied to clipboard", 2000, "bottom-right", false)
+            createNotification("", copiedText, 2000, "bottom-right", false)
         },
         (err) => {
             console.error("Failed to copy to clipboard", err)
@@ -82,19 +84,20 @@ const copyScript = (code: string) => {
 
 
 export const ScriptStateBadge = ({script}: { script: Script }) => {
+    const t = useTranslate()
     switch (script.state) {
         case ScriptState.AVAILABLE:
-            return <span className="badge bg-secondary scriptStatusBadge">Available</span>
+            return <span className="badge bg-secondary scriptStatusBadge">{t("scriptline.state-available")}</span>
         case ScriptState.OFFERING:
-            return <span className="badge bg-success scriptStatusBadge">Offering</span>
+            return <span className="badge bg-success scriptStatusBadge">{t("scriptline.state-offering")}</span>
         case ScriptState.LOADED:
-            return <span className="badge bg-primary scriptStatusBadge">Loaded</span>
+            return <span className="badge bg-primary scriptStatusBadge">{t("scriptline.state-loaded")}</span>
         case ScriptState.USED:
-            return <span className="badge bg-dark scriptStatusBadge">Used</span>
+            return <span className="badge bg-dark scriptStatusBadge">{t("scriptline.state-used")}</span>
         case ScriptState.EXPIRED:
-            return <span className="badge bg-dark scriptStatusBadge">Expired</span>
+            return <span className="badge bg-dark scriptStatusBadge">{t("scriptline.state-expired")}</span>
         default:
-            return <span>Unknown</span>
+            return <span>{t("scriptline.state-unknown")}</span>
     }
 }
 
@@ -153,46 +156,50 @@ const ScriptActionGmLoad = ({script, ram}: { script: Script, ram: Ram }) => {
 }
 
 const ScriptActionUnload = ({script, ram, gmOverride}: { script: Script, ram: Ram, gmOverride: boolean }) => {
+    const t = useTranslate()
     const action = () => {
         const path = gmOverride ? "/gm/script/unload" : "/script/unload"
         webSocketConnection.send(path, script.id)
     }
     const glyphicon =  (ram.lockedUntil != null) ? "glyphicon-export" : "glyphicon-open"
-    return <SilentLink onClick={action} title="Unload from memory"><span className={`glyphicon ${glyphicon}`} /></SilentLink>
+    return <SilentLink onClick={action} title={t("scriptline.unload-title")}><span className={`glyphicon ${glyphicon}`} /></SilentLink>
 }
 
 const ScriptActionDelete = ({script}: { script: Script }) => {
+    const t = useTranslate()
     const action = () => {
         webSocketConnection.send("/script/delete", script.id)
     }
-    return <SilentLink onClick={action} title="Delete"><span className="glyphicon glyphicon-trash"/></SilentLink>
+    return <SilentLink onClick={action} title={t("scriptline.delete-title")}><span className="glyphicon glyphicon-trash"/></SilentLink>
 }
 
 const ScriptActionLoad = ({script, lockedUntil}: { script: Script, lockedUntil: string | null }) => {
+    const t = useTranslate()
     if (lockedUntil) {
         const action = () => {
             const lockedSecondsLeft = serverTime.secondsLeft(lockedUntil)
             const duration = formatTimeInterval(lockedSecondsLeft)
-            notify({type: "neutral", message: `Cannot load, memory locked (too recently hacked, try again in: ${duration}).`})
+            notify({type: "neutral", message: t("scriptline.load-locked-message", duration)})
         }
-        return <SilentLink onClick={action} title="Cannot load, too recently hacked."><span className="glyphicon glyphicon-import" style={{cursor: "not-allowed"}}/></SilentLink>
+        return <SilentLink onClick={action} title={t("scriptline.load-locked-title")}><span className="glyphicon glyphicon-import" style={{cursor: "not-allowed"}}/></SilentLink>
     }
 
     const action = () => {
         webSocketConnection.send("/script/load", script.id)
     }
-    return <SilentLink onClick={action} title="Start loading in memory"><span className="glyphicon glyphicon-import"/></SilentLink>
+    return <SilentLink onClick={action} title={t("scriptline.load-title")}><span className="glyphicon glyphicon-import"/></SilentLink>
 }
 
 const ScriptOfferAction = ({script}: { script: Script }) => {
+    const t = useTranslate()
     const action = (offer: boolean) => {
         webSocketConnection.send("/script/offer", {scriptId: script.id, offer: offer})
     }
     if (script.state === ScriptState.AVAILABLE) {
-        return <SilentLink onClick={() => action(true)} title="Offer script for download by another hacker"><span className="glyphicon glyphicon-share-alt"/></SilentLink>
+        return <SilentLink onClick={() => action(true)} title={t("scriptline.offer-title")}><span className="glyphicon glyphicon-share-alt"/></SilentLink>
     }
     if (script.state === ScriptState.OFFERING) {
-        return <SilentLink onClick={() => action(false)} title="Stop offering script for download"><span className="glyphicon glyphicon-remove-circle"/></SilentLink>
+        return <SilentLink onClick={() => action(false)} title={t("scriptline.stop-offer-title")}><span className="glyphicon glyphicon-remove-circle"/></SilentLink>
     }
     return <></>
 }

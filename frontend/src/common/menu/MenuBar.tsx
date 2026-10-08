@@ -7,6 +7,7 @@ import {ROLE_ADMIN, ROLE_GM, ROLE_HACKER, ROLE_SITE_MANAGER, ROLE_USER_MANAGER} 
 import {GenericUserRootState, hasSkill, UserType} from "../users/CurrentUserReducer";
 import {Page} from "./pageReducer";
 import {HackerSkillType} from "../users/HackerSkills";
+import {useTranslate} from "../i18n/i18n";
 
 /* eslint jsx-a11y/anchor-is-valid: 0*/
 
@@ -37,6 +38,34 @@ export const MenuBar = () => {
     const currentPage = useSelector((state: HackerRootState) => state.currentPage)
 
     const currentUser = useSelector((state: HackerRootState) => state.currentUser)
+    const t = useTranslate()
+
+    // While a hacker is connected to a site (the RUN view) the bottom menu bar is hidden so players
+    // can't wander off or log out mid-game. It's revealed on click of a discreet, barely-visible glyph
+    // in the bottom-right corner (someone who knows it's there can bring the bar back). Only hidden for
+    // hackers — GM/admin keep their bar for authoring/testing.
+    const [barRevealed, setBarRevealed] = React.useState(false)
+    const hideBarInRun = currentPage === Page.RUN && currentUser.type === UserType.HACKER
+
+    if (hideBarInRun && !barRevealed) {
+        return (
+            <span
+                onClick={() => setBarRevealed(true)}
+                style={{
+                    position: "fixed",
+                    right: "5px",
+                    bottom: "1px",
+                    zIndex: 1030,
+                    opacity: 0.1,
+                    color: "#6f6",
+                    fontSize: "13px",
+                    padding: "6px 8px",
+                    cursor: "default",
+                    userSelect: "none",
+                }}
+            >ꕻ</span>
+        )
+    }
 
 
     const hackersCanCreateSites = hasSkill(currentUser, HackerSkillType.CREATE_SITE)
@@ -44,11 +73,11 @@ export const MenuBar = () => {
     const hackerHasScriptsCreditsSkill = hasSkill(currentUser, HackerSkillType.SCRIPT_CREDITS)
 
 
-    const hackerSites = hackersCanCreateSites ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SITES} label="Sites"/> : <></>
-    const hackerScripts = hackerHasScriptsSkill ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.HACKER_SCRIPTS} label="Scripts"/> : <></>
+    const hackerSites = hackersCanCreateSites ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SITES} label={t("nav.sites")}/> : <></>
+    const hackerScripts = hackerHasScriptsSkill ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.HACKER_SCRIPTS} label={t("nav.scripts")}/> : <></>
     const hackerMarket = hackerHasScriptsSkill && hackerHasScriptsCreditsSkill ?
-        <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SCRIPTS_MARKET} label="Market"/> : <></>
-    const hackerCredits = hackerHasScriptsCreditsSkill ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SCRIPTS_CREDITS} label="Credits"/> : <></>
+        <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SCRIPTS_MARKET} label={t("nav.market")}/> : <></>
+    const hackerCredits = hackerHasScriptsCreditsSkill ? <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.SCRIPTS_CREDITS} label={t("nav.credits")}/> : <></>
 
     return (
         <nav className="navbar navbar-expand-sm navbar-av fixed-bottom" style={{
@@ -64,7 +93,7 @@ export const MenuBar = () => {
                             <ul className="navbar-nav mr-auto">
                                 <Title/>
                                 {scanItem(currentPage, siteName)}
-                                <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.HACKER_HOME} label="Home"/>
+                                <MenuItem requiresRole={ROLE_HACKER} targetPage={Page.HACKER_HOME} label={t("nav.home")}/>
                                 {hackerSites}
                                 {hackerScripts}
                                 {hackerMarket}
@@ -80,7 +109,7 @@ export const MenuBar = () => {
                                 <MenuItem requiresRole="ROLE_USER" targetPage={Page.ME} label={"{" + userName + "}"}/>
                                 <li className="nav-item">
                                     <a className="nav-link" href="/login" onClick={(event) => logout(event)}>ꕻ
-                                        Logout</a>
+                                        {t("nav.logout")}</a>
                                 </li>
                             </ul>
                         </div>

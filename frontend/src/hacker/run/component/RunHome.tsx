@@ -11,18 +11,22 @@ import {webSocketConnection} from "../../../common/server/WebSocketConnection";
 import {currentUser} from "../../../common/user/CurrentUser";
 import {HackerRootState} from "../../HackerRootReducer";
 import {ScriptPanel} from "./script/ScriptPanel";
+import {useTranslate} from "../../../common/i18n/i18n";
 
 
 const TerminalAndScanResultPanel = (infoNodeId: string | null, terminal: TerminalState, submit: () => void) => {
 
     const timerCount = useSelector((state: HackerRootState) => state.run.timers.length)
+    const uploadCount = useSelector((state: HackerRootState) => state.run.uploads.length)
     const adjustedTimerCount = timerCount > 0 ? timerCount : 1
 
     if (infoNodeId) {
         return (<NodeScanInfo/>)
     }
 
-    const terminalHeight = 847 - (adjustedTimerCount * 24) - 23
+    // Responsive: fill the viewport height minus the bottom navbar, timers, upload bars and margins.
+    const reserved = 847 - (adjustedTimerCount * 24) - 23
+    const terminalHeight = `calc(100vh - ${reserved}px)`
 
     return <>
         <Timers/>
@@ -47,18 +51,19 @@ export const RunHome = () => {
         dispatch({type: TERMINAL_SUBMIT, key: ENTER_KEY, command: terminal.input, terminalId: terminal.id});
     }
     const infoNodeId = useSelector((state: HackerRootState) => state.run.infoNodeId)
+    const t = useTranslate()
 
     return (
         <>
             <ScriptPanel/>
             <div className="row">
-                <div className="col-lg-4">
+                <div className="col-lg-5">
                     {TerminalAndScanResultPanel(infoNodeId, terminal, submit)}
                 </div>
-                <div className="col-lg-8">
+                <div className="col-lg-7">
                     <div className="row">
-                        <div className="col-lg-12">
-                            <span className="text">Site: {siteName}</span>
+                        <div className="col-lg-12 d-flex justify-content-between align-items-center">
+                            <span className="text">{t("run.site-label")} {siteName}</span>
                         </div>
                     </div>
                     <div className="row">

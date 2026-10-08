@@ -84,6 +84,21 @@ export const UserDetails = ({user, me}: Props) => {
                 </DropDownSaveInput>
             </div>
         </div>
+        <div className="row form-group">
+            <label htmlFor="language" className="col-lg-4 control-label text-muted">Language</label>
+            <div className="col-lg-4">
+                <DropDownSaveInput id="language" className="form-control"
+                                   selectedValue={user.preferences.language}
+                                   save={(value: string) => save(user.id, "language", value)}
+                                   readonly={false}>
+                    <>
+                        <option key="en" value="en">English</option>
+                        <option key="fr" value="fr">Français</option>
+                        <option key="cs" value="cs">Čeština</option>
+                    </>
+                </DropDownSaveInput>
+            </div>
+        </div>
         {showHackerDetails ? <HackerDetails user={user}/> : <></>}
         {deleteUserButton(user, closeUserEdit)}
     </>

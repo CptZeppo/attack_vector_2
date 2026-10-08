@@ -32,6 +32,7 @@ export interface User {
 
 export interface UserPreferences {
     fontSize: number,
+    language: string,
 }
 
 export interface Hacker {
@@ -60,7 +61,7 @@ const defaultUser = {
     name: "",
     email: "",
     type: UserType.NO_DATA,
-    preferences: {fontSize: 12},
+    preferences: {fontSize: 12, language: "en"},
     hacker: undefined,
     gmNote: "",
 }

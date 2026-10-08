@@ -2,6 +2,7 @@ import {fabric} from "fabric";
 import {Canvas, Circle} from "fabric/fabric-impl";
 import {TanglePoint} from "../reducer/TangleIceReducer";
 import {TangleLineDisplay} from "./TangleLineDisplay";
+import {isIceMobile} from "../../common/iceMobile";
 
 
 const COLOR_NORMAL_1 = "#5ec6c8"
@@ -12,6 +13,13 @@ const COLOR_STROKE_NORMAL = "#000"
 const STROKE_WIDTH_NORMAL = 0.7
 
 const STROKE_WIDTH_HIGHLIGHT = 2
+
+// The 1576x828 canvas is displayed ~0.24-0.4x on a phone (iceCanvasFit), where the desktop
+// sizes render points as ~3px dots and lines as sub-pixel hairlines. Mobile sizes compensate.
+const RADIUS = 6
+const RADIUS_MOBILE = 16
+const STROKE_WIDTH_NORMAL_MOBILE = 2
+const STROKE_WIDTH_HIGHLIGHT_MOBILE = 4
 
 const COLOR_HIGHLIGHT_PRIMARY = "#5ec6c8"
 const COLOR_STROKE_HIGHLIGHT_PRIMARY = "#337ab7"
@@ -27,6 +35,8 @@ export class TanglePointDisplay {
     icon: Circle
     colorNormal: string
     cluster: number
+    strokeWidthNormal: number
+    strokeWidthHighlight: number
 
     constructor(canvas: Canvas, pointData: TanglePoint, clustersRevealed: boolean) {
         this.canvas = canvas;
@@ -34,15 +44,19 @@ export class TanglePointDisplay {
         this.cluster = pointData.cluster;
         this.lines = [];
 
+        const mobile = isIceMobile()
+        this.strokeWidthNormal = mobile ? STROKE_WIDTH_NORMAL_MOBILE : STROKE_WIDTH_NORMAL
+        this.strokeWidthHighlight = mobile ? STROKE_WIDTH_HIGHLIGHT_MOBILE : STROKE_WIDTH_HIGHLIGHT
+
         this.colorNormal = this.determineColorNormal(clustersRevealed)
 
         this.icon = new fabric.Circle({
-            radius: 6,
+            radius: mobile ? RADIUS_MOBILE : RADIUS,
             top: pointData.y,
             left: pointData.x,
             fill: this.colorNormal,
             stroke: COLOR_STROKE_NORMAL,
-            strokeWidth: STROKE_WIDTH_NORMAL,
+            strokeWidth: this.strokeWidthNormal,
             selectable: true,
             lockRotation: true,
             lockScalingX: true,
@@ -112,13 +126,13 @@ export class TanglePointDisplay {
     highLight() {
         this.icon.set("fill", COLOR_HIGHLIGHT_PRIMARY);
         this.icon.set("stroke", COLOR_STROKE_HIGHLIGHT_PRIMARY);
-        this.icon.set("strokeWidth", STROKE_WIDTH_HIGHLIGHT);
+        this.icon.set("strokeWidth", this.strokeWidthHighlight);
         this.lines.forEach(line => line.highlightOtherEnd(this));
     }
 
     secondaryHighlight() {
         this.icon.set("fill", COLOR_HIGHLIGHT_SECONDARY);
-        this.icon.set("strokeWidth", STROKE_WIDTH_HIGHLIGHT);
+        this.icon.set("strokeWidth", this.strokeWidthHighlight);
         this.icon.set("stroke", COLOR_STROKE_HIGHLIGHT_SECONDARY);
     }
 
@@ -130,7 +144,7 @@ export class TanglePointDisplay {
     secondaryUnHighlight() {
         this.icon.set("fill", this.colorNormal);
         this.icon.set("stroke", COLOR_STROKE_NORMAL);
-        this.icon.set("strokeWidth", STROKE_WIDTH_NORMAL);
+        this.icon.set("strokeWidth", this.strokeWidthNormal);
 
     }
 

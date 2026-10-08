@@ -17,17 +17,17 @@ class PasswordIceManager extends GenericIceManager {
             return
         }
 
-        this.displayTerminal(20, "↼ Connecting to ice, initiating attack.")
+        this.displayTerminal(20, this.t("ice.generic.connecting"))
         if (!data.quickPlaying) {
-            this.displayTerminal(20, "↼ Scanning for weaknesses.")
+            this.displayTerminal(20, this.t("ice.password.scanning"))
             this.displayTerminal(20, "↼ .......................................................................................................................")
-            this.displayTerminal(30, "↼ Found weak interface: static (non-rotating) password.")
-            this.displayTerminal(20, "↼ Attempting brute force...")
-            this.displayTerminal(30, "↺ Detected incremental time-out.")
-            this.displayTerminal(20, "↺ Failed to sidestep incremental time-out.")
+            this.displayTerminal(30, this.t("ice.password.found-weak"))
+            this.displayTerminal(20, this.t("ice.password.brute-force"))
+            this.displayTerminal(30, this.t("ice.password.timeout-detected"))
+            this.displayTerminal(20, this.t("ice.password.timeout-failed"))
             this.displayTerminal(20, "")
         }
-        this.displayTerminal(20, "↼ Suggested attack vectors: retrieve password, informed password guessing.")
+        this.displayTerminal(20, this.t("ice.password.suggested"))
         this.schedule.run(0, () => {
             terminalManager.start()
         })
@@ -40,8 +40,8 @@ class PasswordIceManager extends GenericIceManager {
 
     serverSentIceHacked() {
         this.displayTerminal(0, "")
-        this.displayTerminal(20, "Password accepted")
-        this.displayTerminal(40, "ICE grants access.")
+        this.displayTerminal(20, this.t("ice.password.accepted"))
+        this.displayTerminal(40, this.t("ice.grants-access"))
 
         this.processHacked()
     }
