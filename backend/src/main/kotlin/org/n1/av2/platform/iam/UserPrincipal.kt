@@ -14,12 +14,13 @@ data class UserPrincipal(
     val connectionId: String,
     val userEntity: UserEntity,
     val type: ConnectionType,
-): Authentication {
+) : Authentication {
 
     companion object {
         fun fromContext(): UserPrincipal {
             return SecurityContextHolder.getContext().authentication as UserPrincipal
         }
+
         fun system(): UserPrincipal {
             return UserPrincipal(
                 _name = "system",
@@ -28,6 +29,7 @@ data class UserPrincipal(
                 type = ConnectionType.NONE,
             )
         }
+
         fun notLoggedIn(): UserPrincipal {
             return UserPrincipal(
                 _name = "notLoggedIn",

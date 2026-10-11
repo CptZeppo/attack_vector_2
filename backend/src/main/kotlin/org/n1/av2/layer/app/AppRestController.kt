@@ -23,7 +23,7 @@ class AppRestController(
     class AppResponse(val appId: String?, val redirectLayerId: String?, val error: String?)
 
     @GetMapping("/api/app/{layerId}")
-    fun getAppOrRedirect(@PathVariable @ValidLayerId layerId: String, ): AppResponse {
+    fun getAppOrRedirect(@PathVariable @ValidLayerId layerId: String): AppResponse {
 
         val node = nodeEntityService.findByLayerId(layerId)
         val layer = node.getLayerById(layerId)
@@ -37,6 +37,7 @@ class AppRestController(
             is StatusLightLayer -> {
                 AppResponse(null, null, null)
             }
+
             is IceLayer -> {
                 val iceId = iceService.findOrCreateIceForLayerAndIceStatus(layer)
                 return AppResponse(iceId, null, null)

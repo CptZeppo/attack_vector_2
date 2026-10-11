@@ -16,9 +16,9 @@ class ScriptCreditsLayer(
     var amount: Int,
     var stolen: Boolean = true,
 
-) : Layer(id, LayerType.SCRIPT_CREDITS, level, name, note) {
+    ) : Layer(id, LayerType.SCRIPT_CREDITS, level, name, note) {
 
-    constructor(id: String, level: Int, name: String, note: String, amount: Int, stolen: Boolean):
+    constructor(id: String, level: Int, name: String, note: String, amount: Int, stolen: Boolean) :
         this(id, LayerType.SCRIPT_CREDITS, level, name, note, amount, stolen)
 
     constructor(id: String, level: Int, defaultName: String) :
@@ -31,7 +31,7 @@ class ScriptCreditsLayer(
     @Suppress("unused")
     private fun validateAmount(validationContext: ValidationContext) {
         if (this.amount < 0) throw SiteValidationException("The value cannot be negative.")
-        if (this.amount ==0) throw SiteValidationException("Value of Credits Source not yet set, currently at 0 credits.", INFO)
+        if (this.amount == 0) throw SiteValidationException("Value of Credits Source not yet set, currently at 0 credits.", INFO)
     }
 
     @Suppress("unused")

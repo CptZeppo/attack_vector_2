@@ -1,9 +1,9 @@
 package org.n1.av2.script.effect.negative
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.ScriptEffectHelper
@@ -19,16 +19,16 @@ import org.springframework.stereotype.Service
 class SpeedUpResetTimerEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val timerService: TimerService,
-    private val messageService: MessageService
-    ) : ScriptEffectInterface {
+    private val i18n: I18n
+) : ScriptEffectInterface {
 
-    override val name = messageService.getMessage("script.effect.speedUp.name")
+    override val name = i18n.t("speed-up-reset-timer.name")
     override val defaultValue = "00:05:00"
-    override val gmDescription = messageService.getMessage("script.effect.speedUp.description.gm")
+    override val gmDescription = i18n.t("speed-up-reset-timer.description-gm")
 
-    override fun playerDescription(effect: ScriptEffect) = messageService.getMessage("script.effect.speedUp.description.player", toHumanTime(effect.value!!))
+    override fun playerDescription(effect: ScriptEffect) = i18n.t("speed-up-reset-timer.description-player", toHumanTime(effect.value!!))
 
-    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(messageService, effect)
+    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(i18n, effect)
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkAtNonShutdownSite(hackerState)?.let { return ScriptExecution(it) }

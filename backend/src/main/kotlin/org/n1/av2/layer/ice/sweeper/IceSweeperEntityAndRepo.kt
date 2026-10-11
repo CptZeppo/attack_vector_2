@@ -15,7 +15,7 @@ empty: 0
 adjacent to mine: 1-8
 
 For example:
-*1001**
+ *1001**
 1211122
 01*1000
 0111000
@@ -33,7 +33,7 @@ rrrrrrr
 
 Note that in this example, the top left mine has exploded, as it has been revealed
 
-*/
+ */
 
 const val MINE = '*'
 const val HIDDEN = 'h'
@@ -53,6 +53,6 @@ data class SweeperIceStatus(
 )
 
 @Repository
-interface SweeperIceStatusRepo: CrudRepository<SweeperIceStatus, String> {
+interface SweeperIceStatusRepo : CrudRepository<SweeperIceStatus, String> {
     fun findByLayerId(layerId: String): SweeperIceStatus?
 }

@@ -1,5 +1,6 @@
 package org.n1.av2.layer.ice.wordsearch
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.n1.av2.layer.ice.HackedUtil
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
@@ -12,7 +13,6 @@ import org.n1.av2.statistics.IceHackState
 import org.springframework.stereotype.Service
 import kotlin.jvm.optionals.getOrElse
 import kotlin.system.measureTimeMillis
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 
 @Service

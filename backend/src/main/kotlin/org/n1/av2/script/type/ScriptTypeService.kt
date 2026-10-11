@@ -1,5 +1,6 @@
 package org.n1.av2.script.type
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.connection.ServerActions.SERVER_SCRIPT_UI_FORCE_DELETE_ENABLED
@@ -12,7 +13,6 @@ import org.n1.av2.script.access.ScriptAccessService
 import org.n1.av2.script.effect.ScriptEffectType
 import org.n1.av2.script.effect.ScriptEffectTypeLookup
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
 import kotlin.jvm.optionals.getOrElse
 
 @Service
@@ -37,7 +37,7 @@ class ScriptTypeService(
     private val effectService: ScriptEffectTypeLookup,
     private val currentUserService: CurrentUserService,
     private val userEntityService: UserEntityService,
-)  {
+) {
 
     lateinit var scriptService: ScriptService
     lateinit var scriptAccessService: ScriptAccessService
@@ -74,7 +74,7 @@ class ScriptTypeService(
             ScriptTypeUI(
                 id = scriptType.id,
                 name = scriptType.name,
-                category =  scriptType.category,
+                category = scriptType.category,
                 size = scriptType.size,
                 gmNote = scriptType.gmNote,
                 defaultPrice = scriptType.defaultPrice,
@@ -205,16 +205,15 @@ class ScriptTypeService(
 
     fun delete(scriptTypeId: ScriptTypeId, force: Boolean) {
         val scriptType = getById(scriptTypeId)
-        val existingScripts: List<Script> = scriptService.findByTypeId(scriptTypeId )
-        val usableExistingScripts = existingScripts.filter { scriptService.usable(it)}
+        val existingScripts: List<Script> = scriptService.findByTypeId(scriptTypeId)
+        val usableExistingScripts = existingScripts.filter { scriptService.usable(it) }
 
         val ownershipError = if (usableExistingScripts.isNotEmpty()) {
             val instances = usableExistingScripts.map {
                 userEntityService.getUserName(it.ownerUserId)
             }.toSet().joinToString(", ")
             "Cannot delete ${scriptType.name} because there are still ${usableExistingScripts.size} scripts of this type, owned by: ${instances}."
-        }
-        else null
+        } else null
 
         val accesses = scriptAccessService.findByTypeId(scriptTypeId)
         val accessError = if (accesses.isNotEmpty()) {
@@ -223,8 +222,7 @@ class ScriptTypeService(
             }.toSet().joinToString(", ")
             "Cannot delete ${scriptType.name} because there are still ${accesses.size} access entries for this type, owned by: ${instances}."
 
-        }
-        else null
+        } else null
 
         if (!force && (ownershipError != null || accessError != null)) {
             ownershipError?.let { connectionService.replyNotificationError(it) }

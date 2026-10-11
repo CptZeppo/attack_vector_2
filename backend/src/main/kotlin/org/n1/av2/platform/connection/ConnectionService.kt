@@ -55,7 +55,7 @@ class ConnectionService(
         val dataAsPairs = data.filterIsInstance<Pair<*, *>>()
         if (dataAsPairs.size == data.size) {
             val map = HashMap<String, Any?>()
-            dataAsPairs.forEach { pair  ->
+            dataAsPairs.forEach { pair ->
                 val first = pair.first ?: error("null keys not supported for stomp call")
                 if (first !is String) error("keys must be strings, otherwise it's invalid json")
                 map[first] = pair.second

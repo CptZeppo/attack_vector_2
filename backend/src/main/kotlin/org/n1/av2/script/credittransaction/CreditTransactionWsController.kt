@@ -10,7 +10,7 @@ import org.springframework.stereotype.Controller
 class CreditTransactionWsController(
     private val userTaskRunner: UserTaskRunner,
     private val creditTransactionService: CreditTransactionService,
-    ) {
+) {
 
     @MessageMapping("/hacker/creditTransaction/send")
     fun sendTransactionsForCurrentUser(userPrincipal: UserPrincipal) {
@@ -30,6 +30,7 @@ class CreditTransactionWsController(
     }
 
     data class GmAdjustCreditsCommand(val userId: String, val amount: Int, val description: String)
+
     @MessageMapping("/gm/scriptCredits/adjust")
     fun gmAdjustCredits(command: GmAdjustCreditsCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptCredits/adjust", userPrincipal) {

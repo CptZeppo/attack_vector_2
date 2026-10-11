@@ -46,7 +46,8 @@ class NetwalkConnectionTracer(
             (fromDirection == Direction.N && type.s) ||
             (fromDirection == Direction.E && type.w) ||
             (fromDirection == Direction.S && type.n) ||
-            (fromDirection == Direction.W && type.e)) {
+            (fromDirection == Direction.W && type.e)
+        ) {
 
             connected.add(Point(x, y))
 

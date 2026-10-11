@@ -4,7 +4,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateEntityService
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
-import org.n1.av2.run.local.MessageService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.terminal.generic.*
 import org.n1.av2.run.terminal.inside.*
 import org.n1.av2.run.terminal.inside.skillbased.CommandJumpToHackerService
@@ -15,13 +15,11 @@ import org.springframework.stereotype.Service
 
 const val TERMINAL_MAIN = "main"
 
-
-const val MISSING_SKILL_RESPONSE = "command.missingSkill"
-
 @Service
 class TerminalService(
     private val hackerStateEntityService: HackerStateEntityService,
     private val connectionService: ConnectionService,
+    private val i18n: I18n,
 
     private val commandHelpService: CommandHelpService,
     private val socialTerminalService: SocialTerminalService,
@@ -42,8 +40,6 @@ class TerminalService(
     private val commandDisconnectService: CommandDisconnectService,
 
     private val devCommandHelper: DevCommandHelper,
-
-    private val messageService: MessageService,
 ) {
 
     fun processCommand(command: String) {
@@ -52,7 +48,7 @@ class TerminalService(
         val commandAction = tokens.first().lowercase()
 
         if (commandAction.isBlank()) {
-            connectionService.reply( ServerActions.SERVER_TERMINAL_RECEIVE, ConnectionService.TerminalReceive(TERMINAL_MAIN, emptyArray(), false) )
+            connectionService.reply(ServerActions.SERVER_TERMINAL_RECEIVE, ConnectionService.TerminalReceive(TERMINAL_MAIN, emptyArray(), false))
             return
         }
 
@@ -85,13 +81,13 @@ class TerminalService(
 
 
             "qs" -> commandScanService.processQuickScan(hackerState)
-            "qa" ->commandStartAttackService.startQuickAttack(hackerState)
+            "qa" -> commandStartAttackService.startQuickAttack(hackerState)
             "qmove" -> commandMoveService.processQuickMove(arguments, hackerState)
             "qhack" -> commandHackService.processQuickHack(arguments, hackerState)
             "sweeperunblock" -> commandDebugService.processSweepUnblock(arguments, hackerState)
-            "quick"-> devCommandHelper.setQuickPlaying()
+            "quick" -> devCommandHelper.setQuickPlaying()
 
-            else -> connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.unknown"))
+            else -> connectionService.replyTerminalReceive(i18n.t("terminal.unknown-command"))
         }
     }
 

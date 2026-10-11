@@ -1,6 +1,7 @@
 package org.n1.av2.platform.config
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.n1.av2.platform.config.ConfigItemVisibility.ADMIN
 import org.n1.av2.platform.config.ConfigItemVisibility.EVERYONE
 import org.n1.av2.platform.connection.ConnectionService
@@ -11,7 +12,6 @@ import org.n1.av2.platform.util.validateDuration
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.*
-import jakarta.annotation.PostConstruct
 
 @Service
 class ConfigService(
@@ -30,8 +30,8 @@ class ConfigService(
     fun initConfigValues() {
         val allEntries = repo.findAll()
         val allItems: List<ConfigEntry> = ConfigItem.entries.map { item ->
-            allEntries.find { it.item == item } ?: ConfigEntry(item, item.defaultValue).also {
-                newEntry: ConfigEntry -> repo.save(newEntry)
+            allEntries.find { it.item == item } ?: ConfigEntry(item, item.defaultValue).also { newEntry: ConfigEntry ->
+                repo.save(newEntry)
             }
         }
         updateCache(allItems)

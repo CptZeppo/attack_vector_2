@@ -1,8 +1,6 @@
 package org.n1.av2.platform.config
 
-import org.n1.av2.platform.config.ConfigItemVisibility.ADMIN
-import org.n1.av2.platform.config.ConfigItemVisibility.EVERYONE
-import org.n1.av2.platform.config.ConfigItemVisibility.NEVER
+import org.n1.av2.platform.config.ConfigItemVisibility.*
 import org.n1.av2.platform.util.validateDuration
 import org.springframework.data.annotation.Id
 import org.springframework.data.repository.CrudRepository
@@ -33,6 +31,7 @@ enum class ConfigItem(
     HACKER_SCRIPT_LOCKOUT_DURATION(EVERYONE, "01:00:00", ::validDuration),
     HACKER_SCRIPT_LOAD_DURING_RUN(EVERYONE, "false", ::validBoolean),
     HACKER_DEFAULT_SPEED(EVERYONE, "4", ::validHackerSpeed),
+    HACKER_DEFAULT_LANGUAGE(EVERYONE, "en", ::validLanguage),
 
     LOGIN_PATH(EVERYONE, "/login", ::notEmpty, ::loginPathMessage),
     LOGIN_PASSWORD(ADMIN, "", ::validPassword, ::loginPasswordMessage),
@@ -103,6 +102,11 @@ fun validPassword(toValidate: String, configValues: Map<ConfigItem, String>): St
 
 @Suppress("unused")
 fun validDuration(toValidate: String, configValues: Map<ConfigItem, String>) = toValidate.validateDuration()
+
+@Suppress("unused")
+fun validLanguage(toValidate: String, configValues: Map<ConfigItem, String>) =
+    if (toValidate in org.n1.av2.platform.i18n.SUPPORTED_LANGUAGES) null
+    else "Value must be one of: ${org.n1.av2.platform.i18n.SUPPORTED_LANGUAGES.joinToString(", ")}"
 
 fun loginPathMessage(value: String): String? {
     return if (value != "/login" && value != "/devLogin") {

@@ -88,7 +88,12 @@ class SiteRestController(
     class EditNetworkIdRequest(val value: String = "")
 
     @PutMapping("/{siteId}/node/{nodeId}/networkId")
-    fun editNetworkId(@PathVariable siteId: String, @PathVariable nodeId: String, @RequestBody request: EditNetworkIdRequest, userPrincipal: UserPrincipal): SiteFull {
+    fun editNetworkId(
+        @PathVariable siteId: String,
+        @PathVariable nodeId: String,
+        @RequestBody request: EditNetworkIdRequest,
+        userPrincipal: UserPrincipal
+    ): SiteFull {
         editorService.validateAccessToSiteById(siteId, userPrincipal)
         editorService.editNetworkId(EditNetworkIdCommand(siteId = siteId, nodeId = nodeId, value = request.value))
         return siteService.getSiteFull(siteId)
@@ -158,7 +163,12 @@ class SiteRestController(
     }
 
     @PostMapping("/{siteId}/node/{nodeId}/layer/{layerId}/statusLightOption")
-    fun addStatusLightOption(@PathVariable siteId: String, @PathVariable nodeId: String, @PathVariable layerId: String, userPrincipal: UserPrincipal): SiteFull {
+    fun addStatusLightOption(
+        @PathVariable siteId: String,
+        @PathVariable nodeId: String,
+        @PathVariable layerId: String,
+        userPrincipal: UserPrincipal
+    ): SiteFull {
         editorService.validateAccessToSiteById(siteId, userPrincipal)
         editorService.addStatusLightOption(EditorWsController.AddStatusLightOptionCommand(siteId, nodeId, layerId))
         return siteService.getSiteFull(siteId)

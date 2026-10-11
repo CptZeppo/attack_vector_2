@@ -235,8 +235,16 @@ class ExportedSiteParser(
 
     private fun mapTimerAdjusterLayer(input: JsonNode, id: String, level: Int, name: String, note: String): TimerAdjusterLayer {
         val amount = input.get("amount")?.asString() ?: input.get("increase").asString() // In initial version the field was called "increase"
-        val adjustmentType = if (input.has("adjustmentType")) { TimerAdjustmentType.valueOf(input.get("adjustmentType").asString()) } else { TimerAdjustmentType.SPEED_UP }
-        val recurring = if (input.has("recurring")) { TimerAdjustmentRecurring.valueOf(input.get("recurring").asString()) } else { TimerAdjustmentRecurring.EVERY_ENTRY }
+        val adjustmentType = if (input.has("adjustmentType")) {
+            TimerAdjustmentType.valueOf(input.get("adjustmentType").asString())
+        } else {
+            TimerAdjustmentType.SPEED_UP
+        }
+        val recurring = if (input.has("recurring")) {
+            TimerAdjustmentRecurring.valueOf(input.get("recurring").asString())
+        } else {
+            TimerAdjustmentRecurring.EVERY_ENTRY
+        }
 
         return TimerAdjusterLayer(
             id = id, level = level, name = name, note = note,

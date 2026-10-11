@@ -1,5 +1,6 @@
 package org.n1.av2.site
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.hacker.hackerstate.HackerActivity
 import org.n1.av2.hacker.hackerstate.HackerStateEntityService
 import org.n1.av2.hacker.skill.SkillService
@@ -25,7 +26,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.ZonedDateTime
-import jakarta.annotation.PostConstruct
 
 // To prevent circular bean dependencies
 @Configuration

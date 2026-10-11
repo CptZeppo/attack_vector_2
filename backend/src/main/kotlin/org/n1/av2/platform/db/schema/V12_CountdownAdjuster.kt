@@ -51,7 +51,7 @@ class V12_CountdownAdjuster : MigrationStep {
                     layer["adjustmentType"] = "SPEED_UP"
                     layer["recurring"] = "EVERY_ENTRY"
 
-                    if ( layer["name"] == "Shutdown amplifier") {
+                    if (layer["name"] == "Shutdown amplifier") {
                         layer["name"] = "Timer accelerator"
                     }
                 }

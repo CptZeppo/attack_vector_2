@@ -1,5 +1,6 @@
 package org.n1.av2.layer.app.status_light
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.editor.EditorService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
@@ -7,7 +8,6 @@ import org.n1.av2.site.entity.Node
 import org.n1.av2.site.entity.NodeEntityService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
 
 @Configuration
 class InitStatusLightService(

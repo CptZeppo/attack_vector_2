@@ -2,12 +2,12 @@ package org.n1.av2.platform.iam.login.frontier
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.servlet.http.Cookie
-import tools.jackson.core.type.TypeReference
-import tools.jackson.databind.json.JsonMapper
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.iam.login.HttpClient
 import org.springframework.stereotype.Service
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.json.JsonMapper
 
 @Service
 class OrthankService(
@@ -59,6 +59,7 @@ class OrthankService(
     private fun orthankToken(): String {
         return configService.get(ConfigItem.LARP_SPECIFIC_FRONTIER_ORTHANK_TOKEN)
     }
+
     private fun getCharacterInfo(accountId: String): CharacterInfo {
         val headers = mapOf("accountID" to accountId, "token" to orthankToken())
         val responseText = httpClient.get("https://api.eosfrontier.space/orthanc/v2/chars_player/", headers)

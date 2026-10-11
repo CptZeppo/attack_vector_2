@@ -17,7 +17,7 @@ abstract class Layer(
 ) {
 
     constructor(id: String, type: LayerType, level: Int, defaultName: String) :
-            this(id, type, level, defaultName, "")
+        this(id, type, level, defaultName, "")
 
 
     @Suppress("unused")
@@ -41,7 +41,7 @@ abstract class Layer(
     }
 
     open fun updateInternal(key: String, value: String): Boolean {
-        when(key) {
+        when (key) {
             NAME -> name = value
             NOTE -> note = value
             else -> return false

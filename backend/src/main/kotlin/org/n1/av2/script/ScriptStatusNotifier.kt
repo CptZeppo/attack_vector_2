@@ -51,15 +51,15 @@ class ScriptStatusNotifier(
     )
 
     fun sendScriptStatusOfCurrentUser(scriptsAndTypes: List<Pair<Script, ScriptType>>, ram: RamEntity) {
-        val status = createUiScriptStatus(scriptsAndTypes, ram,)
-        connectionService.toUser (currentUserService.userId, ServerActions.SERVER_RECEIVE_SCRIPT_STATUS, status)
+        val status = createUiScriptStatus(scriptsAndTypes, ram)
+        connectionService.toUser(currentUserService.userId, ServerActions.SERVER_RECEIVE_SCRIPT_STATUS, status)
     }
 
     fun sendScriptStatusOfSpecificUser(userId: String, scriptsAndTypes: List<Pair<Script, ScriptType>>, ram: RamEntity, alsoSendToCurrentUser: Boolean = true) {
         val status = createUiScriptStatus(scriptsAndTypes, ram)
         connectionService.toUser(userId, ServerActions.SERVER_RECEIVE_SCRIPT_STATUS, status)
         if (alsoSendToCurrentUser) {
-            connectionService.toUser (currentUserService.userId, ServerActions.SERVER_RECEIVE_SCRIPT_STATUS, status)
+            connectionService.toUser(currentUserService.userId, ServerActions.SERVER_RECEIVE_SCRIPT_STATUS, status)
         }
     }
 

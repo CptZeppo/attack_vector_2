@@ -6,15 +6,15 @@ import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.connection.ServerActions.SERVER_PROBE_LAUNCH
 import org.n1.av2.platform.engine.UserTaskRunner
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.run.entity.NodeScan
 import org.n1.av2.run.entity.NodeScanStatus
 import org.n1.av2.run.entity.Run
 import org.n1.av2.run.entity.RunEntityService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.runlink.RunLinkService
 import org.n1.av2.run.scanning.NodeScanType.OUTSIDE_SCAN
-import org.n1.av2.run.terminal.outside.CONNECTION_REFUSED_DURING_SITE_RESET
+import org.n1.av2.run.terminal.outside.CONNECTION_REFUSED_SHUTDOWN_KEY
 import org.n1.av2.run.timings.TimingsService
 import org.n1.av2.site.entity.Node
 import org.n1.av2.site.entity.NodeEntityService
@@ -38,13 +38,13 @@ class InitiateScanService(
     private val timingsService: TimingsService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
     private val skillService: SkillService,
-    private val messageService: MessageService
+    private val i18n: I18n,
 ) {
 
     fun scanIgnoringIceAtTargetNode(run: Run, startNode: Node?, targetNode: Node) {
         val siteProperties = sitePropertiesEntityService.getBySiteId(run.siteId)
         if (siteProperties.shutdownEnd != null) {
-            connectionService.replyTerminalReceive(messageService.getMessage(CONNECTION_REFUSED_DURING_SITE_RESET))
+            connectionService.replyTerminalReceive(i18n.t(CONNECTION_REFUSED_SHUTDOWN_KEY))
             return
         }
 
@@ -64,7 +64,7 @@ class InitiateScanService(
     fun scanFromOutside(run: Run, startNode: Node) {
         val siteProperties = sitePropertiesEntityService.getBySiteId(run.siteId)
         if (siteProperties.shutdownEnd != null) {
-            connectionService.replyTerminalReceive(messageService.getMessage(CONNECTION_REFUSED_DURING_SITE_RESET))
+            connectionService.replyTerminalReceive(i18n.t(CONNECTION_REFUSED_SHUTDOWN_KEY))
             connectionService.replyTerminalSetLocked(false)
             return
         }
@@ -77,11 +77,13 @@ class InitiateScanService(
         scanFromOutSide(start, target, run, startNode, nodes, false)
     }
 
-    private fun scanFromOutSide(start: TraverseNode,
-                        target: TraverseNode,
-                        run: Run, targetNode:
-                        Node, nodes: List<Node>,
-                        ignoreIceAtTarget: Boolean) {
+    private fun scanFromOutSide(
+        start: TraverseNode,
+        target: TraverseNode,
+        run: Run, targetNode:
+        Node, nodes: List<Node>,
+        ignoreIceAtTarget: Boolean
+    ) {
         try {
             val path = TraverseNode.createPath(start, target)
 
@@ -99,9 +101,8 @@ class InitiateScanService(
                 scanService.areaScan(run, targetNode, nodes, ignoreIceAtTarget)
             }
 
-        }
-        catch (exception: BlockedPathException) {
-            connectionService.replyTerminalReceiveAndLocked(false, exception.message!!)
+        } catch (exception: BlockedPathException) {
+            connectionService.replyTerminalReceiveAndLocked(false, i18n.t("scan.ice-blocks-path", exception.networkId))
             return
         }
     }
@@ -134,7 +135,7 @@ class InitiateScanService(
     fun quickScan(run: Run) {
         val nodes = nodeEntityService.findBySiteId(run.siteId)
 
-        nodes.forEach {node ->
+        nodes.forEach { node ->
             val oldStatus = run.nodeScanById[node.id]
             run.nodeScanById[node.id] = NodeScan(NodeScanStatus.FULLY_SCANNED_4, oldStatus!!.distance)
         }

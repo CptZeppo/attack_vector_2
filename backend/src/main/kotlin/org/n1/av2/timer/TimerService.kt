@@ -12,10 +12,10 @@ import org.n1.av2.platform.engine.CalledBySystem
 import org.n1.av2.platform.engine.ScheduledTask
 import org.n1.av2.platform.engine.SystemTaskRunner
 import org.n1.av2.platform.engine.TaskEngine
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.util.TimeService
 import org.n1.av2.platform.util.toHumanTime
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.site.SiteResetService
 import org.n1.av2.site.entity.SitePropertiesEntityService
@@ -40,7 +40,7 @@ class TimerService(
     private val currentUserService: CurrentUserService,
     private val skillService: SkillService,
     private val taskEngine: TaskEngine,
-    private val messageService: MessageService
+    private val i18n: I18n
 ) {
 
     private val MINIMUM_TIMER_DURATION = Duration.ofSeconds(10)
@@ -113,9 +113,9 @@ class TimerService(
             )
         }
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.trigger", timerSourceMessage, durations.effective.toHumanTime()))
-        reportAdjustment(messageService.getMessage("layer.timerAdjuster.source.positive.stealth"), messageService.getMessage("layer.timerAdjuster.source.negative.stealth"), durations.stealthAdjustment)
-        reportAdjustment(messageService.getMessage("layer.timerAdjuster.source.positive.alertness"), messageService.getMessage("layer.timerAdjuster.source.negative.alertness"), durations.alertnessAdjustment)
+        connectionService.replyTerminalReceive(i18n.t("timer.triggered-reset", timerSourceMessage, durations.effective.toHumanTime()))
+        reportAdjustment(i18n.t("timer.adjust.stealth-skill"), i18n.t("timer.adjust.low-stealth-skill"), durations.stealthAdjustment)
+        reportAdjustment(i18n.t("timer.adjust.decreased-alertness "), i18n.t("timer.adjust.increased-alertness"), durations.alertnessAdjustment)
     }
 
     private fun informClientsOfTimer(action: ServerActions, timer: Timer) {
@@ -128,9 +128,9 @@ class TimerService(
     private fun reportAdjustment(sourcePositive: String, sourceNegative: String, adjustment: Duration) {
         if (adjustment != Duration.ZERO) {
             val message = if (adjustment.isPositive)
-                messageService.getMessageAsLines("timer.adjustment.increase", sourcePositive, adjustment.toHumanTime())
+                i18n.t("timer.adjust.increased", sourcePositive, adjustment.toHumanTime())
             else
-                messageService.getMessageAsLines("timer.adjustment.decrease", sourceNegative, adjustment.multipliedBy(-1).toHumanTime())
+                i18n.t("timer.adjust.decreased", sourceNegative, adjustment.multipliedBy(-1).toHumanTime())
             connectionService.replyTerminalReceive(message)
         }
     }
@@ -225,8 +225,8 @@ class TimerService(
 
     private fun determineEffect(type: TimerEffect, duration: Duration): String {
         return when (type) {
-            TimerEffect.SHUTDOWN_START -> messageService.getMessage("timer.shutdown.start", duration.toHumanTime())
-            TimerEffect.SHUTDOWN_FINISH -> messageService.getMessage("timer.shutdown.finish")
+            TimerEffect.SHUTDOWN_START -> i18n.t("timer.effect.shutdown", duration.toHumanTime())
+            TimerEffect.SHUTDOWN_FINISH -> i18n.t("timer.effect.available")
         }
     }
 
@@ -234,7 +234,7 @@ class TimerService(
         val updatedTimer = timer.copy(finishAt = timer.finishAt.plus(duration))
         timerEntityService.update(updatedTimer)
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.delay", duration.toHumanTime()))
+        connectionService.replyTerminalReceive(i18n.t("timer.countdown-delayed", duration.toHumanTime()))
         informClientsOfTimer(ServerActions.SERVER_CHANGE_TIMER, updatedTimer)
 
         alterTimerTask(updatedTimer, duration)
@@ -257,7 +257,7 @@ class TimerService(
             return // no timers yet.
         }
         if (timers.size > 1) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.speedUp.multy"))
+            connectionService.replyTerminalReceive(i18n.t("timer.script-error-multiple"))
             return
         }
 
@@ -277,7 +277,7 @@ class TimerService(
         val updatedTimer = timer.copy(finishAt = adjustedFinishAt)
         timerEntityService.update(updatedTimer)
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("timer.speedUp.info", duration.toHumanTime()))
+        connectionService.replyTerminalReceive(i18n.t("timer.countdown-accelerated", duration.toHumanTime()))
         informClientsOfTimer(ServerActions.SERVER_CHANGE_TIMER, updatedTimer)
 
         alterTimerTask(updatedTimer, duration.negated())

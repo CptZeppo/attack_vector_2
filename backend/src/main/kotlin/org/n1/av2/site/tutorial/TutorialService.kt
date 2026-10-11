@@ -47,8 +47,7 @@ class TutorialService(
             currentUserService.set(userEntityService.getSystemUser())
             val json = this::class.java.getResource("/sites/v1-tutorial.json")?.readText() ?: error("tutorial json not found")
             importService.importSite(json)
-        }
-        finally {
+        } finally {
             currentUserService.remove()
         }
         return true

@@ -1,7 +1,7 @@
 package org.n1.av2.frontend.web
 
-import jakarta.servlet.http.HttpServletRequest
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
@@ -38,7 +38,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidationException(e: MethodArgumentNotValidException): ResponseEntity<String> {
-        val message = e.bindingResult.allErrors.map { it.defaultMessage}.joinToString(", ")
+        val message = e.bindingResult.allErrors.map { it.defaultMessage }.joinToString(", ")
         logger.error(e) { "Bad request: $message" }
         // Handle validation exceptions here
         return ResponseEntity(message, HttpStatus.BAD_REQUEST)
@@ -64,7 +64,7 @@ class GlobalExceptionHandler {
     fun handleException(e: HandlerMethodValidationException, request: HttpServletRequest): ResponseEntity<String> {
         // Handle validation exceptions here
         val message = e.parameterValidationResults.map {
-            val errorMessage =  it.resolvableErrors.map{
+            val errorMessage = it.resolvableErrors.map {
                 it.defaultMessage
             }.joinToString(", ")
             val argument = parseArgument(it.argument)
@@ -75,7 +75,7 @@ class GlobalExceptionHandler {
 
 
 
-        logger.warn{ "${request.requestURL.toString().limit(100)} -> $message" }
+        logger.warn { "${request.requestURL.toString().limit(100)} -> $message" }
         return ResponseEntity(message, e.statusCode)
     }
 

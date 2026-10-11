@@ -2,6 +2,8 @@
 // Czech overrides live in cs.ts; missing keys fall back to these English values.
 // Use {0}, {1}, ... for interpolated arguments (same convention as the backend).
 export const en = {
+    //TODO retirer les cles qui ne sont plus utilisées
+
     // shared
     "common.ram": "RAM",
     "common.name": "Name",

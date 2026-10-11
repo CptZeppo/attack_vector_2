@@ -244,6 +244,6 @@ class SiteService(
                 return attempt
             }
         }
-        error("No free site name found within 1000 attempts" )
+        error("No free site name found within 1000 attempts")
     }
 }

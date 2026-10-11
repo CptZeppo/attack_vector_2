@@ -44,7 +44,7 @@ data class Node(
     }
 
     @Transient
-    val ice  = layers.any { it is IceLayer } // used in frontend as well
+    val ice = layers.any { it is IceLayer } // used in frontend as well
 
     @get:JsonProperty("hacked")
     val hacked: Boolean get() = if (!ice) true else layers.filterIsInstance<IceLayer>().all { it.hacked }

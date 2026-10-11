@@ -27,6 +27,7 @@ class ScriptTypeWsController(
     }
 
     data class DeleteScriptTypeCommand(val scriptTypeId: ScriptTypeId, val force: Boolean)
+
     @MessageMapping("/gm/scriptType/delete")
     fun deleteScriptType(command: DeleteScriptTypeCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptType/delete", userPrincipal) {
@@ -35,6 +36,7 @@ class ScriptTypeWsController(
     }
 
     class EditCommand(val scriptTypeId: ScriptTypeId, val name: String, val category: String, val gmNote: String, val size: Int, val defaultPrice: Int?)
+
     @MessageMapping("/gm/scriptType/edit")
     fun editScriptType(command: EditCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptType/edit", userPrincipal) {
@@ -43,6 +45,7 @@ class ScriptTypeWsController(
     }
 
     class AddEffectCommand(val scriptTypeId: ScriptTypeId, val effectType: ScriptEffectType)
+
     @MessageMapping("/gm/scriptType/addEffect")
     fun addEffect(command: AddEffectCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptType/addEffect", userPrincipal) {
@@ -51,6 +54,7 @@ class ScriptTypeWsController(
     }
 
     class DeleteEffectCommand(val scriptTypeId: ScriptTypeId, val effectNumber: Int)
+
     @MessageMapping("/gm/scriptType/deleteEffect")
     fun deleteEffect(command: DeleteEffectCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptType/deleteEffect", userPrincipal) {
@@ -59,6 +63,7 @@ class ScriptTypeWsController(
     }
 
     class EditEffectCommand(val scriptTypeId: ScriptTypeId, val effectNumber: Int, val value: String)
+
     @MessageMapping("/gm/scriptType/editEffect")
     fun editEffect(command: EditEffectCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/gm/scriptType/editEffect", userPrincipal) {

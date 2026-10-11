@@ -16,7 +16,7 @@ data class RunLink(
 
 @Repository
 interface RunLinkRepo : CrudRepository<RunLink, String> {
-    fun findAllByUserId(userId:String): List<RunLink>
+    fun findAllByUserId(userId: String): List<RunLink>
     fun findAllByRunId(runId: String): List<RunLink>
     fun findByUserIdAndRunId(userId: String, runId: String): RunLink?
     fun deleteByUserIdAndRunId(userId: String, runId: String)

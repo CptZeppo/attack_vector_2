@@ -6,7 +6,7 @@ val totalsByName = HashMap<String, Long>()
 val countByName = HashMap<String, Int>()
 
 
-inline fun <T>logNanoTime(name: String, logger: KLogger, block: () -> T): T {
+inline fun <T> logNanoTime(name: String, logger: KLogger, block: () -> T): T {
     val start = System.nanoTime()
     val result = block()
     val time = System.nanoTime() - start

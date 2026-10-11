@@ -25,7 +25,7 @@ import org.n1.av2.layer.other.tripwire.TripwireLayer
 import org.n1.av2.layer.other.tripwire.TripwireLayerService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
-import org.n1.av2.run.local.MessageService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.terminal.generic.DevCommandHelper
 import org.n1.av2.site.entity.NodeEntityService
 import org.n1.av2.statistics.IceHackState
@@ -48,7 +48,7 @@ class CommandHackService(
     private val timerAdjusterService: TimerAdjusterService,
     private val insideTerminalHelper: InsideTerminalHelper,
     private val devCommandHelper: DevCommandHelper,
-    private val messageService: MessageService,
+    private val i18n: I18n,
 ) {
 
     fun processHackCommand(arguments: List<String>, hackerState: HackerStateRunning) {
@@ -64,10 +64,15 @@ class CommandHackService(
         process(arguments, hackerState, "password ", ::handlePassword)
     }
 
-    private fun process(arguments: List<String>, hackerState: HackerStateRunning, commandName: String, commandFunction: (layer: Layer, hackerState: HackerStateRunning) -> Unit) {
+    private fun process(
+        arguments: List<String>,
+        hackerState: HackerStateRunning,
+        commandName: String,
+        commandFunction: (layer: Layer, hackerState: HackerStateRunning) -> Unit
+    ) {
         if (!insideTerminalHelper.verifyInside(hackerState)) return
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.missing", commandName))
+            connectionService.replyTerminalReceive(i18n.t("hack.missing-layer", commandName))
             return
         }
         val layer = insideTerminalHelper.verifyCanAccessLayer(arguments.first(), hackerState, commandName) ?: return
@@ -89,38 +94,39 @@ class CommandHackService(
             is ScriptInteractionLayer -> scriptInteractionLayerService.hack()
             is ScriptCreditsLayer -> scriptCreditsLayerService.hack(layer, hackerState)
             is TimerAdjusterLayer -> timerAdjusterService.hack(layer)
-            else -> connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.unsupportedType", layer.type, layer.javaClass.name)).also { error("Non implemented layer type: ${layer.type}") }
+            else -> connectionService.replyTerminalReceive(i18n.t("hack.layer-not-supported", layer.type, layer.javaClass.name))
+                .also { error("Non implemented layer type: ${layer.type}") }
         }
     }
 
     private fun hackIce(layer: IceLayer) {
         if (layer.hacked) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.ice.allredyHacked"))
+            connectionService.replyTerminalReceive(i18n.t("hack.ice-already-hacked"))
             return
         }
         val iceId = iceService.findOrCreateIceForLayerAndIceStatus(layer)
 
         data class EnterIce(val iceId: String)
         connectionService.reply(ServerActions.SERVER_REDIRECT_HACK_ICE, EnterIce(iceId))
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.ice.newWindow"))
+        connectionService.replyTerminalReceive(i18n.t("hack.opened-new-window"))
     }
 
     @Suppress("unused")
     private fun handlePassword(layer: Layer, hackerState: HackerStateRunning) {
         if (layer !is IceLayer) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.password.notIce"))
+            connectionService.replyTerminalReceive(i18n.t("hack.password-only-ice"))
             return
         }
 
         data class EnterIce(val layerId: String)
         connectionService.reply(ServerActions.SERVER_REDIRECT_CONNECT_ICE, EnterIce(layer.id))
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.newWindow"))
+        connectionService.replyTerminalReceive(i18n.t("hack.password-opened-new-window"))
     }
 
     @Suppress("unused")
     private fun handleQuickHack(layer: Layer, hackerState: HackerStateRunning) {
-        if (layer !is IceLayer ) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.quickhack.unsupported"))
+        if (layer !is IceLayer) {
+            connectionService.replyTerminalReceive(i18n.t("hack.quick-only-ice"))
             return
         }
         val iceId = iceService.findOrCreateIceForLayerAndIceStatus(layer)
@@ -128,7 +134,7 @@ class CommandHackService(
         requireNotNull(hackerState.currentNodeId)
         val node = nodeEntityService.getById(hackerState.currentNodeId)
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.hack.quickhack", layer.level))
+        connectionService.replyTerminalReceive(i18n.t("hack.quick-hacked", layer.level))
         hackedUtil.iceHacked(iceId, layer.id, node, 0, IceHackState.USED_DEV_MODE)
     }
 

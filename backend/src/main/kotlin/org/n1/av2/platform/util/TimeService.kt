@@ -32,6 +32,7 @@ class TimeService(
     fun now(): ZonedDateTime {
         return ZonedDateTime.now(clock)
     }
+
     fun scriptResetMomentToday(): ZonedDateTime = now()
         .withHour(resetTime.hour)
         .withMinute(resetTime.minute)

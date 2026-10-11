@@ -50,15 +50,15 @@ class DbSchemaVersioning(
             .sortedBy { it.version }
     }
 
-        private fun runUpgradeStep(step: MigrationStep, db: MongoDatabase) {
-            val version = step.version
+    private fun runUpgradeStep(step: MigrationStep, db: MongoDatabase) {
+        val version = step.version
 
-            logger.info { "Upgrading to version $version" }
+        logger.info { "Upgrading to version $version" }
 
-            val description = step.migrate(db)
+        val description = step.migrate(db)
 
-            val versionRecord = DbSchemaVersion(version, description, ZonedDateTime.now())
-            dbSchemaVersionRepository.save(versionRecord)
-            logger.info { " Upgraded to version $version : $description" }
-        }
+        val versionRecord = DbSchemaVersion(version, description, ZonedDateTime.now())
+        dbSchemaVersionRepository.save(versionRecord)
+        logger.info { " Upgraded to version $version : $description" }
+    }
 }

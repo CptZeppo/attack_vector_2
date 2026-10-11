@@ -14,7 +14,7 @@ class RunEntityService(
     }
 
     fun create(siteId: String, nodeScanById: MutableMap<String, NodeScan>, initiatorId: String): Run {
-        val runId =  createId("run") { candidate: String -> runRepo.findByRunId(candidate) }
+        val runId = createId("run") { candidate: String -> runRepo.findByRunId(candidate) }
 
         val run = Run(
             runId = runId,

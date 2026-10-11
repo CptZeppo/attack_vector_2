@@ -10,7 +10,7 @@ import org.n1.av2.platform.config.ConfigItem.DEV_HACKER_USE_DEV_COMMANDS
 import org.n1.av2.platform.config.ConfigItem.HACKER_SCRIPT_LOAD_DURING_RUN
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
-import org.n1.av2.run.local.MessageService
+import org.n1.av2.platform.i18n.I18n
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,8 +18,10 @@ class CommandHelpService(
     private val connectionService: ConnectionService,
     private val configService: ConfigService,
     private val skillService: SkillService,
-    private val messageService: MessageService,
-    ) {
+    private val i18n: I18n,
+) {
+
+    private fun replyHelp(key: String) = connectionService.replyTerminalReceive(i18n.t(key).split("\n"))
 
     fun processHelp(arguments: List<String>, hackerState: HackerStateRunning) {
         val skills = skillService.findSkillsForUser(hackerState.userId)
@@ -36,27 +38,26 @@ class CommandHelpService(
     }
 
     private fun processHelpOutside(skills: List<Skill>) {
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.outside")
-        )
+        replyHelp("help.outside.intro")
         if (skills.containsType(SCAN)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.outside.scan"))
+            replyHelp("help.outside.scan")
         }
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.outside.attack"))
+        replyHelp("help.outside.attack")
         showRunScriptHelp(skills)
         showShareHelp()
         showDownloadScriptHelp(skills)
 
         if (configService.getAsBoolean(DEV_HACKER_USE_DEV_COMMANDS)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.outside.dev"))
+            replyHelp("help.outside.dev")
         }
     }
 
     private fun processHelpInside(skills: List<Skill>) {
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside"))
+        replyHelp("help.inside.intro")
 
         if (skills.containsType(SCAN)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.scan"))
+            replyHelp("help.inside.scan")
         }
 
         showRunScriptHelp(skills)
@@ -64,46 +65,44 @@ class CommandHelpService(
         showUndoTripwireHelp(skills)
         showJumpToHackerHelp(skills)
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.passwordAndDC"))
+        replyHelp("help.inside.password-dc")
         showShareHelp()
         showDownloadScriptHelp(skills)
 
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.help"))
+        replyHelp("help.inside.shortcuts-hint")
     }
 
-    private fun processHelpKeys() =
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.shortcuts"))
+    private fun processHelpKeys() = replyHelp("help.keys")
 
     private fun showRunScriptHelp(skills: List<Skill>) {
         if (skills.containsType(SCRIPT_RAM)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.script"))
+            replyHelp("help.run-script")
         }
     }
 
     private fun showWeakenHelp(skills: List<Skill>) {
         if (skills.containsType(WEAKEN)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.weaken"))
+            replyHelp("help.weaken")
         }
     }
 
     private fun showUndoTripwireHelp(skills: List<Skill>) {
         if (skills.containsType(UNDO_TRIPWIRE)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.undoTripwire"))
+            replyHelp("help.rollback")
         }
     }
 
     private fun showJumpToHackerHelp(skills: List<Skill>) {
         if (skills.containsType(JUMP_TO_HACKER)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.jumpToHacker"))
+            replyHelp("help.jump")
         }
     }
 
     private fun showDownloadScriptHelp(skills: List<Skill>) {
         if (configService.getAsBoolean(HACKER_SCRIPT_LOAD_DURING_RUN) && skills.containsType(SCRIPT_RAM)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.dowloadScipt"))
+            replyHelp("help.download-script")
         }
     }
 
-    private fun showShareHelp() =
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.help.inside.share"))
+    private fun showShareHelp() = replyHelp("help.share")
 }

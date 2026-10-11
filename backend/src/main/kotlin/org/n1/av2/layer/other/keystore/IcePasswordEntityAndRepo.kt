@@ -13,6 +13,6 @@ data class IcePassword(
 )
 
 @Repository
-interface IcePasswordRepository: CrudRepository<IcePassword, String> {
+interface IcePasswordRepository : CrudRepository<IcePassword, String> {
     fun findByIceId(iceId: String): IcePassword?
 }

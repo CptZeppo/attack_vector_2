@@ -113,6 +113,7 @@ class ScriptWsController(
     }
 
     data class ScriptOfferCommand(val scriptId: ScriptId, val offer: Boolean)
+
     @MessageMapping("/script/offer")
     fun offer(command: ScriptOfferCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/script/offer", userPrincipal) {

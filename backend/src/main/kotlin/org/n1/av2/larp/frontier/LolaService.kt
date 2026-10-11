@@ -26,7 +26,7 @@ class LolaService(
     private val hackerStateEntityService: HackerStateEntityService,
     private val userEntityService: UserEntityService,
     private val configService: ConfigService,
-    ) {
+) {
 
     /** Important to be after the ContextRefreshedEvent to give [DbSchemaVersioning] a chance to run first */
     @EventListener(ApplicationStartedEvent::class)
@@ -60,6 +60,7 @@ class LolaService(
     }
 
     class SpeakResponse(val success: Boolean, val message: String)
+
     fun speak(text: String): SpeakResponse {
         val lolaUser = userEntityService.getByName(LOLA_USER_NAME)
 

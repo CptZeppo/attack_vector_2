@@ -40,8 +40,9 @@ annotation class SafeJwt(
 // Without this class, the @Pattern and @Size annotations are ignored
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class SafeStringValidator : ConstraintValidator<SafeString, String?> {
-    override fun isValid(value: String?, context: ConstraintValidatorContext)= true
+    override fun isValid(value: String?, context: ConstraintValidatorContext) = true
 }
+
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
 class SafeJwtValidator : ConstraintValidator<SafeJwt, String?> {
     override fun isValid(value: String?, context: ConstraintValidatorContext) = true

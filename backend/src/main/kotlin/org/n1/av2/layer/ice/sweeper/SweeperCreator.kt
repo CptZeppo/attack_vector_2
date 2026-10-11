@@ -77,12 +77,12 @@ class SweeperMap(
     }
 
     private fun newMinePosition(): Pair<Int, Int> {
-        while(true) {
+        while (true) {
             val x = random.nextInt(xSize)
             val y = random.nextInt(ySize)
 
-            val xAtEdge = (x % (xSize-1) == 0)
-            val yAtEdge = (y % (ySize-1) == 0)
+            val xAtEdge = (x % (xSize - 1) == 0)
+            val yAtEdge = (y % (ySize - 1) == 0)
 
             // No mines in the corners
             if (!(xAtEdge && yAtEdge)) {
@@ -112,7 +112,7 @@ class SweeperMap(
 
     private fun adjacent(location: Pair<Int, Int>, x: Int, y: Int): Boolean {
         return location.first in x - 1..x + 1 &&
-                location.second in y - 1..y + 1
+            location.second in y - 1..y + 1
     }
 
     fun modifiers(): MutableList<String> {

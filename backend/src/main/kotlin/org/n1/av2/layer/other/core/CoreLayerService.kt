@@ -2,8 +2,8 @@ package org.n1.av2.layer.other.core
 
 import org.n1.av2.layer.other.tripwire.TripwireLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.entity.RunEntityService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.scanning.InitiateScanService
 import org.n1.av2.site.entity.NodeEntityService
 import org.n1.av2.site.entity.SitePropertiesEntityService
@@ -21,29 +21,29 @@ class CoreLayerService(
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
-    private val messageService: MessageService,
+    private val i18n: I18n,
 ) {
 
     fun hack(layer: CoreLayer, runId: String) {
-        var hackingDetails = listOf(messageService.getMessage("layer.common.hacked", layer.level, layer.name)).toMutableList()
+        val hackingDetails = listOf(i18n.t("layer.hacked-header", layer.level, layer.name)).toMutableList()
         if (layer.revealNetwork) {
             val run = runEntityService.getByRunId(runId)
             initiateScanService.quickScan(run)
-            hackingDetails.add(messageService.getMessage("layer.core.hack.reveal"))
+            hackingDetails.add(i18n.t("core.revealed-network"))
         }
 
         val timers = stopTimers(runId, layer)
         timers.forEach { timer ->
             if (timer.targetSiteId == timer.siteId) {
-                hackingDetails.add(messageService.getMessage("layer.core.hack.timer"))
+                hackingDetails.add(i18n.t("core.stopped-timer-local"))
             } else {
                 val siteProperties = sitePropertiesEntityService.getBySiteId(timer.targetSiteId)
-                hackingDetails.add(messageService.getMessage("layer.core.hack.timer.remote", siteProperties.name))
+                hackingDetails.add(i18n.t("core.stopped-timer-remote", siteProperties.name))
             }
         }
 
         if (hackingDetails.isEmpty()) {
-            hackingDetails.add(messageService.getMessage("layer.core.hack.empty"))
+            hackingDetails.add(i18n.t("core.no-effect"))
         }
 
         connectionService.replyTerminalReceive(hackingDetails)

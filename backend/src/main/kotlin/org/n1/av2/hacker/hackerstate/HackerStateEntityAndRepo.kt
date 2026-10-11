@@ -37,7 +37,7 @@ data class HackerState(
             currentNodeId,
             previousNodeId, activity, iceId, networkedConnectionId, iceConnectTimestamp,
 
-        )
+            )
     }
 }
 

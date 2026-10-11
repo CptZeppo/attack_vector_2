@@ -1,6 +1,8 @@
 package org.n1.av2.platform.engine
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
+import jakarta.annotation.PreDestroy
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.iam.UserPrincipal
@@ -14,8 +16,6 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
-import jakarta.annotation.PostConstruct
-import jakarta.annotation.PreDestroy
 import kotlin.system.measureTimeMillis
 
 const val TICK_MILLIS = 50

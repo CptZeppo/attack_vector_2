@@ -14,10 +14,10 @@ import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.engine.ScheduledTask
 import org.n1.av2.platform.engine.UserTaskRunner
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.util.isOneOf
 import org.n1.av2.run.entity.NodeScanStatus.*
 import org.n1.av2.run.entity.RunEntityService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.scanning.ScanService
 import org.n1.av2.run.terminal.generic.DevCommandHelper
 import org.n1.av2.run.timings.Timings
@@ -45,14 +45,14 @@ class CommandMoveService(
     private val insideTerminalHelper: InsideTerminalHelper,
     private val devCommandHelper: DevCommandHelper,
     private val skillService: SkillService,
-    private val messageService: MessageService,
+    private val i18n: I18n,
 ) {
 
     fun processCommand(arguments: List<String>, hackerState: HackerStateRunning) {
         if (!insideTerminalHelper.verifyInside(hackerState)) return
 
         if (arguments.isEmpty()) {
-           connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.missing"))
+            connectionService.replyTerminalReceive(i18n.t("move.missing-network-id"))
             return
         }
         val networkId = arguments.first()
@@ -73,7 +73,7 @@ class CommandMoveService(
                 reportProtected()
                 return
             } else {
-               connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.bypass", currentNode.networkId))
+                connectionService.replyTerminalReceive(i18n.t("move.bypassing-ice", currentNode.networkId))
                 handleMove(toNode, hackerState, true)
             }
         } else {
@@ -97,16 +97,16 @@ class CommandMoveService(
     }
 
     private fun reportAtTargetNode(networkId: String): Boolean {
-       connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.error.already", networkId))
+        connectionService.replyTerminalReceive(i18n.t("move.already-at", networkId))
         return false
     }
 
     fun reportNodeNotFound(networkId: String) {
-       connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.error.notFound", networkId))
+        connectionService.replyTerminalReceive(i18n.t("move.node-not-found", networkId))
     }
 
     fun reportNoPath(networkId: String): Boolean {
-       connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.error.noPath", networkId))
+        connectionService.replyTerminalReceive(i18n.t("move.no-path", networkId))
         return false
     }
 
@@ -124,7 +124,7 @@ class CommandMoveService(
     }
 
     private fun reportProtected(): Boolean {
-       connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.protected"))
+        connectionService.replyTerminalReceive(i18n.t("move.blocked-by-ice"))
         return false
     }
 
@@ -191,8 +191,9 @@ class CommandMoveService(
 
         val node = nodeEntityService.getById(nodeId)
         val nodeName = (node.layers[0] as OsLayer).nodeName
-        val nodeNameText = if (nodeName.isNotBlank()) "[/]: $nodeName" else ""
-       connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.enter", node.networkId, nodeNameText))
+        val enteredText = if (nodeName.isNotBlank()) i18n.t("move.entered-node-named", node.networkId, nodeName)
+        else i18n.t("move.entered-node", node.networkId)
+        connectionService.replyTerminalReceive(enteredText)
 
         triggerLayersAtArrive(state.siteId, nodeId, runId)
 
@@ -219,7 +220,7 @@ class CommandMoveService(
         if (!insideTerminalHelper.verifyInside(hackerState)) return
 
         if (arguments.isEmpty()) {
-           connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.move.quickMove"))
+            connectionService.replyTerminalReceive(i18n.t("move.missing-network-id"))
             return
         }
         val networkId = arguments.first()

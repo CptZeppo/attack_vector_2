@@ -29,6 +29,7 @@ class CurrentUserService {
             val user = userEntityStore.get() ?: return true
             return user.id == SYSTEM_USER.id
         }
+
     fun remove() {
         userEntityStore.remove()
     }

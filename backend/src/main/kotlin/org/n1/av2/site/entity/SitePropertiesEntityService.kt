@@ -16,7 +16,7 @@ class SitePropertiesEntityService(
     }
 
     fun getBySiteId(id: String): SiteProperties {
-        return sitePropertiesRepo.findBySiteId(id) ?: error ("No SiteProperties found for id: ${id}")
+        return sitePropertiesRepo.findBySiteId(id) ?: error("No SiteProperties found for id: ${id}")
     }
 
     fun findByName(name: String): SiteProperties? {

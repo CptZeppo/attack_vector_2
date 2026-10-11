@@ -5,7 +5,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.Layer
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.platform.connection.ConnectionService
-import org.n1.av2.run.local.MessageService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.site.entity.Node
 import org.n1.av2.site.entity.NodeEntityService
 import org.springframework.stereotype.Service
@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service
 class InsideTerminalHelper(
     private val connectionService: ConnectionService,
     private val nodeEntityService: NodeEntityService,
-    private val messageService: MessageService,
+    private val i18n: I18n,
 ) {
 
     fun verifyInside(hackerState: HackerStateRunning): Boolean {
         if (hackerState.activity != HackerActivity.INSIDE) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.inside.notInside"))
+            connectionService.replyTerminalReceive(i18n.t("terminal.outside-start-attack"))
             return false
         }
         return true
@@ -47,15 +47,22 @@ class InsideTerminalHelper(
     private fun reportLayerUnknown(node: Node, layerInput: String, command: String): Layer? {
         val layerCount = node.layers.size
         if (layerCount == 1) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.inside.layerUnknown.one", layerInput, command))
+            connectionService.replyTerminalReceive(
+                i18n.t("layer.not-found", layerInput),
+                i18n.t("layer.only-one-option", command)
+            )
         } else {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.inside.layerUnknown.multy", layerInput, layerCount, layerCount - 1))
+            connectionService.replyTerminalReceive(
+                i18n.t("layer.not-found", layerInput),
+                i18n.t("layer.choose-range", layerCount, layerCount - 1),
+                i18n.t("layer.use-view")
+            )
         }
         return null
     }
 
     private fun reportBlockingIce(blockingIceLayer: Layer): Layer? {
-        connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.inside.blocked", blockingIceLayer.name, blockingIceLayer.level ))
+        connectionService.replyTerminalReceive(i18n.t("layer.blocked-by-ice", blockingIceLayer.name, blockingIceLayer.level))
         return null
     }
 

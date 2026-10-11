@@ -12,12 +12,14 @@ class WordSearchIceController(
 ) {
 
     data class EnterInput(val iceId: String)
+
     @MessageMapping("/ice/wordSearch/enter")
     fun enter(command: EnterInput, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/ice/wordSearch/enter", userPrincipal) { wordSearchService.enter(command.iceId) }
     }
 
     data class SelectedInput(val iceId: String, val letters: List<String>)
+
     @MessageMapping("/ice/wordSearch/selected")
     fun selected(command: SelectedInput, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/ice/wordSearch/selected", userPrincipal) { wordSearchService.selected(command.iceId, command.letters) }

@@ -20,7 +20,7 @@ data class IcePasswordStatus(
 )
 
 @Repository
-interface IcePasswordStatusRepo: CrudRepository<IcePasswordStatus, String> {
+interface IcePasswordStatusRepo : CrudRepository<IcePasswordStatus, String> {
     fun findByLayerId(layerId: String): IcePasswordStatus?
 }
 

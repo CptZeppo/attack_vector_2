@@ -3,8 +3,8 @@ package org.n1.av2.script.effect.helper
 import org.n1.av2.hacker.hackerstate.HackerStateRepo
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.scanning.BlockedPathException
 import org.n1.av2.run.scanning.TraverseNode
 import org.n1.av2.run.scanning.TraverseNodeService
@@ -29,10 +29,17 @@ class JumpEffectHelper(
     private val commandMoveService: CommandMoveService,
     private val currentUserService: CurrentUserService,
     private val hackerStateRepo: HackerStateRepo,
-    private val messageService: MessageService
+    private val i18n: I18n,
 ) {
 
-    fun jump(effect: ScriptEffect, siteId: String, currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
+    fun jump(
+        effect: ScriptEffect,
+        siteId: String,
+        currentNodeId: String,
+        targetNodeId: String,
+        hackerState: HackerStateRunning,
+        targetDescription: String
+    ): ScriptExecution {
         val blockedType = JumpBlockedType.valueOf(effect.value!!)
         return when (blockedType) {
             JumpBlockedType.IGNORE_ICE -> jumpIgnoringIce(currentNodeId, targetNodeId, hackerState, targetDescription)
@@ -41,10 +48,10 @@ class JumpEffectHelper(
     }
 
     private fun jumpIgnoringIce(currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
-        if (targetNodeId == currentNodeId) return ScriptExecution(messageService.getMessage("script.effect.jump.currentNode"))
+        if (targetNodeId == currentNodeId) return ScriptExecution(i18n.t("jump-effect.cannot-jump-current"))
 
         return ScriptExecution(TerminalState.KEEP_LOCKED) {
-            connectionService.replyTerminalReceive(messageService.getMessage("script.effect.jump.to"))
+            connectionService.replyTerminalReceive(i18n.t("jump.jumping-to", targetDescription))
             setPreviousNode(hackerState, targetNodeId)
             commandMoveService.moveArrive(targetNodeId, currentUserService.userId, hackerState.runId)
         }
@@ -57,26 +64,31 @@ class JumpEffectHelper(
         hackerStateRepo.save(newPosition)
     }
 
-    private fun jumpBlockedByIce(siteId: String, currentNodeId: String, targetNodeId: String, hackerState: HackerStateRunning, targetDescription: String): ScriptExecution {
-        if (targetNodeId == currentNodeId) return ScriptExecution(messageService.getMessage("script.effect.jump.currentNode"))
+    private fun jumpBlockedByIce(
+        siteId: String,
+        currentNodeId: String,
+        targetNodeId: String,
+        hackerState: HackerStateRunning,
+        targetDescription: String
+    ): ScriptExecution {
+        if (targetNodeId == currentNodeId) return ScriptExecution(i18n.t("jump-effect.cannot-jump-current"))
 
         val nodes: List<Node> = nodeEntityService.findBySiteId(siteId)
 
 
         val currentNode = nodeEntityService.findById(currentNodeId)
-        if (currentNode.unhackedIce) return ScriptExecution(messageService.getMessage("script.effect.jump.toIce"))
+        if (currentNode.unhackedIce) return ScriptExecution(i18n.t("jump-effect.cannot-jump-from-ice"))
 
         val (start, traverseNodesById) = traverseNodeService.createTraverseNodesWithDistance(siteId, currentNodeId, nodes, targetNodeId)
         val targetTraverseNode = traverseNodesById[targetNodeId] ?: error("Target node not found in traverse nodes.")
 
         val path = try {
             TraverseNode.createPath(start, targetTraverseNode)
-        }
-        catch (_: BlockedPathException) {
-            return ScriptExecution(messageService.getMessage("script.effect.jump.pathBlocked"))
+        } catch (_: BlockedPathException) {
+            return ScriptExecution(i18n.t("jump-effect.ice-blocks-path"))
         }
         return ScriptExecution(TerminalState.KEEP_LOCKED) {
-            connectionService.replyTerminalReceiveAndLocked(true, messageService.getMessage("script.effect.jump.to", targetDescription))
+            connectionService.replyTerminalReceiveAndLocked(true, i18n.t("jump.jumping-to", targetDescription))
 
             setPreviousNodeToPreviousInPath(path, hackerState)
             commandMoveService.moveArrive(targetNodeId, currentUserService.userId, hackerState.runId)

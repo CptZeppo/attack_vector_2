@@ -9,9 +9,9 @@ import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.engine.ScheduledTask
 import org.n1.av2.platform.engine.UserTaskRunner
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.run.entity.RunEntityService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.terminal.SyntaxHighlightingService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.run.terminal.inside.CommandMoveService
@@ -35,7 +35,7 @@ class CommandStartAttackService(
     private val configService: ConfigService,
     private val runEntityService: RunEntityService,
     private val outsideTerminalHelper: OutsideTerminalHelper,
-    private val messageService: MessageService
+    private val i18n: I18n,
 ) {
 
     fun startAttack(hackerState: HackerStateRunning) {
@@ -44,7 +44,7 @@ class CommandStartAttackService(
 
     fun startQuickAttack(hackerState: HackerStateRunning) {
         if (!configService.getAsBoolean(ConfigItem.DEV_HACKER_USE_DEV_COMMANDS)) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.attack.dev"))
+            connectionService.replyTerminalReceive(i18n.t("attack.quick-disabled"))
             return
         }
         startAttack(hackerState, true)

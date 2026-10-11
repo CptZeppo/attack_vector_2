@@ -6,8 +6,8 @@ import org.n1.av2.larp.frontier.LolaService
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.UserEntityService
-import org.n1.av2.run.local.MessageService
 import org.n1.av2.run.runlink.RunLinkService
 import org.springframework.stereotype.Service
 
@@ -18,16 +18,16 @@ class SocialTerminalService(
     private val runLinkService: RunLinkService,
     private val configService: ConfigService,
     private val lolaService: LolaService,
-    private val messageService: MessageService,
+    private val i18n: I18n,
 ) {
 
     fun processShare(arguments: List<String>, hackerState: HackerStateRunning) {
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive(messageService.getMessageAsLines("command.social.missing"))
+            connectionService.replyTerminalReceive(i18n.t("social.share-missing-username"))
             return
         }
 
-        val userNames = arguments.flatMap { it.split(",") }.map { it.trim() }. filter { it != "" }
+        val userNames = arguments.flatMap { it.split(",") }.map { it.trim() }.filter { it != "" }
 
         userNames.forEach { userName ->
             shareWithUser(userName, hackerState.runId)
@@ -38,7 +38,7 @@ class SocialTerminalService(
     private fun shareWithUser(userName: String, runId: String) {
         val user = userEntityService.findByNameIgnoreCase(userName)
         if (user == null) {
-            connectionService.replyTerminalReceive(hackerNotFound(userName, messageService))
+            connectionService.replyTerminalReceive(i18n.t("social.hacker-not-found", userName))
             return
         }
 
@@ -48,9 +48,5 @@ class SocialTerminalService(
             runLinkService.shareRun(runId, user, true)
         }
     }
-
-    companion object {
-        fun hackerNotFound(userName: String, messageService: MessageService) = messageService.getMessage("command.social.notFound", userName)
-  }
 
 }

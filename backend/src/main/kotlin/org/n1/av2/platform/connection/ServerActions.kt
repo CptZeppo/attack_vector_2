@@ -3,7 +3,7 @@ package org.n1.av2.platform.connection
 enum class ServerActions {
 
     SERVER_USER_CONNECTION,         // Tell the client that a new user-connection was established. Have the client check if this
-                                    // is the connection it just made, or if a newer connection was made and the old one needs to shut down
+    // is the connection it just made, or if a newer connection was made and the old one needs to shut down
 
     SERVER_TIME_SYNC,               // Send server time to client to make it use server time.
 

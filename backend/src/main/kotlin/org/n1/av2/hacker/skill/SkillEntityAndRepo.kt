@@ -60,7 +60,6 @@ val noUpdateAction = { _: String, _: String?, _: ApplicationContext -> }
 val noRemovalAction = { _: String, _: ApplicationContext -> }
 
 
-
 fun validatePositiveNumber(input: String): String? {
     val value = input.toIntOrNull() ?: return "must be a whole number"
     if (value < 0) return "must be a positive number"

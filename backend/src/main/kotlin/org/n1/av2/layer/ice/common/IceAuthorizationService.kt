@@ -14,7 +14,7 @@ class IceAuthorizationService(
     @Lazy private val authAppService: AuthAppService,
     @Lazy private val iceService: IceService,
     private val currentUserService: CurrentUserService,
-    ) {
+) {
 
     fun layerProtectingTargetLayer(node: Node, targetLayer: Layer): String? {
         val targetLevel = targetLayer.level

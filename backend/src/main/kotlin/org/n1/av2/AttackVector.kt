@@ -5,8 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
 
 
-
-
 @SpringBootApplication(exclude = [UserDetailsServiceAutoConfiguration::class])
 class AttackVector
 

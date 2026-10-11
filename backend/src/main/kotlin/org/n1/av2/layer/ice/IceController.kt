@@ -19,6 +19,7 @@ class IceController(
 
 
     class IceBasicInfo(val type: LayerType, val iceId: String?, val userId: String)
+
     @GetMapping("/api/ice/{layerId}")
     fun getIce(@PathVariable @ValidLayerId layerId: String): IceBasicInfo {
         val node = nodeEntityService.findByLayerId(layerId)
