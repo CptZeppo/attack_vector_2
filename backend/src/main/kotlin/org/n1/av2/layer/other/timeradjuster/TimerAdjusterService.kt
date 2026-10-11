@@ -89,7 +89,7 @@ class TimerAdjusterService(
                     timerService.speedUpTimer(timer, layer.amount.toDuration())
                 }
             } else {
-                connectionService.replyTerminalReceive(i18n.t("timer-adjuster.slow-down", layer.name))
+                connectionService.replyTerminalReceive(i18n.t("timer-adjuster.slow-down-existing", layer.name))
                 timers.forEach { timer ->
                     timerService.delayTripwireTimer(timer, layer.amount.toDuration())
                 }
