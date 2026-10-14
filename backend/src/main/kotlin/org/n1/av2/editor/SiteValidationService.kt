@@ -44,7 +44,7 @@ class SiteValidationService(
 
 
     private fun validateSiteProperties(siteProperties: SiteProperties, nodes: List<Node>, messages: MutableList<SiteStateMessage>) {
-        validate(messages) { validateSiteName(siteProperties)}
+        validate(messages) { validateSiteName(siteProperties) }
         validate(messages) { validateStartNode(siteProperties, nodes) }
         validate(messages) { validateSiteCreator(siteProperties) }
     }
@@ -66,7 +66,7 @@ class SiteValidationService(
             throw SiteValidationException("Set the start node network id.")
         }
         nodes.find { node -> node.networkId == data.startNodeNetworkId }
-                ?: throw SiteValidationException("Start node network id not found: ${data.startNodeNetworkId}.")
+            ?: throw SiteValidationException("Start node network id not found: ${data.startNodeNetworkId}.")
     }
 
     private fun validateNodes(siteProperties: SiteProperties, nodes: List<Node>, messages: MutableList<SiteStateMessage>) {
@@ -89,8 +89,7 @@ class SiteValidationService(
         if (networkIds.contains(networkId)) {
             val message = SiteStateMessage(SiteStateMessageType.ERROR, "Duplicate network id: ${networkId}", node.id, node.layers[0].id)
             messages.add(message)
-        }
-        else {
+        } else {
             networkIds.add(networkId)
         }
     }
@@ -117,19 +116,24 @@ class SiteValidationService(
         }
     }
 
-    private fun validateConnections(siteProperties: SiteProperties, nodes: List<Node>, traverseNodesById: Map<String, TraverseNode>, messages: MutableList<SiteStateMessage> ) {
-        val startNode = nodes.find { it.networkId == siteProperties.startNodeNetworkId } ?: return // start network-id invalid, another validation will report this.
+    private fun validateConnections(
+        siteProperties: SiteProperties,
+        nodes: List<Node>,
+        traverseNodesById: Map<String, TraverseNode>,
+        messages: MutableList<SiteStateMessage>
+    ) {
+        val startNode =
+            nodes.find { it.networkId == siteProperties.startNodeNetworkId } ?: return // start network-id invalid, another validation will report this.
         val startTraverseNode = traverseNodesById[startNode.id]!!
 
         startTraverseNode.fillDistanceFromHere(0)
         val unreachableNodes = traverseNodesById.values.filter { it.distance == null }
         unreachableNodes.forEach { node ->
-            val osLayer = nodes.find {it.id == node.nodeId}!!.layers[0]
-            val message = SiteStateMessage(SiteStateMessageType.ERROR, "Unreachable node: ${node.networkId}", node.nodeId, osLayer.id )
+            val osLayer = nodes.find { it.id == node.nodeId }!!.layers[0]
+            val message = SiteStateMessage(SiteStateMessageType.ERROR, "Unreachable node: ${node.networkId}", node.nodeId, osLayer.id)
             messages.add(message)
         }
     }
-
 
 
     private fun processValidationMessages(messages: ArrayList<SiteStateMessage>, id: String, alwaysPersistResult: Boolean) {
@@ -145,7 +149,6 @@ class SiteValidationService(
         }
     }
 }
-
 
 
 class SiteValidationException(message: String, val type: SiteStateMessageType = SiteStateMessageType.ERROR) : Exception(message)

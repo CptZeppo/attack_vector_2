@@ -2,49 +2,42 @@ import React from "react";
 import {useSelector} from "react-redux";
 import {StatusLightState} from "./StatusLightReducers";
 import {getReadableTextColor} from "./contrast-color";
+import {useTranslate} from "../../../common/i18n/i18n";
 
-const MARGIN = 23
-
+/**
+ * Status-light widget: a freely-accessible (/o/, WS_UNRESTRICTED), display-only fullscreen view of a
+ * StatusLightLayer's current state, meant for a screen on another device that mirrors what a hacker
+ * flips on the switch. Shares the switch's visual language (dark, monospace, the coloured
+ * status-light-color-box) but is deliberately minimal: just the switch label as a heading and one big
+ * status indicator filling the screen - no eyebrow/footer fluff.
+ *
+ * useMobileViewport() resets the app-global body{zoom} that otherwise shrinks the page to ~22% on a
+ * phone/tablet (see mobile.ts / docs/development/dev-notes.md); layout is fluid (vmin) so it fills any display 1:1.
+ */
 export const StatusLight = () => {
+    const t = useTranslate()
     const state: StatusLightState = useSelector((state: StatusLightState) => state)
 
     if (state.currentOption === null) {
-        return <div className="container-fluid" data-bs-theme="dark">
-            <div className="d-flex justify-content-center">
-                <h1 style={{color: "#333"}}><br/>Connecting...</h1>
+        return (
+            <div className="widgetConsole" data-bs-theme="dark">
+                <div className="switchConnecting">{t("switch.connecting")}</div>
             </div>
-        </div>
+        )
     }
 
-
-
-    const screenWidth = document.documentElement.clientWidth
-    const screenHeight = document.documentElement.clientHeight
-    const size = Math.min(screenWidth, screenHeight)
-    const sizeMinMargin = size - (2 * MARGIN)
-    const spacerHeight = (screenHeight - size) / 2
-
-
-    const text = state.options[state.currentOption]?.text || ""
-    const color = state.options[state.currentOption]?.color || "grey"
+    const option = state.options[state.currentOption]
+    const color = option?.color || "grey"
     const contrastColor = getReadableTextColor(color)
+    const text = option?.text || ""
 
     return (
-        <>
-            <div style={{height: spacerHeight}}/>
-            <div className="container-fluid" data-bs-theme="dark">
-                <div className="d-flex justify-content-center">
-                    <div style={{"--status-light-color": color, height: sizeMinMargin, width: sizeMinMargin} as React.CSSProperties}
-                         className="status-light-color-box status-light">
-                        <div className="d-flex justify-content-center">
-                            <br/>
-                            <br/>
-                            <h1 style={{color: contrastColor}}> {text} </h1>
-                        </div>
-                    </div>
-                </div>
+        <div className="widgetConsole" data-bs-theme="dark">
+            {state.switchLabel && <h1 className="widgetTitle">{state.switchLabel}</h1>}
+            <div className="widgetStatus status-light-color-box"
+                 style={{"--status-light-color": color, color: contrastColor} as React.CSSProperties}>
+                <span className="widgetStatusText">{text}</span>
             </div>
-        </>
+        </div>
     )
 }
-

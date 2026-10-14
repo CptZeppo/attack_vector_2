@@ -10,7 +10,7 @@ enum class IceStrength(val description: String, val value: Int) {
 
     companion object {
         fun forValue(value: Int): IceStrength {
-            return entries.find {it.value == value} ?: error("No IceStrength exists for value: $value")
+            return entries.find { it.value == value } ?: error("No IceStrength exists for value: $value")
         }
     }
 }

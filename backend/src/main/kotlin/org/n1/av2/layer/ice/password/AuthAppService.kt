@@ -9,6 +9,7 @@ import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.iam.user.UserType
 import org.n1.av2.platform.util.TimeService
@@ -43,7 +44,8 @@ class AuthAppService(
     private val appService: AppService,
     private val runService: RunService,
     private val configService: ConfigService,
-    ) {
+    private val i18n: I18n,
+) {
 
     fun findOrCreateIceStatus(layer: PasswordIceLayer): IcePasswordStatus {
         return icePasswordStatusRepo.findByLayerId(layer.id) ?: findOrCreateIceForPasswordIce(layer)
@@ -103,8 +105,7 @@ class AuthAppService(
 
         if (currentUser.userEntity.type == UserType.HACKER) {
             resolveForHacker(iceId, password, iceStatus, layer)
-        }
-        else {
+        } else {
             resolveForUser(password, iceStatus, layer)
         }
     }
@@ -146,17 +147,15 @@ class AuthAppService(
     private fun resolveForHacker(iceId: String, password: String, icePasswordStatus: IcePasswordStatus, layer: IceLayer) {
         if (icePasswordStatus.hackerAttempts.contains(password)) {
             resolveDuplicate(icePasswordStatus, password, layer)
-        }
-        else if (checkPassword(password, layer, icePasswordStatus.id)) {
+        } else if (checkPassword(password, layer, icePasswordStatus.id)) {
             hackedUtil.iceHacked(iceId, icePasswordStatus.layerId, 70, IceHackState.USED_PASSCODE)
             redirectToNextLayer(layer)
-        }
-        else {
+        } else {
             resolveHackAttemptFailed(icePasswordStatus, password, layer)
         }
     }
 
-    private fun checkPassword(password: String, layer: IceLayer, iceId: String ): Boolean {
+    private fun checkPassword(password: String, layer: IceLayer, iceId: String): Boolean {
         if (layer is PasswordIceLayer && password == layer.password) {
             return true
         }
@@ -165,7 +164,7 @@ class AuthAppService(
     }
 
     private fun resolveDuplicate(icePasswordStatus: IcePasswordStatus, password: String, layer: IceLayer) {
-        connectionService.replyNotificationNeutral("Password \"${password}\" already attempted, ignoring")
+        connectionService.replyNotificationNeutral(i18n.t("auth.duplicate-password", password))
 
         val showHint = showHint(icePasswordStatus, layer)
         val result = UiStateUpdate(icePasswordStatus.lockedUntil, icePasswordStatus.hackerAttempts, showHint)
@@ -183,7 +182,7 @@ class AuthAppService(
             lockedUntil = time.now().plusSeconds(timeOutSeconds)
         )
         icePasswordStatusRepo.save(newStatus)
-        connectionService.replyNotificationNeutral("Password incorrect: ${password}")
+        connectionService.replyNotificationNeutral(i18n.t("auth.password-incorrect", password))
         val showHint = showHint(newStatus, layer)
         val result = UiStateUpdate(newStatus.lockedUntil, newStatus.hackerAttempts, showHint)
         connectionService.toIce(icePasswordStatus.id, ServerActions.SERVER_AUTH_UPDATE, result)

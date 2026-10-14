@@ -1,5 +1,6 @@
 package org.n1.av2.layer.ice.common
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.layer.Layer
 import org.n1.av2.layer.ice.netwalk.NetwalkIceLayer
 import org.n1.av2.layer.ice.netwalk.NetwalkIceService
@@ -23,7 +24,6 @@ import org.n1.av2.site.entity.enums.LayerType
 import org.n1.av2.site.entity.enums.LayerType.*
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
 import kotlin.reflect.KClass
 
 // To prevent circular bean dependencies

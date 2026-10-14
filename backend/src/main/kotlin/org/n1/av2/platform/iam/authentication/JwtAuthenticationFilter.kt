@@ -41,8 +41,7 @@ class JwtAuthenticationFilter(
                 val (authResult, authErrorMessage) = parseJwt(jwt, request)
                 authentication = authResult
                 errorMessage = authErrorMessage
-            }
-            else {
+            } else {
                 errorMessage = "No JWT token supplied."
             }
         } catch (exception: Exception) {
@@ -94,7 +93,7 @@ class JwtAuthenticationFilter(
         // don't parse JWT for static resources or login related paths
         request.requestURI.let {
             return (
-                    it == "/" ||
+                it == "/" ||
                     it.startsWith("/resources") ||
                     it.startsWith("/img") ||
                     it.startsWith("/css") ||
@@ -105,7 +104,7 @@ class JwtAuthenticationFilter(
                     it.startsWith("/adminLogin") ||
                     it.startsWith("/login") ||
                     it.startsWith("/openapi/")
-                    )
+                )
         }
     }
 

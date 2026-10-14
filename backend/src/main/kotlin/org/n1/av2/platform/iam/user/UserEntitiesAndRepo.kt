@@ -28,7 +28,8 @@ data class UserEntity(
 )
 
 data class UserPreferences(
-    val fontSize: Int = 12
+    val fontSize: Int = 12,
+    val language: String = "en",
 )
 
 

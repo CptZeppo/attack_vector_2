@@ -20,11 +20,11 @@ data class TangleIceStatus(
 
 data class TanglePoint(val id: String, val x: Int, val y: Int, val cluster: Int)
 
-enum class TangleLineType { NORMAL, SETUP}
+enum class TangleLineType { NORMAL, SETUP }
 data class TangleLine(val id: String, val fromId: String, val toId: String, val type: TangleLineType)
 
 
 @Repository
-interface TangleIceStatusRepo: CrudRepository<TangleIceStatus, String> {
+interface TangleIceStatusRepo : CrudRepository<TangleIceStatus, String> {
     fun findByLayerId(layerId: String): TangleIceStatus?
 }

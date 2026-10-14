@@ -5,6 +5,8 @@ import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.layer.ice.tangle.TangleIceStatusRepo
 import org.n1.av2.layer.ice.tangle.TangleService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
+import org.n1.av2.script.effect.SCRIPT_CANNOT_INSTANTIATE_ICE_KEY
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -23,23 +25,24 @@ class TangleRevealClustersEffectService(
     private val connectionService: ConnectionService,
     private val tangleIceStatusRepo: TangleIceStatusRepo,
     private val tangleService: TangleService,
+    private val i18n: I18n,
 ) : ScriptEffectInterface {
 
 
-    override val name = "Tangle reveal clusters"
+    override val name = i18n.t("tangle-reveal-clusters.name")
     override val defaultValue = ""
-    override val gmDescription = "Reveal clusters in Tangle ICE."
+    override val gmDescription = i18n.t("tangle-reveal-clusters.description-gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Reveal clusters in Gaanth ICE (tangle)."
+    override fun playerDescription(effect: ScriptEffect) = i18n.t("tangle-reveal-clusters.description-player")
 
     override fun validate(effect: ScriptEffect) = null
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         return iceEffectHelper.runForSpecificIceType(LayerType.TANGLE_ICE, argumentTokens, hackerState) { layer: IceLayer ->
             ScriptExecution {
-                val iceStatus = tangleIceStatusRepo.findByLayerId(layer.id) ?: error("Failed to instantiate ICE for: ${layer.id}")
+                val iceStatus = tangleIceStatusRepo.findByLayerId(layer.id) ?: error(i18n.t(SCRIPT_CANNOT_INSTANTIATE_ICE_KEY, layer.id))
                 tangleService.revealClusters(iceStatus)
-                connectionService.replyTerminalReceive("Clusters revealed.")
+                connectionService.replyTerminalReceive(i18n.t("script-effect.clusters-revealed"))
             }
         }
     }

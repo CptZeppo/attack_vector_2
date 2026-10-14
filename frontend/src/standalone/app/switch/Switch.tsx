@@ -6,15 +6,16 @@ import {layer} from "../../StandaloneGlobals";
 import {CloseTabButton} from "../../ice/common/CloseTabButton";
 import {getReadableTextColor} from "../../widget/statusLight/contrast-color";
 import {StatusLightOption} from "../../widget/statusLight/StatusLightReducers";
+import {useTranslate} from "../../../common/i18n/i18n";
 
 
 export const Switch = () => {
-
+    const t = useTranslate()
     const state: SwitchState = useSelector((state: SwitchRootState) => state.switch)
 
     let content;
     if (state.currentOption === null) {
-        content = <div>Loading...</div>
+        content = <div>${t("switch.connecting")}</div>
     } else if (state.options.length === 2) {
         content = <TwoOptionSwitch state={state}/>
     } else {

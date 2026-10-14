@@ -27,10 +27,10 @@ class ConstraintViolationWsExceptionHandler(
         } else {
             ReduxEvent(
                 ServerActions.SERVER_NOTIFICATION, NotyMessage(
-                title= "Invalid input",
-                type= NotyType.NEUTRAL,
-                message= exception.message!!
-            )
+                    title = "Invalid input",
+                    type = NotyType.NEUTRAL,
+                    message = exception.message!!
+                )
             )
         }
     }

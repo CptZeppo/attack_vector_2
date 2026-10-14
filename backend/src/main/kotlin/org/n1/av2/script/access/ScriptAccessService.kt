@@ -1,7 +1,9 @@
 package org.n1.av2.script.access
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.*
 import org.n1.av2.platform.inputvalidation.ValidationException
 import org.n1.av2.platform.util.TimeService
@@ -13,7 +15,6 @@ import org.n1.av2.script.type.ScriptTypeId
 import org.n1.av2.script.type.ScriptTypeService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
 
 @Configuration
 class ScriptAccessServiceInit(
@@ -37,6 +38,7 @@ class ScriptAccessService(
     private val scriptEffectTypeLookup: ScriptEffectTypeLookup,
     private val timeService: TimeService,
     private val userEntityService: UserEntityService,
+    private val i18n: I18n,
 ) {
 
     lateinit var userAndHackerService: UserAndHackerService
@@ -107,13 +109,13 @@ class ScriptAccessService(
         if (accesses.any { it.typeId == typeId }) {
             val user = userEntityService.getById(userId)
             val scriptType = scriptTypeService.getById(typeId)
-            throw ValidationException("${user.name} already has access to ${scriptType.name}.")
+            throw ValidationException(i18n.t("script-accass.has-already-access", user.name, scriptType.name))
         }
     }
 
     fun deleteAccess(accessId: ScriptAccessId) {
         validateCanManageAccess()
-        val access = scriptAccessRepository.findById(accessId).orElseThrow { error("Access not found with id: $accessId, maybe it was already deleted?") }
+        val access = scriptAccessRepository.findById(accessId).orElseThrow { error(i18n.t("script-accass.not-found-deleted", accessId)) }
 
         scriptAccessRepository.delete(access)
         sendScriptAccess(access.ownerUserId)
@@ -122,16 +124,16 @@ class ScriptAccessService(
     private fun validateCanManageAccess() {
         val userManager = currentUserService.userEntity.type.authorities.contains(ROLE_USER_MANAGER)
         if (!userManager) {
-            error("You are not allowed to manage script access.")
+            error(i18n.t("script-accass.not-allowed"))
         }
     }
 
     fun editAccess(accessId: ScriptAccessId, receiveForFree: Int, priceInput: Int?) {
         validateCanManageAccess()
-        val access = scriptAccessRepository.findById(accessId).orElseThrow { error("Access not found with id: $accessId, maybe it was already deleted?") }
+        val access = scriptAccessRepository.findById(accessId).orElseThrow { error(i18n.t("script-accass.not-found-deleted", accessId)) }
 
         if (priceInput != null && priceInput < 0) {
-            connectionService.replyNotificationError("Price cannot be negative.")
+            connectionService.replyNotificationError(i18n.t("script-accass.negative-price"))
             sendScriptAccess(access.ownerUserId)
             return
         }
@@ -157,7 +159,7 @@ class ScriptAccessService(
     }
 
     fun getById(id: ScriptAccessId): ScriptAccess {
-        return scriptAccessRepository.findById(id).orElseThrow { error("Script access not found with id: $id") }
+        return scriptAccessRepository.findById(id).orElseThrow { error(i18n.t("script-accass.not-found", id)) }
     }
 
     fun deleteByTypeId(scriptTypeId: ScriptTypeId) {
@@ -174,9 +176,9 @@ class ScriptAccessService(
         copyScriptAccess(from, to)
 
         if (existingAccess.isNotEmpty()) {
-            connectionService.replyNotificationError("${to.name} already has some script access, nothing was overwritten.")
+            connectionService.replyNotificationError(i18n.t("script-accass.copied-already-has-access", to.name))
         }
-        connectionService.replyNotificationNeutral("Copied script access from ${from.name} to ${to.name}.")
+        connectionService.replyNotificationNeutral(i18n.t("script-accass.copied", from.name, to.name))
     }
 
 
@@ -184,8 +186,7 @@ class ScriptAccessService(
         findScriptAccessForUser(from.id).forEach { access ->
             try {
                 addScriptAccess(access.typeId, to.id, access.receiveForFree, access.price)
-            }
-            catch (validationException: ValidationException) {
+            } catch (validationException: ValidationException) {
                 connectionService.replyNotificationError(validationException.message!!)
             }
         }

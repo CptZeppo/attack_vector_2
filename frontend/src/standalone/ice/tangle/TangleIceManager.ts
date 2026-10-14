@@ -10,7 +10,7 @@ export interface EnterTanglePuzzle {
     strength: string,
     points: TanglePoint[],
     lines: TangleLine[],
-    clusters: Number,
+    clusters: number,
     hacked: boolean,
     clustersRevealed: boolean,
     quickPlaying: boolean,
@@ -38,20 +38,29 @@ class TangleIceManager extends GenericIceManager {
         })
         this.schedule.clear()
         this.dispatch({type: TERMINAL_CLEAR, terminalId: ICE_DISPLAY_TERMINAL_ID})
+
+        if (puzzle.hacked) {
+            // Already solved: reveal the solved puzzle so the hacker sees it, then the terminal
+            // reports "already hacked" and auto-advances to the next layer (GenericIceManager).
+            this.schedule.dispatch(0, {type: ICE_TANGLE_BEGIN})
+            this.enterHacked()
+            return
+        }
+
         if (!puzzle.quickPlaying) {
-            this.displayTerminal(20, "[primary]↼ Connecting to ice, initiating attack")
-            this.displayTerminal(40, "↼ Network inspection")
-            this.displayTerminal(10, "↼ Complete")
-            this.displayTerminal(10, "↼ Weak encryption detected: [info]Undirected Cyclic Graph")
+            this.displayTerminal(20, this.t("ice.tangle.connecting"))
+            this.displayTerminal(40, this.t("ice.tangle.network-inspection"))
+            this.displayTerminal(10, this.t("ice.tangle.complete"))
+            this.displayTerminal(10, this.t("ice.tangle.weak-encryption"))
             if (puzzle.clusters > 1) {
-                this.displayTerminal(10, `↼ Detected: [info]${puzzle.clusters}[/] clusters`)
+                this.displayTerminal(10, this.t("ice.tangle.clusters-detected", puzzle.clusters.toString()))
 
             }
-            this.displayTerminal(20, "↼ Negotiating lowest entropy")
+            this.displayTerminal(20, this.t("ice.tangle.negotiating"))
             this.displayTerminal(30, "...")
-            this.displayTerminal(20, "↼ Negotiation complete")
+            this.displayTerminal(20, this.t("ice.tangle.negotiation-complete"))
         }
-        this.displayTerminal(5, "[primary]↼ Start manual decryption")
+        this.displayTerminal(5, this.t("ice.tangle.start-decryption"))
         this.schedule.dispatch(0, {type: ICE_TANGLE_BEGIN})
     }
 
@@ -62,14 +71,14 @@ class TangleIceManager extends GenericIceManager {
     clustersRevealed() {
         tangleIceCanvas.clustersRevealed()
         this.displayTerminal(20, "")
-        this.displayTerminal(0, "Clusters revealed")
+        this.displayTerminal(0, this.t("ice.tangle.clusters-revealed"))
     }
 
     serverSentIceHacked() {
         notify({type: "ok", title: "Result", message: "Ice hacked"})
         this.displayTerminal(0, "")
-        this.displayTerminal(20, "Decryption complete")
-        this.displayTerminal(40, "ICE grants access.")
+        this.displayTerminal(20, this.t("ice.tangle.decryption-complete"))
+        this.displayTerminal(40, this.t("ice.grants-access"))
 
         this.processHacked()
     }

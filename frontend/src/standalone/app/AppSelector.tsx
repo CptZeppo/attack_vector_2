@@ -3,6 +3,7 @@ import {SwitchRoot} from "./switch/SwitchRoot";
 import {TopLevelError} from "../../common/component/TopLevelError";
 import {AuthRoot} from "./auth/AuthRoot";
 import {avEncodedUrl} from "../../common/util/PathEncodeUtils";
+import {tStored} from "../../common/i18n/i18n";
 
 
 interface ServerResponse {
@@ -37,11 +38,11 @@ export const AppSelector = ({type, layerId}: Props) => {
     }, []) /* eslint react-hooks/exhaustive-deps: 0 */
 
     if (response === null) {
-        return <div style={{color: "dimgrey"}}>Loading</div>
+        return <div style={{color: "dimgrey"}}>{tStored("app.loading")}</div>
     }
 
     if (response.error) {
-        return <TopLevelError error="Error retrieving data from server"
+        return <TopLevelError error={tStored("app.error.load-failed")}
                               description={`(server: ${response.error})`}/>
     }
 
@@ -58,7 +59,7 @@ export const AppSelector = ({type, layerId}: Props) => {
         case "auth":
             return <AuthRoot iceId={response.appId} layerId={layerId}/>
         default:
-            return <TopLevelError error="Server error"
-                                  description={`(Unknown app type: ${type})`}/>
+            return <TopLevelError error={tStored("app.error.server")}
+                                  description={tStored("app.error.unknown-type", type)}/>
     }
 }

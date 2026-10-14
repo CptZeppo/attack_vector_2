@@ -1,5 +1,6 @@
 package org.n1.av2.hacker.hackerstate
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.iam.UserPrincipal
@@ -8,7 +9,6 @@ import org.n1.av2.statistics.IceStatisticsService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
-import jakarta.annotation.PostConstruct
 
 @Configuration
 class HackerConnectionServiceInit(

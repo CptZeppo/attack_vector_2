@@ -41,7 +41,7 @@ export const LayerStatusLightPanel = ({node, layer}: Props) => {
 
             <AddOptions statusLight={statusLight}/>
             <AttributeUrlWithQr name="Switch" type="app" subType="switch" layerId={statusLight.id} description="Switch"
-                                fileName={`node-${node.networkId}-level-${layer.level}-${layer.name}-switch`}/>
+                                requireLogin={false} fileName={`node-${node.networkId}-level-${layer.level}-${layer.name}-switch`}/>
 
             <AttributeUrlWithQr name="Widget" type="widget" subType="statusLight" layerId={statusLight.id} description="Status light widget"
                                 requireLogin={false} fileName={`node-${node.networkId}-level-${layer.level}-${layer.name}-widget`}/>

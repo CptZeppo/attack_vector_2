@@ -20,7 +20,7 @@ class NetwalkIceService(
     private val hackedUtil: HackedUtil,
     private val runService: RunService,
     private val configService: ConfigService,
-    ) {
+) {
 
     companion object {
         const val MAX_CREATE_ATTEMPTS = 20
@@ -58,6 +58,7 @@ class NetwalkIceService(
 
     @Suppress("unused")
     class NetwalkEnter(val iceId: String, val cellGrid: List<List<NetwalkCell>>, val strength: IceStrength, val wrapping: Boolean, val quickPlaying: Boolean)
+
     fun enter(iceId: String) {
         val netwalk = netwalkIceStatusRepo.findById(iceId).getOrElse { error("Netwalk not found for: ${iceId}") }
         val quickPlaying = configService.getAsBoolean(ConfigItem.DEV_QUICK_PLAYING)
@@ -86,6 +87,7 @@ class NetwalkIceService(
 
         @Suppress("unused")
         class NetwalkRotateUpdate(val iceId: String, val x: Int, val y: Int, val connected: List<Point>)
+
         val message = NetwalkRotateUpdate(iceId, x, y, connectedList)
         connectionService.toIce(iceId, ServerActions.SERVER_NETWALK_NODE_ROTATED, message)
 

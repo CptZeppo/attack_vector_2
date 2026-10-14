@@ -18,8 +18,10 @@ class IdTPoint(val x: Float, val y: Float, val id: String, val clusterNumber: In
 
 data class TConnection(val from: TPoint, val to: TPoint)
 
-class TLine(val slope: Float, val yOffset: Float, val intersections: MutableList<TPoint>,
-            val x1: Float, val y1: Float, val x2: Float, val y2: Float) {
+class TLine(
+    val slope: Float, val yOffset: Float, val intersections: MutableList<TPoint>,
+    val x1: Float, val y1: Float, val x2: Float, val y2: Float
+) {
 
     constructor(slope: Float, yOffset: Float) : this(slope, yOffset, LinkedList<TPoint>(), 0F, 0F, 0F, 0F)
 
@@ -57,7 +59,6 @@ class TLine(val slope: Float, val yOffset: Float, val intersections: MutableList
         return connections
     }
 }
-
 
 
 class TangleCreation(val points: MutableList<TanglePoint>, val lines: List<TangleLine>)
@@ -159,11 +160,12 @@ class TangleCreator(testingMode: Boolean) {
 
 
         return idPoints.map {
-            TanglePoint("p${it.clusterNumber}-${it.id}",
-                    (50 + (it.x - minX) / scaleX).roundToInt(),
-                    (30 + (it.y - minY) / scaleY).roundToInt(),
-                    it.clusterNumber
-                )
+            TanglePoint(
+                "p${it.clusterNumber}-${it.id}",
+                (50 + (it.x - minX) / scaleX).roundToInt(),
+                (30 + (it.y - minY) / scaleY).roundToInt(),
+                it.clusterNumber
+            )
         }
     }
 
@@ -179,7 +181,7 @@ class TangleCreator(testingMode: Boolean) {
         val ySize = 828
         val canvasXSize = 1576
         val dx = (canvasXSize - xSize) / 2
-        val xCenter = xSize / 2  + dx
+        val xCenter = xSize / 2 + dx
         val yCenter = ySize / 2
         val xRadius = (xSize / 2) - padding
         val yRadius = (ySize / 2) - padding

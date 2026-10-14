@@ -35,7 +35,7 @@ class SweeperIceManager extends GenericIceManager {
             cells: this.cells,
             modifiers: this.modifiers,
             strength: sweeperEnterData.strength,
-            hacked: false,
+            hacked: sweeperEnterData.hacked,
             blockedUserIds: sweeperEnterData.blockedUserIds,
             minesLeft: sweeperEnterData.minesLeft
         }
@@ -45,25 +45,34 @@ class SweeperIceManager extends GenericIceManager {
         })
         this.schedule.clear();
         this.dispatch({type: TERMINAL_CLEAR, terminalId: ICE_DISPLAY_TERMINAL_ID});
-        if (!sweeperEnterData.quickPlaying) {
-            this.displayTerminal(15, "[primary]↼ Connecting to ice, initiating attack.");
-            this.displayTerminal(40, "↼ Probing for weaknesses.");
-            this.displayTerminal(20, "↼ Memory corruption vulnerability detected.");
-            this.displayTerminal(10, "↼ Exploit [ok]success[/] (error message: [warn]00387[/] block unstable) ");
-            this.displayTerminal(20, "↼ Memory meta access requested.");
-            this.displayTerminal(10, "...granted");
+
+        if (sweeperEnterData.hacked) {
+            // Already solved: reveal the cleared board, then report + auto-advance to the next layer.
+            this.solved = true
+            this.schedule.dispatch(0, {type: SWEEPER_BEGIN})
+            this.enterHacked()
+            return
         }
-        this.displayTerminal(5, "↼ Repair interface [info]online");
+
+        if (!sweeperEnterData.quickPlaying) {
+            this.displayTerminal(15, this.t("ice.sweeper.connecting"));
+            this.displayTerminal(40, this.t("ice.sweeper.probing"));
+            this.displayTerminal(20, this.t("ice.sweeper.memory-corruption"));
+            this.displayTerminal(10, this.t("ice.sweeper.exploit-success"));
+            this.displayTerminal(20, this.t("ice.sweeper.meta-access"));
+            this.displayTerminal(10, this.t("ice.sweeper.granted"));
+        }
+        this.displayTerminal(5, this.t("ice.sweeper.repair-online"));
         this.schedule.dispatch(0, {type: SWEEPER_BEGIN});
         if (this.modifiers[0][0] !== SweeperCellModifier.REVEALED) {
             this.displayTerminal(10, "");
-            this.displayTerminal(10, "↼ Geometric analysis: [info]corner blocks[/] are [ok]safe");
+            this.displayTerminal(10, this.t("ice.sweeper.corner-safe"));
         }
 
         if (this.userBlocked) {
             this.displayTerminal(10, "");
-            this.displayTerminal(5, "↼ [warn]Warning[/] connection blocked due to previous access of corrupted memory.")
-            this.displayTerminal(5, "Press (and hold) [b info]reset[/] to restart this hack.");
+            this.displayTerminal(5, this.t("ice.sweeper.warning-blocked"))
+            this.displayTerminal(5, this.t("ice.sweeper.press-reset"));
             this.displayTerminal(5, "");
         }
     }
@@ -113,27 +122,26 @@ class SweeperIceManager extends GenericIceManager {
         this.solved = true
         sweeperCanvas.serverSolved(() => this.processHacked())
 
-        notify({type: "ok", title: "Result", message: "Ice hacked"});
         this.displayTerminal(0, "");
-        this.displayTerminal(20, "Memory restored");
-        this.displayTerminal(40, "ICE grants access.");
+        this.displayTerminal(20, this.t("ice.sweeper.memory-restored"));
+        this.displayTerminal(40, this.t("ice.grants-access"));
     }
 
     blockUser(userId: string, userName: string) {
         this.displayTerminal(5, "");
-        this.displayTerminal(5, `↼ [warn]Warning[/] corrupted memory accessed, [info]${userName}[/] blocked.`);
+        this.displayTerminal(5, this.t("ice.sweeper.user-blocked-warning", userName));
         if (currentUser.id === userId) {
             this.userBlocked = true
-            notify({message: 'You have been blocked from interacting with the ice', type: 'ok'})
+            notify({message: this.t("ice.sweeper.you-blocked"), type: 'ok'})
             sweeperCanvas.changeUserBlocked(true)
-            this.displayTerminal(5, "Press (and hold) [b info]reset[/] to restart this hack.");
+            this.displayTerminal(5, this.t("ice.sweeper.press-reset"));
             this.displayTerminal(5, "");
         }
     }
 
     unblockUser(userId: string, userName: string) {
         this.displayTerminal(5, "");
-        this.displayTerminal(5, `↼ Memory access restored for [info]${userName}[/].`);
+        this.displayTerminal(5, this.t("ice.sweeper.access-restored", userName));
         if (currentUser.id === userId) {
             this.userBlocked = false
             sweeperCanvas.changeUserBlocked(false)
@@ -142,16 +150,16 @@ class SweeperIceManager extends GenericIceManager {
 
     startReset(userName: string) {
         this.dispatch({type: SWEEPER_RESET_START})
-        this.displayTerminal(5, `↼ Reset initiated by [info]${userName}[/]`);
+        this.displayTerminal(5, this.t("ice.sweeper.reset-initiated", userName));
     }
 
     stopReset(userName: string) {
         this.dispatch({type: SWEEPER_RESET_STOP})
-        this.displayTerminal(5, `↼ Reset [ok]aborted[/]. Keep holding reset to complete the reset.`);
+        this.displayTerminal(5, this.t("ice.sweeper.reset-aborted"));
     }
 
     completeReset(userName: string, newIceId: string) {
-        this.displayTerminal(30, `↼ Reset completed by [info]${userName}[/]`);
+        this.displayTerminal(30, this.t("ice.sweeper.reset-completed", userName));
         this.schedule.run(0, () => {
             const url = avEncodedUrl(`ice/siteHack/${newIceId}`)
             window.open(url, "_self")

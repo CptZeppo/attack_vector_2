@@ -1,5 +1,6 @@
 package org.n1.av2.platform.connection
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.hacker.hackerstate.HackerConnectionService
 import org.n1.av2.platform.connection.ConnectionType.WS_HACKER_MAIN
 import org.n1.av2.platform.connection.ConnectionType.WS_NETWORK_APP
@@ -7,7 +8,6 @@ import org.n1.av2.platform.engine.UserTaskRunner
 import org.n1.av2.platform.iam.UserPrincipal
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
 
 
 // Prevent circular connection
@@ -48,7 +48,7 @@ class ConnectDisconnectService {
     fun browserDisconnect(userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("browser disconnect", userPrincipal) {
 
-            if (userPrincipal.type == WS_HACKER_MAIN ) {
+            if (userPrincipal.type == WS_HACKER_MAIN) {
                 hackerConnectionService.browserDisconnectHackerMain(userPrincipal)
             }
             if (userPrincipal.type == WS_NETWORK_APP) {

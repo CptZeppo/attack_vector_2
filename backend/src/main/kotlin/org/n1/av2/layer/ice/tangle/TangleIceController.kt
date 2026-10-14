@@ -18,10 +18,12 @@ class TangleIceController(
         userTaskRunner.runTask("/ice/tangle/enter", userPrincipal) { tangleService.enter(command.iceId) }
     }
 
-    data class TanglePointMoveInput(val iceId: String,
-                                    val pointId: String,
-                                    val x: Int,
-                                    val y: Int)
+    data class TanglePointMoveInput(
+        val iceId: String,
+        val pointId: String,
+        val x: Int,
+        val y: Int
+    )
 
     @MessageMapping("/ice/tangle/moved")
     fun movedPoint(command: TanglePointMoveInput, userPrincipal: UserPrincipal) {

@@ -32,6 +32,7 @@ class TimeService(
     fun now(): ZonedDateTime {
         return ZonedDateTime.now(clock)
     }
+
     fun scriptResetMomentToday(): ZonedDateTime = now()
         .withHour(resetTime.hour)
         .withMinute(resetTime.minute)
@@ -115,7 +116,7 @@ fun String.validateDuration(): String? {
     return null
 }
 
-fun toHumanTime(durationString: String): String? {
+fun toHumanTime(durationString: String): String {
     return durationString.toDuration().toHumanTime()
 }
 

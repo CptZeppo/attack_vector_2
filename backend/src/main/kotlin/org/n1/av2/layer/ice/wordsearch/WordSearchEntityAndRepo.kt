@@ -21,6 +21,6 @@ data class WordSearchIceStatus(
 )
 
 @Repository
-interface WordSearchIceStatusRepo: CrudRepository<WordSearchIceStatus, String> {
+interface WordSearchIceStatusRepo : CrudRepository<WordSearchIceStatus, String> {
     fun findByLayerId(layerId: String): WordSearchIceStatus?
 }

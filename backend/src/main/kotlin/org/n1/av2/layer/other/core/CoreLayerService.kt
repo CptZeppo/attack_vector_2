@@ -2,6 +2,7 @@ package org.n1.av2.layer.other.core
 
 import org.n1.av2.layer.other.tripwire.TripwireLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.entity.RunEntityService
 import org.n1.av2.run.scanning.InitiateScanService
 import org.n1.av2.site.entity.NodeEntityService
@@ -20,28 +21,29 @@ class CoreLayerService(
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
+    private val i18n: I18n,
 ) {
 
     fun hack(layer: CoreLayer, runId: String) {
-        var hackingDetails = listOf("Hacked: [pri]${layer.level}[/] ${layer.name}").toMutableList()
+        val hackingDetails = listOf(i18n.t("layer.hacked-header", layer.level, layer.name)).toMutableList()
         if (layer.revealNetwork) {
             val run = runEntityService.getByRunId(runId)
             initiateScanService.quickScan(run)
-            hackingDetails.add("- revealed network")
+            hackingDetails.add(i18n.t("core.revealed-network"))
         }
 
         val timers = stopTimers(runId, layer)
         timers.forEach { timer ->
             if (timer.targetSiteId == timer.siteId) {
-                hackingDetails.add("- stopped timer for this site")
+                hackingDetails.add(i18n.t("core.stopped-timer-local"))
             } else {
                 val siteProperties = sitePropertiesEntityService.getBySiteId(timer.targetSiteId)
-                hackingDetails.add( "- stopped timer for remote site: [info]${siteProperties.name}")
+                hackingDetails.add(i18n.t("core.stopped-timer-remote", siteProperties.name))
             }
         }
 
         if (hackingDetails.isEmpty()) {
-            hackingDetails.add("- no effect")
+            hackingDetails.add(i18n.t("core.no-effect"))
         }
 
         connectionService.replyTerminalReceive(hackingDetails)

@@ -3,6 +3,7 @@ package org.n1.av2.run.scanning
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.engine.ScheduledTask
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.entity.NodeScan
 import org.n1.av2.run.entity.NodeScanStatus
 import org.n1.av2.run.entity.NodeScanStatus.*
@@ -24,6 +25,7 @@ class ScanService(
     private val traverseNodeService: TraverseNodeService,
     private val siteService: SiteService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
+    private val i18n: I18n,
 ) {
 
     @ScheduledTask
@@ -42,13 +44,13 @@ class ScanService(
 
     @ScheduledTask
     fun areaScan(run: Run, scanNode: Node, nodes: List<Node>, ignoreIceAtScanNode: Boolean) {
-        if (sitePropertiesEntityService.getBySiteId(run.siteId).shutdownEnd != null ) {
+        if (sitePropertiesEntityService.getBySiteId(run.siteId).shutdownEnd != null) {
             // the site has shut down since we started scanning
             connectionService.replyTerminalSetLocked(false)
             return
         }
         if (scanNode.unhackedIce && !ignoreIceAtScanNode) {
-            connectionService.replyTerminalReceive("Scan blocked by ICE at [ok]${scanNode.networkId}")
+            connectionService.replyTerminalReceive(i18n.t("scan.blocked-by-ice", scanNode.networkId))
         }
 
         val traverseNodesById = traverseNodeService.createTraverseNodes(run.siteId, nodes)
@@ -71,13 +73,18 @@ class ScanService(
         connectionService.toRun(run.runId, ServerActions.SERVER_DISCOVER_NODES, "nodeStatusById" to nodeStatusById)
         runLinkService.sendUpdatedRunInfoToHackers(run)
 
-        connectionService.replyTerminalReceive("New nodes discovered: ${newNodesDiscoveredCount}")
+        connectionService.replyTerminalReceive(i18n.t("scan.new-nodes-discovered", newNodesDiscoveredCount.toString()))
     }
 
     class Discovery(val nodeId: String, val scanStatus: NodeScanStatus)
 
 
-    private fun determineDiscoveries(targetNodeId: String, run: Run, traverseNodesById: Map<String, TraverseNode>, ignoreIceAtScanNode: Boolean): List<Discovery> {
+    private fun determineDiscoveries(
+        targetNodeId: String,
+        run: Run,
+        traverseNodesById: Map<String, TraverseNode>,
+        ignoreIceAtScanNode: Boolean
+    ): List<Discovery> {
 
         val target = traverseNodesById[targetNodeId]!!
         val scannedNodes: List<TraverseNode> = target.unblockedNetwork(emptyList(), ignoreIceAtScanNode)

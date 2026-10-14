@@ -2,6 +2,7 @@ package org.n1.av2.script.effect.positive.ice
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.ice.common.IceService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -17,25 +18,25 @@ import org.springframework.stereotype.Service
 class AutoHackIceTypeEffectService(
     private val iceEffectHelper: IceEffectHelper,
     private val iceService: IceService,
+    private val i18n: I18n
 ) : ScriptEffectInterface {
 
-    override val name = "Automatically hack specific ICE type"
+    override val name = i18n.t("auto-hack-ice-type.name")
     override val defaultValue = "WORD_SEARCH_ICE"
-    override val gmDescription = "Automatically hack one specific type of ICE."
+    override val gmDescription = i18n.t("auto-hack-ice-type.description-gm")
 
     override fun playerDescription(effect: ScriptEffect): String {
         val layerType = LayerType.valueOf(effect.value!!)
-        return "Automatically hack one layer of ${iceService.helpfulNameFor(layerType)}."
+        return i18n.t("auto-hack-ice-type.description-player", iceService.helpfulNameFor(layerType))
     }
 
     override fun validate(effect: ScriptEffect): String? {
-        if (effect.value == null) return "ICE type is required."
+        if (effect.value == null) return i18n.t("auto-hack-ice-type.error.required")
         try {
             LayerType.valueOf(effect.value)
             return null
-        }
-        catch (_: IllegalArgumentException) {
-            return "Invalid ICE type."
+        } catch (_: IllegalArgumentException) {
+            return i18n.t("auto-hack-ice-type.error.invalid")
         }
     }
 

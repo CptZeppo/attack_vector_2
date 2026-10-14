@@ -26,11 +26,13 @@ class TraverseNodeService(
         return traverseNodesById
     }
 
-    fun createTraverseNodesWithDistance(siteId: String,
-                                        startNodeId: String,
-                                        nodes: List<Node>,
-                                        targetNodeId: String,
-                                        iceNodeIdToIgnore: String? = null): Pair<TraverseNode, Map<String, TraverseNode>> {
+    fun createTraverseNodesWithDistance(
+        siteId: String,
+        startNodeId: String,
+        nodes: List<Node>,
+        targetNodeId: String,
+        iceNodeIdToIgnore: String? = null
+    ): Pair<TraverseNode, Map<String, TraverseNode>> {
         val traverseNodesById = createTraverseNodes(siteId, nodes)
 
         val start: TraverseNode = traverseNodesById[startNodeId]!!

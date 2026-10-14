@@ -8,11 +8,13 @@ import {webSocketConnection} from "../../../../common/server/WebSocketConnection
 import {ice, layer} from "../../../StandaloneGlobals";
 import {CloseTabButton} from "../../../ice/common/CloseTabButton";
 import {avEncodedUrl} from "../../../../common/util/PathEncodeUtils";
+import {useTranslate} from "../../../../common/i18n/i18n";
 
 export const AuthHome = () => {
 
     const type = useSelector((root: AuthAppRootState) => root.info.type)
-    const infoType = type === PASSWORD_ICE ? "Password" : "Passcode"
+    const t = useTranslate()
+    const infoType = type === PASSWORD_ICE ? t("ice.auth.password-word") : t("ice.auth.passcode-word")
 
     return (
         <>
@@ -27,15 +29,15 @@ export const AuthHome = () => {
                 <div className="col-lg-12">
                     <div className="d-flex justify-content-center">
                         <h2 className="text-info">
-                            <strong>Authorization required</strong>
+                            <strong>{t("ice.auth.required")}</strong>
                         </h2>
                     </div>
                     <div className="d-flex justify-content-center text">
-                        Automatic authorization failed
+                        {t("ice.auth.auto-failed")}
                     </div>
                     <br/>
                     <div className="d-flex justify-content-center text">
-                        Please enter {infoType} to continue
+                        {t("ice.auth.please-enter", infoType)}
                     </div>
                     <br/>
                 </div>
@@ -71,6 +73,7 @@ export const AuthHome = () => {
 
 const IceBanner = () => {
     const type = useSelector((root: AuthAppRootState) => root.info.type)
+    const t = useTranslate()
     const [clickCount, setClickCount] = useState(0)
 
     if (!type) return <></>
@@ -85,7 +88,7 @@ const IceBanner = () => {
         }
     }
     return <>
-        <strong>Protected by {iceName} </strong><span className="text-success unselectable">I<span onClick={clickIceName}>C</span>E</span>
+        <strong>{t("ice.auth.protected-by", iceName)}</strong><span className="text-success unselectable">I<span onClick={clickIceName}>C</span>E</span>
     </>
 }
 
@@ -109,7 +112,8 @@ const PasswordInput = () => {
     const [password, setPassword] = React.useState("")
     const [showPassword, setShowPassword] = React.useState(false)
     const type = useSelector((root: AuthAppRootState) => root.info.type)
-    const placeHolder = type === PASSWORD_ICE ? "password" : "type/xx-xx-xx-xx/xx-xx-xx-xx/"
+    const t = useTranslate()
+    const placeHolder = type === PASSWORD_ICE ? t("ice.auth.placeholder-password") : "type/xx-xx-xx-xx/xx-xx-xx-xx/"
     const dispatch = useDispatch()
 
     const submit = () => {
@@ -177,15 +181,17 @@ const PasswordDisabled = () => {
 
 const PasswordLocked = () => {
     const waitSeconds = useSelector((root: AuthAppRootState) => root.ui.waitSeconds)
+    const t = useTranslate()
 
     return (
-        <div className="text-muted">Invalid input. Please wait {waitSeconds} seconds before retrying</div>
+        <div className="text-muted">{t("ice.auth.invalid-wait", waitSeconds)}</div>
     )
 }
 
 const PasswordCorrect = () => {
+    const t = useTranslate()
     return (
-        <div><h3 className="text-success">Authentication success</h3></div>
+        <div><h3 className="text-success">{t("ice.auth.success")}</h3></div>
     )
 }
 
@@ -193,9 +199,10 @@ const HintSection = () => {
     const showHint = useSelector((root: AuthAppRootState) => root.ui.showHint)
     const hint = useSelector((root: AuthAppRootState) => root.info.hint)
     const state = useSelector((root: AuthAppRootState) => root.ui.state)
+    const t = useTranslate()
 
     if (state !== UI_STATE_UNLOCKED || !showHint) {
         return <div>&nbsp;</div>
     }
-    return <div className="text-muted">Hint: {hint}</div>
+    return <div className="text-muted">{t("ice.auth.hint", hint ?? "")}</div>
 }

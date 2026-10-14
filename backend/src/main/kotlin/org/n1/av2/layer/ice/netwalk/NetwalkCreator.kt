@@ -18,8 +18,7 @@ import kotlin.random.Random
  * - Add the neighboring walls of the cell to the wall list.
  * - Remove the wall from the list.
  * It will usually be relatively easy to find the way to the starting cell, but hard to find the way anywhere else.
-*/
-
+ */
 
 
 class Wall(
@@ -59,11 +58,11 @@ class NetwalkCreator(iceStrength: IceStrength, testingMode: Boolean = false) {
 
     companion object {
         val sizeByStrength = mapOf(
-            IceStrength.VERY_WEAK to Pair (7, 7),
-            IceStrength.WEAK to Pair (9, 9),
-            IceStrength.AVERAGE to Pair (11, 11),
-            IceStrength.STRONG to Pair (15, 13),
-            IceStrength.VERY_STRONG to Pair (9, 9),
+            IceStrength.VERY_WEAK to Pair(7, 7),
+            IceStrength.WEAK to Pair(9, 9),
+            IceStrength.AVERAGE to Pair(11, 11),
+            IceStrength.STRONG to Pair(15, 13),
+            IceStrength.VERY_STRONG to Pair(9, 9),
             IceStrength.ONYX to Pair(17, 11)
         )
     }
@@ -129,7 +128,7 @@ class NetwalkCreator(iceStrength: IceStrength, testingMode: Boolean = false) {
         grid.add(start)
 
         while (walls.isNotEmpty()) {
-    //            printGrid(walls, finalWalls)
+            //            printGrid(walls, finalWalls)
 
             val wall = walls.random(random)
             if (grid.contains(wall.to)) {
@@ -200,9 +199,9 @@ class NetwalkCreator(iceStrength: IceStrength, testingMode: Boolean = false) {
 
         return NetwalkCellType.entries.find { type ->
             type.n != nHasWall &&
-                    type.e != eHasWall &&
-                    type.s != sHasWall &&
-                    type.w != wHasWall
+                type.e != eHasWall &&
+                type.s != sHasWall &&
+                type.w != wHasWall
         }
     }
 

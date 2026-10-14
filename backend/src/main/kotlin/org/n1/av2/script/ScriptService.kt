@@ -1,5 +1,6 @@
 package org.n1.av2.script
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.frontend.model.NotyMessage
 import org.n1.av2.frontend.model.NotyType
 import org.n1.av2.hacker.hacker.HackerEntityService
@@ -8,6 +9,8 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ConnectionService.TerminalReceive
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.I18n
+import org.n1.av2.platform.i18n.localeForLanguage
 import org.n1.av2.platform.iam.user.*
 import org.n1.av2.platform.util.TimeService
 import org.n1.av2.platform.util.createId
@@ -21,7 +24,7 @@ import org.n1.av2.script.type.ScriptTypeId
 import org.n1.av2.script.type.ScriptTypeService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import jakarta.annotation.PostConstruct
+
 
 @Configuration
 class ScriptServiceInit(
@@ -48,6 +51,7 @@ class ScriptService(
     private val hackerEntityService: HackerEntityService,
     private val userEntityService: UserEntityService,
     private val creditTransactionService: CreditTransactionService,
+    private val i18n: I18n,
 ) {
 
     lateinit var userAndHackerService: UserAndHackerService
@@ -240,11 +244,11 @@ class ScriptService(
         val script = scriptRepository.findByCode(scriptCode)
 
         if (script == null || script.ownerUserId != currentUserService.userId) {
-            connectionService.replyTerminalReceive("No script loaded with code: $scriptCode")
+            connectionService.replyTerminalReceive(i18n.t("script.no-script-loaded", scriptCode))
             return null
         }
         if (expired(script)) {
-            connectionService.replyTerminalReceive("System has been patched against this script. (Script is expired.)")
+            connectionService.replyTerminalReceive(i18n.t("script.patched-expired"))
             return null
         }
 
@@ -253,10 +257,10 @@ class ScriptService(
         }
 
         val message = when (script.state) {
-            ScriptState.EXPIRED -> "System has been patched against this script. (Script is expired.)"
-            ScriptState.USED -> "System has been patched against this script. (Script has already been used.)"
-            ScriptState.AVAILABLE -> "Script has not been loaded."
-            ScriptState.OFFERING -> "Script has not been loaded."
+            ScriptState.EXPIRED -> i18n.t("script.patched-expired")
+            ScriptState.USED -> i18n.t("script.patched-used")
+            ScriptState.AVAILABLE -> i18n.t("script.not-loaded")
+            ScriptState.OFFERING -> i18n.t("script.not-loaded")
             ScriptState.LOADED -> error("illegal code path")
         }
 
@@ -327,12 +331,12 @@ class ScriptService(
         val script = scriptRepository.findByCode(scriptCode)
 
         if (script == null) {
-            reply(currentUser.id, "No script found with code: $scriptCode", fromTerminal)
+            reply(currentUser.id, i18n.t("script.no-script-found", scriptCode), fromTerminal)
             return
         }
 
         if (script.state != ScriptState.OFFERING) {
-            reply(currentUser.id, "Script is not available for download.", fromTerminal)
+            reply(currentUser.id, i18n.t("script.not-available-download"), fromTerminal)
             return
 
         }
@@ -342,8 +346,9 @@ class ScriptService(
         scriptRepository.save(updatedScript)
         sendScriptStatusToCurrentUser()
         sendScriptStatusForUser(script.ownerUserId, false)
-        reply(currentUser.id, "Script ${type.name} downloaded.", fromTerminal)
-        reply(script.ownerUserId, "Script ${type.name} has been downloaded by ${currentUser.name}", false)
+        reply(currentUser.id, i18n.t("script.downloaded", type.name), fromTerminal)
+        val ownerLocale = localeForLanguage(userEntityService.getByIdOrNull(script.ownerUserId)?.preferences?.language ?: "en")
+        reply(script.ownerUserId, i18n.t("script.downloaded-by", ownerLocale, type.name, currentUser.name), false)
     }
 
     private fun reply(userId: String, message: String, toTerminal: Boolean) {
@@ -370,7 +375,7 @@ class ScriptService(
         val scriptType = scriptTypeService.getById(scriptAccess.typeId)
 
         addScript(scriptAccess.typeId, currentUserService.userId)
-        creditTransactionService.transferCredits(hacker.hackerUserId, SCRIPT_MARKET_USER.id,  scriptAccess.price, "Purchase script: ${scriptType.name}")
+        creditTransactionService.transferCredits(hacker.hackerUserId, SCRIPT_MARKET_USER.id, scriptAccess.price, "Purchase script: ${scriptType.name}")
         creditTransactionService.sendTransactionsForUser(hacker.hackerUserId)
 
         sendScriptStatusToCurrentUser()
@@ -401,8 +406,13 @@ class ScriptService(
         userAndHackerService.sendDetailsOfCurrentUser()
         userAndHackerService.sendDetailsOfSpecificUserOnlyToThatUser(receiverUser.id)
 
-        connectionService.replyNotificationNeutral("Transfer completed.")
-        connectionService.toUser(receiverUser.id, ServerActions.SERVER_NOTIFICATION, NotyMessage(NotyType.NEUTRAL, "", "You received $amount \uD83D\uDDF2 from ${currentUserService.userEntity.name}"))
+        connectionService.replyNotificationNeutral(i18n.t("script.transfer-completed"))
+        val receiverLocale = localeForLanguage(receiverUser.preferences.language)
+        connectionService.toUser(
+            receiverUser.id,
+            ServerActions.SERVER_NOTIFICATION,
+            NotyMessage(NotyType.NEUTRAL, "", i18n.t("script.credits-received", receiverLocale, amount.toString(), currentUserService.userEntity.name))
+        )
     }
 
     fun deleteByTypeId(scriptTypeId: ScriptTypeId) {

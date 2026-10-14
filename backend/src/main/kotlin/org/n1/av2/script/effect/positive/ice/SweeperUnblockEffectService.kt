@@ -5,7 +5,9 @@ import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.layer.ice.sweeper.SweeperIceStatusRepo
 import org.n1.av2.layer.ice.sweeper.SweeperService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
+import org.n1.av2.script.effect.SCRIPT_CANNOT_INSTANTIATE_ICE_KEY
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.IceEffectHelper
@@ -25,23 +27,24 @@ class SweeperUnblockEffectService(
     private val currentUserService: CurrentUserService,
     private val sweeperService: SweeperService,
     private val connectionService: ConnectionService,
+    private val i18n: I18n,
 ) : ScriptEffectInterface {
 
 
-    override val name = "Sweeper unblock"
+    override val name = i18n.t("sweeper-unblock.name")
     override val defaultValue = ""
-    override val gmDescription = "Unlock a hacker who clicked on a mine in minesweeper ICE."
+    override val gmDescription = i18n.t("sweeper-unblock.description-gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Unlock a hacker who clicked on a mine in Visphotak ICE (minesweeper)."
+    override fun playerDescription(effect: ScriptEffect) = i18n.t("sweeper-unblock.description-player")
 
     override fun validate(effect: ScriptEffect) = null
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         return iceEffectHelper.runForSpecificIceType(LayerType.SWEEPER_ICE, argumentTokens, hackerState) { layer: IceLayer ->
             ScriptExecution {
-                val iceStatus = sweeperIceStatusRepo.findByLayerId(layer.id) ?: error("Failed to instantiate ICE for: ${layer.id}")
+                val iceStatus = sweeperIceStatusRepo.findByLayerId(layer.id) ?: error(i18n.t(SCRIPT_CANNOT_INSTANTIATE_ICE_KEY, layer.id))
                 sweeperService.unblockHacker(iceStatus, currentUserService.userId)
-                connectionService.replyTerminalReceive("Hacker unblocked.")
+                connectionService.replyTerminalReceive(i18n.t("script-effect.hacker-unblocked"))
             }
         }
     }

@@ -41,6 +41,7 @@ class SiteWsController(
     }
 
     class UpdateHackable(val siteId: String, val hackable: Boolean)
+
     @MessageMapping("/site/updateHackable")
     fun updateHackable(command: UpdateHackable, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/site/updateHackable", userPrincipal) {

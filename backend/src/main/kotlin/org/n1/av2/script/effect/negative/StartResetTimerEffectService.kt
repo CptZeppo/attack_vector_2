@@ -1,6 +1,7 @@
 package org.n1.av2.script.effect.negative
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.util.toDuration
 import org.n1.av2.platform.util.toHumanTime
 import org.n1.av2.script.effect.ScriptEffectInterface
@@ -22,15 +23,16 @@ class StartResetTimerEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
+    private val i18n: I18n
 ) : ScriptEffectInterface {
 
-    override val name = "Drawback: Start reset timer"
+    override val name = i18n.t("start-reset-timer.name")
     override val defaultValue = "00:15:00"
-    override val gmDescription = "Drawback: when running this script, a countdown timer will start to reset the site. "
+    override val gmDescription = i18n.t("start-reset-timer.description-gm")
 
-    override fun playerDescription(effect: ScriptEffect) = "Start a countdown of ${toHumanTime(effect.value!!)} to reset the site."
+    override fun playerDescription(effect: ScriptEffect) = i18n.t("start-reset-timer.description-player", toHumanTime(effect.value!!))
 
-    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(effect)
+    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(i18n, effect)
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkAtNonShutdownSite(hackerState)?.let { return ScriptExecution(it) }

@@ -1,6 +1,7 @@
 package org.n1.av2.script.credittransaction
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.n1.av2.hacker.hacker.HackerEntityService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions.SERVER_RECEIVE_CREDITS_TRANSACTIONS
@@ -13,7 +14,6 @@ import org.n1.av2.platform.util.createId
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
-import jakarta.annotation.PostConstruct
 
 @Configuration
 class CreditTransactionServiceInit(
@@ -67,8 +67,7 @@ class CreditTransactionService(
         }
         if (toUserId == null) {
             connectionService.reply(SERVER_RECEIVE_CREDITS_TRANSACTIONS, uiTransactions)
-        }
-        else {
+        } else {
             connectionService.toUser(toUserId, SERVER_RECEIVE_CREDITS_TRANSACTIONS, uiTransactions)
         }
     }
@@ -79,18 +78,22 @@ class CreditTransactionService(
             val sender = hackerEntityService.findForUserId(fromUserId)
             val newBalance = sender.scriptCredits - amount
             if (newBalance < 0) error("Sender does not have enough script credits. Current balance: ${sender.scriptCredits}, attempted to send: $amount")
-            hackerEntityService.save(sender.copy(
-                scriptCredits = newBalance
-            ))
+            hackerEntityService.save(
+                sender.copy(
+                    scriptCredits = newBalance
+                )
+            )
         }
 
         val toUser = userEntityService.getById(toUserId)
         if (toUser.type == UserType.HACKER) {
             val receiver = hackerEntityService.findForUserId(toUserId)
             val newBalance = receiver.scriptCredits + amount
-            hackerEntityService.save(receiver.copy(
-                scriptCredits = newBalance
-            ))
+            hackerEntityService.save(
+                receiver.copy(
+                    scriptCredits = newBalance
+                )
+            )
         }
 
         val transaction = CreditTransaction(
@@ -109,8 +112,7 @@ class CreditTransactionService(
     fun gmAdjust(userId: String, amount: Int, description: String) {
         if (amount > 0) {
             transferCredits(GM_ADJUST_CREDITS_USER.id, userId, amount, description)
-        }
-        else {
+        } else {
             transferCredits(userId, GM_ADJUST_CREDITS_USER.id, -amount, description)
         }
         sendTransactionsForUser(userId)

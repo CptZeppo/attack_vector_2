@@ -1,11 +1,11 @@
 package org.n1.av2.platform.iam.login
 
-import java.io.IOException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URI
 import java.net.URL

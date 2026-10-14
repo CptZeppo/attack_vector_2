@@ -27,11 +27,6 @@ class TarManager extends GenericIceManager {
 
     enter(data: TarEnter) {
 
-        if (data.hacked) {
-            this.enterHacked()
-            return
-        }
-
         this.unitsHacked = data.unitsHacked
         this.lastUnitsHacked = data.unitsHacked
         this.totalUnits = data.totalUnits
@@ -41,21 +36,29 @@ class TarManager extends GenericIceManager {
         this.schedule.clear()
         this.dispatch({type: TERMINAL_CLEAR, terminalId: ICE_DISPLAY_TERMINAL_ID})
 
+        if (data.hacked) {
+            // Already solved: reveal the finished matrix (unitsHacked == totalUnits), then report
+            // + auto-advance to the next layer.
+            this.schedule.dispatch(0, {type: TAR_BEGIN})
+            this.enterHacked()
+            return
+        }
+
         if (!data.quickPlaying) {
-            this.displayTerminal(20, "[warn]↼ Connecting to ice, initiating attack.")
-            this.displayTerminal(42, "↼ Analysing [info]Tar[/] elliptic curve encryption.")
-            this.displayTerminal(6, `↼ ECC strength: [warn]${data.totalUnits}[/] units.`)
+            this.displayTerminal(20, this.t("ice.tar.connecting"))
+            this.displayTerminal(42, this.t("ice.tar.analysing"))
+            this.displayTerminal(6, this.t("ice.tar.ecc-strength", data.totalUnits))
             this.displayTerminal(5, "")
-            this.displayTerminal(15, "↼ Initializing curve approximation arrays.")
-            this.displayTerminal(20, "↼ Generating block matrix.")
+            this.displayTerminal(15, this.t("ice.tar.init-arrays"))
+            this.displayTerminal(20, this.t("ice.tar.gen-matrix"))
         }
 
         this.schedule.dispatch(35, {type: TAR_BEGIN})
 
-        this.displayTerminal(25, "↼ Matrix status [ok]ready[/].")
+        this.displayTerminal(25, this.t("ice.tar.matrix-ready"))
         this.displayTerminal(5, "")
-        this.displayTerminal(15, "↼ [i]Automatic brute force in progress.")
-        this.displayTerminal(20, `↼ Updating progress every [primary]${DELAY_BETWEEN_HACK_TICKS_S}[/] seconds.`)
+        this.displayTerminal(15, this.t("ice.tar.brute-force"))
+        this.displayTerminal(20, this.t("ice.tar.updating-progress", DELAY_BETWEEN_HACK_TICKS_S))
         this.displayTerminal(0, "")
         this.displayTerminal(0, "")
         this.schedule.run(10, () => {
@@ -77,7 +80,7 @@ class TarManager extends GenericIceManager {
                 const secondsLeft = Math.floor(unitsLeft / speed)
 
                 const timeLeft = formatTimeInterval(secondsLeft)
-                this.schedule.dispatch(0, {type: TERMINAL_REPLACE_LAST_LINE, terminalId: ICE_DISPLAY_TERMINAL_ID, data: `Speed: [info]${speed}[/] units/s. To go: ${timeLeft}.`})
+                this.schedule.dispatch(0, {type: TERMINAL_REPLACE_LAST_LINE, terminalId: ICE_DISPLAY_TERMINAL_ID, data: this.t("ice.tar.speed-line", speed, timeLeft)})
 
             }, DELAY_BETWEEN_HACK_TICKS_S * 1000)
         })
@@ -92,7 +95,7 @@ class TarManager extends GenericIceManager {
     serverSentIceHacked () {
         tarCanvas.finish()
         this.displayTerminal(30, "");
-        this.displayTerminal(50, "[warn]↼ Access granted.");
+        this.displayTerminal(50, this.t("ice.access-granted"));
 
         this.clearIntervalTasks()
         this.processHacked()

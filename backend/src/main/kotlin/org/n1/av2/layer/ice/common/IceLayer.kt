@@ -19,7 +19,7 @@ abstract class IceLayer(
     // Ice layers can be changed by hackers. The original (if set) contains the layer as part of the site design.
     // If a site resets, the changed layer is replaced with the original and the value of original is set to null.
     val original: IceLayer? = null,
-    ) : Layer(id, type, level, name, note) {
+) : Layer(id, type, level, name, note) {
 
     @Suppress("unused")
     var ice: Boolean

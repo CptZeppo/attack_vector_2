@@ -1,6 +1,7 @@
 package org.n1.av2.script.ram
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.annotation.PostConstruct
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.config.ConfigItem
@@ -24,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.*
-import jakarta.annotation.PostConstruct
 
 @Configuration
 class RamServiceInitializer(

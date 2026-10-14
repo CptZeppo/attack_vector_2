@@ -14,11 +14,10 @@ fun ScriptType.toUiEffectDescriptions(scriptEffectTypeLookup: ScriptEffectTypeLo
 
     val hideIndex = this.effects.indexOfFirst { effect -> effect.type == ScriptEffectType.HIDDEN_EFFECTS }
 
-    return this.effects.mapIndexed{ index, effect ->
+    return this.effects.mapIndexed { index, effect ->
         if (hideIndex > -1 && index > hideIndex) {
             null
-        }
-        else {
+        } else {
             val effectService = scriptEffectTypeLookup.getForType(effect.type)
             val description = effectService.playerDescription(effect)
             val label = if (effect.type == ScriptEffectType.HIDDEN_EFFECTS) "*" else index.toString()

@@ -11,6 +11,7 @@ import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.engine.CalledBySystem
 import org.n1.av2.platform.engine.TaskEngine
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.iam.user.HackerIcon
 import org.n1.av2.platform.iam.user.UserEntityService
@@ -54,6 +55,7 @@ class RunService(
     private val hackerEntityService: HackerEntityService,
     private val timerService: TimerService,
     private val statisticsService: IceStatisticsService,
+    private val i18n: I18n,
 ) {
 
     class HackerPresence(
@@ -70,7 +72,7 @@ class RunService(
     fun startNewRunAndReply(siteName: String): Run? {
         val siteProperties = sitePropertiesEntityService.findByName(siteName)
         if (siteProperties == null) {
-            connectionService.replyNotification(NotyMessage(NotyType.NEUTRAL, "Error", "Site '${siteName}' not found"))
+            connectionService.replyNotification(NotyMessage(NotyType.NEUTRAL, i18n.t("noty.error-title"), i18n.t("run.site-not-found", siteName)))
             return null
         }
         if (!siteProperties.hackable) {
@@ -114,8 +116,8 @@ class RunService(
         connectionService.replyNotification(
             NotyMessage(
                 NotyType.NEUTRAL,
-                "Site '${siteProperties.name}'",
-                "currently not hackable"
+                i18n.t("run.site-title", siteProperties.name),
+                i18n.t("run.not-hackable")
             )
         )
     }
@@ -197,7 +199,7 @@ class RunService(
 
     fun enterIce(iceId: String) {
         hackerStateEntityService.enterIce(iceId)
-        val hackerState =  hackerStateEntityService.retrieveForCurrentUser()
+        val hackerState = hackerStateEntityService.retrieveForCurrentUser()
         statisticsService.hackerEnterIce(iceId, currentUserService.userEntity)
 
         if (hackerState.runId != null) {
@@ -272,12 +274,12 @@ class RunService(
         connectionService.toSite(
             siteId,
             ServerActions.SERVER_TERMINAL_RECEIVE,
-            ConnectionService.TerminalReceive(TERMINAL_MAIN, arrayOf("[info]Site reboot"))
+            ConnectionService.TerminalReceive(TERMINAL_MAIN, arrayOf(i18n.tDefault("run.site-reboot")))
         )
         hackerStates
             .filter { it.activity == HackerActivity.INSIDE }
             .forEach { hackerState ->
-                hackerDisconnect(hackerState, "Disconnected (server abort)")
+                hackerDisconnect(hackerState, i18n.tDefault("run.disconnected-server-abort"))
             }
     }
 
@@ -308,7 +310,7 @@ class RunService(
         connectionService.toRun(
             run.runId,
             ServerActions.SERVER_NOTIFICATION,
-            NotyMessage(NotyType.ERROR, "Error", "Lost network connection to site: ${siteName}")
+            NotyMessage(NotyType.ERROR, i18n.tDefault("noty.error-title"), i18n.tDefault("run.lost-connection", siteName))
         )
 
         // FIXME: properly inform browser that they need to move to home screen
@@ -341,8 +343,7 @@ class RunService(
                 newNodeScansById.forEach { (nodeId: String, newStatus: NodeScanStatus?) ->
                     if (newStatus == null) {
                         run.nodeScanById.remove(nodeId)
-                    }
-                    else {
+                    } else {
                         run.updateScanStatus(nodeId, newStatus)
                     }
                 }

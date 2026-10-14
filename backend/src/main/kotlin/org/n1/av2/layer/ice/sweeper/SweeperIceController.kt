@@ -12,18 +12,21 @@ class SweeperIceController(
 ) {
 
     data class SweeperEnterInput(val iceId: String)
+
     @MessageMapping("/ice/sweeper/enter")
     fun enter(command: SweeperEnterInput, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/ice/sweeper/enter", userPrincipal) { sweeperService.enter(command.iceId) }
     }
 
     data class SweeperInteract(val iceId: String, val x: Int, val y: Int, val action: SweeperModifyAction)
+
     @MessageMapping("/ice/sweeper/interact")
     fun click(command: SweeperInteract, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/ice/sweeper/interact", userPrincipal) { sweeperService.interact(command.iceId, command.x, command.y, command.action) }
     }
 
     data class SweeperResetAction(val iceId: String)
+
     @MessageMapping("/ice/sweeper/startReset")
     fun startReset(command: SweeperResetAction, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/ice/sweeper/startReset", userPrincipal) { sweeperService.startReset(command.iceId) }

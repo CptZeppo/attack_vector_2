@@ -3,7 +3,7 @@ package org.n1.av2.run.scanning
 import jakarta.validation.constraints.NotEmpty
 import java.util.*
 
-class BlockedPathException(message: String) : RuntimeException(message)
+class BlockedPathException(val networkId: String) : RuntimeException("ICE blocks path to $networkId")
 
 data class TraverseNode(
     val nodeId: String,
@@ -55,11 +55,11 @@ data class TraverseNode(
             val path = LinkedList(listOf(targetNode.nodeId))
             var currentNode = targetNode
             while (currentNode != startNode) {
-                if (currentNode.distance == null) throw BlockedPathException("ICE blocks path to ${currentNode.networkId}")
+                if (currentNode.distance == null) throw BlockedPathException(currentNode.networkId)
                 val previousNode = currentNode
                     .connections
                     .find { it.distance == (currentNode.distance!! - 1) && (ignoreIce || !it.unhackedIce) }
-                    ?: throw BlockedPathException("ICE blocks path to ${currentNode.networkId}")
+                    ?: throw BlockedPathException(currentNode.networkId)
                 currentNode = previousNode
                 path.add(0, currentNode.nodeId)
             }

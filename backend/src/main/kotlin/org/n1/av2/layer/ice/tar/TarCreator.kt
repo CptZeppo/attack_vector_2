@@ -20,8 +20,6 @@ Hacking crew: 10 + 10 + 9 + 8 + 8 ~ 95 units / s
 */
 
 
-
-
 const val MINUTE_SECONDS = 60
 const val HOUR_SECONDS = MINUTE_SECONDS * 60
 
@@ -39,7 +37,7 @@ class TarCreator {
             IceStrength.ONYX to AVERAGE_UNITS_PER_SECOND * HOUR_SECONDS * 144         // 144 hours   : 24 hours    : 7776000
         )
 
-        fun defaultTimeHackerGroup(strength: IceStrength, hackerLevel: Int, hackerCount: Int ): String {
+        fun defaultTimeHackerGroup(strength: IceStrength, hackerLevel: Int, hackerCount: Int): String {
             val units = totalUnitsByStrength[strength] ?: error("No Ice units defined for strength: ${strength}")
             val seconds = units / unitsPerSecondForLevel(hackerLevel, hackerCount)
             return secondsToTime(seconds)
@@ -62,7 +60,6 @@ class TarCreator {
         }
 
     }
-
 
 
     fun create(strength: IceStrength): Int {

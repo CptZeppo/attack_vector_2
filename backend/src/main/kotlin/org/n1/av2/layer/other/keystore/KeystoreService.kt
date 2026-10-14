@@ -48,6 +48,7 @@ class KeystoreService(
 }
 
 const val PASSWORD_CHARACTERS = "abcdefghjkmnpqrstuvwyxz0123456789"
+
 class PasswordGenerator {
 
     fun createPassword(iceName: String): String {

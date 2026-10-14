@@ -1,6 +1,7 @@
 package org.n1.av2.script.effect.positive
 
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.script.effect.ScriptEffectInterface
 import org.n1.av2.script.effect.ScriptExecution
 import org.n1.av2.script.effect.helper.JumpBlockedType
@@ -21,14 +22,16 @@ class JumpToNodeEffectService(
     private val scriptEffectHelper: ScriptEffectHelper,
     private val nodeAccessHelper: NodeAccessHelper,
     private val jumpEffectHelper: JumpEffectHelper,
+    private val i18n: I18n
 ) : ScriptEffectInterface {
 
-    override val name = "Jump to node"
+    override val name = i18n.t("jump-to-node.name")
     override val defaultValue = JumpBlockedType.BLOCKED_BY_ICE.name
-    override val gmDescription = "Jump to another node"
+    override val gmDescription = i18n.t("jump-to-node.description")
 
-    override fun playerDescription(effect: ScriptEffect): String{
-        val suffix = if (effect.value == JumpBlockedType.BLOCKED_BY_ICE.name) ", blocked by ICE along the way." else ", not blocked by ICE."
+    override fun playerDescription(effect: ScriptEffect): String {
+        val suffix =
+            if (effect.value == JumpBlockedType.BLOCKED_BY_ICE.name) i18n.t("description.description-player-blocked") else i18n.t("jump-to-hacker.description-player")
         return gmDescription + suffix
     }
 
@@ -36,11 +39,11 @@ class JumpToNodeEffectService(
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkInNode(hackerState)?.let { return ScriptExecution(it) }
-        val targetNetworkId = argumentTokens.firstOrNull() ?: return ScriptExecution("Provide the [ok]network id[/] of the node to jump to.")
+        val targetNetworkId = argumentTokens.firstOrNull() ?: return ScriptExecution(i18n.t("jump-to-node.execute"))
         val targetNode = nodeEntityService.findByNetworkId(hackerState.siteId, targetNetworkId)
         nodeAccessHelper.checkNodeRevealed(targetNode, targetNetworkId, hackerState.runId)?.let { return ScriptExecution(it) }
 
-        val currentNodeId = hackerState.currentNodeId ?: error("Current node ID not set.")
+        val currentNodeId = hackerState.currentNodeId ?: error(i18n.t("jump-to-node.error"))
 
         return jumpEffectHelper.jump(effect, hackerState.siteId, currentNodeId, targetNode!!.id, hackerState, targetNetworkId)
     }

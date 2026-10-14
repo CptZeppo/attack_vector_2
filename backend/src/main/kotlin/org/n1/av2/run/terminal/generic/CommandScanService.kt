@@ -5,9 +5,9 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.entity.RunEntityService
 import org.n1.av2.run.scanning.InitiateScanService
-import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
 import org.n1.av2.run.terminal.outside.OutsideTerminalHelper
 import org.n1.av2.site.entity.NodeEntityService
 import org.n1.av2.site.entity.SitePropertiesEntityService
@@ -23,6 +23,7 @@ class CommandScanService(
     private val devCommandHelper: DevCommandHelper,
     private val outsideTerminalHelper: OutsideTerminalHelper,
     private val skillService: SkillService,
+    private val i18n: I18n,
 ) {
 
     fun processScan(arguments: List<String>, hackerState: HackerStateRunning) {
@@ -34,7 +35,7 @@ class CommandScanService(
 
     private fun processScanFromOutside(arguments: List<String>, hackerState: HackerStateRunning) {
         if (arguments.isNotEmpty()) {
-            connectionService.replyTerminalReceive("Ignoring arguments, scanning from outside")
+            connectionService.replyTerminalReceive(i18n.t("scan.ignoring-args-outside"))
         }
         if (!checkHasScanSkill()) return
         if (!outsideTerminalHelper.verifySiteNotShutdown(hackerState.siteId)) return
@@ -43,7 +44,7 @@ class CommandScanService(
         val networkId = sitePropertiesEntityService.getBySiteId(run.siteId).startNodeNetworkId
 
         val node = nodeEntityService.findByNetworkId(run.siteId, networkId)
-            ?: return connectionService.replyTerminalReceive("[error]Network error[/] no route to this site.")
+            ?: return connectionService.replyTerminalReceive(i18n.t("scan.no-route"))
 
         connectionService.replyTerminalSetLocked(true)
         initiateScanService.scanFromOutside(run, node)
@@ -51,7 +52,7 @@ class CommandScanService(
 
     private fun processScanFromInside(arguments: List<String>, hackerState: HackerStateRunning) {
         if (arguments.isNotEmpty()) {
-            connectionService.replyTerminalReceive("Ignoring arguments, scanning current node")
+            connectionService.replyTerminalReceive(i18n.t("scan.ignoring-args-inside"))
         }
         connectionService.replyTerminalSetLocked(true)
         requireNotNull(hackerState.currentNodeId)
@@ -63,7 +64,7 @@ class CommandScanService(
     private fun checkHasScanSkill(): Boolean {
         val hasScanSkill = skillService.currentUserHasSkill(SkillType.SCAN)
         if (!hasScanSkill) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(i18n.t("terminal.missing-skill"))
             return false
         }
         return true
@@ -77,7 +78,7 @@ class CommandScanService(
         val run = runEntityService.getByRunId(hackerState.runId)
 
         initiateScanService.quickScan(run)
-        connectionService.replyTerminalReceive("QuickScanned.")
+        connectionService.replyTerminalReceive(i18n.t("scan.quick-scanned"))
     }
 
 }

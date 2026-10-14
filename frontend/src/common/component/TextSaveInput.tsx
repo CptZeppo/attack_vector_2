@@ -1,4 +1,4 @@
-import React, {CSSProperties, useState} from 'react';
+import React, {CSSProperties, useRef, useState} from 'react';
 import {ENTER_KEY} from "../util/KeyCodes";
 import {useDispatch} from "react-redux";
 import {TEXT_INPUT_CHANGED} from "./terminalPreview/terminalPreviewReducer";
@@ -36,9 +36,6 @@ enum State {
 
 const stateMap: Map<string, State> = new Map<string, State>()
 
-// state of the component is stored globally, see below component for an explanation
-let value: string = ""
-
 export const TextSaveInput = (props: Props) => {
     const readonly = props.readonly ? props.readonly : false
     // convert potential number values to string, otherwise equals detection does not work
@@ -49,13 +46,20 @@ export const TextSaveInput = (props: Props) => {
     const [saveIcon, setSaveIcon] = useState(false)
     const dispatch = useDispatch()
 
+    // The current value is stored per-instance in a ref (not in a module global), so that multiple
+    // TextSaveInputs rendered at once (e.g. the editor's layer panel has Layer name + Hacked text)
+    // don't overwrite each other's value on re-render. A ref (rather than useState) is used so the
+    // value survives re-renders without triggering them, and so the blur closure below reads the
+    // latest value even when invoked externally via saveTextInput(). See the note at the bottom.
+    const valueRef = useRef<string>(valueFromProps)
+
     if (!stateMap.has(id)) {
         stateMap.set(id, State.IDLE)
     }
     let state = stateMap.get(id) as State
 
-    if (state === State.IDLE && valueFromProps !== value) { // update from external
-        value = valueFromProps
+    if (state === State.IDLE && valueFromProps !== valueRef.current) { // update from external
+        valueRef.current = valueFromProps
     }
 
     if (state === State.EDITING) {
@@ -67,9 +71,9 @@ export const TextSaveInput = (props: Props) => {
     }
 
     if (state === State.WAITING_FOR_SERVER) {
-        if (valueFromProps === value) { // save successful
+        if (valueFromProps === valueRef.current) { // save successful
         } else { // save unsuccessful, revert back to previous values
-            value = valueFromProps
+            valueRef.current = valueFromProps
         }
         stateMap.set(id, State.IDLE)
         setSaveIcon(false)
@@ -80,13 +84,13 @@ export const TextSaveInput = (props: Props) => {
         if (state === State.IDLE) {
             stateMap.set(id, State.EDITING)
         }
-        value = event.target.value
+        valueRef.current = event.target.value
         currentTextInputBlurMethod = handleBlur
 
         setDummy(dummy + 1) // force re-rendering
 
         if (props.sendEvent) {
-            dispatch({type: TEXT_INPUT_CHANGED, text: value})
+            dispatch({type: TEXT_INPUT_CHANGED, text: valueRef.current})
         }
     }
 
@@ -104,11 +108,11 @@ export const TextSaveInput = (props: Props) => {
 
         const currentState = stateMap.get(id) as State
         if (currentState === State.EDITING) {
-            if (value === props.value) { // nothing changed, no save needed.
+            if (valueRef.current === props.value) { // nothing changed, no save needed.
                 stateMap.set(id, State.IDLE)
             } else {
                 stateMap.set(id, State.SHOW_SAVE)
-                props.save(value) // trigger call to server, that will in turn trigger call to update this component.
+                props.save(valueRef.current) // trigger call to server, that will in turn trigger call to update this component.
                 setSaveIcon(true)
             }
         }
@@ -120,7 +124,7 @@ export const TextSaveInput = (props: Props) => {
     // Don't have text be null or undefined, this will cause React to treat the Input as
     // an uncontrolled component and then later detect that it is now a controlled component.
     // This will log errors in the console
-    let text = value;
+    let text = valueRef.current;
     if (text === null || text === undefined) {
         text = ''
     }
@@ -194,9 +198,11 @@ Additional complication: we want this component to save when it is no longer ren
 
 - The user clicks on another node. The layer panel of that node is rendered, and this (propably) includes the TextInput, but for another layer. In this case the onBlur()
  method is not triggered. To solve this, there is the global saveTextInput method that is triggered when a new node is selected. This method will trigger the onBlur() of
- the component that was last focussed. This works, but introduces new problems. The 'value' of the component is stored in the closure of the function that is stored.
- When storing the value of the compent via a regular useState hook, the _old_ value of the component is stored in the closure. To get around this, we store the value
- globally as well.
+ the component that was last focussed. This works, but introduces new problems. The 'value' of the component is read inside the closure of the function that is stored.
+ When storing the value of the component via a regular useState hook, the _old_ value of the component is captured in the closure. To get around this, the value is held
+ in a per-instance ref (valueRef): the closure captures the stable ref and reads .current at call time, so it always sees the latest value. (Earlier this used a single
+ module-global value, but that was shared across all mounted instances, so siblings - e.g. Layer name + Hacked text in the editor panel - overwrote each other's value on
+ re-render. The per-instance ref fixes that.)
 */
 let currentTextInputBlurMethod: (() => void) | null = null
 

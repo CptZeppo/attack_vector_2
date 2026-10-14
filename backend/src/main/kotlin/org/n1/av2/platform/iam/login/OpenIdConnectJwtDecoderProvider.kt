@@ -40,7 +40,7 @@ class OpenIdConnectJwtDecoderProvider(
         cachedDecoder?.let { if (cachedUrl == protocolUrl) return it }
 
         // the config stores the issuer with the /protocol/openid-connect suffix
-        val issuer = protocolUrl.removeSuffix("/protocol/openid-connect")
+        val issuer = protocolUrl.removeSuffix("/openid-connect").removeSuffix("/protocol")
         val clientId = configService.get(ConfigItem.LARP_SPECIFIC_OPENID_CONNECT_CLIENT_ID)
 
         val decoder = NimbusJwtDecoder

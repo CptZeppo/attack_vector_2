@@ -20,8 +20,10 @@ fun toLine(x1Input: Float, y1: Float, x2: Float, y2: Float): TLine {
     return TLine(slope, offset, LinkedList(), x1, y1, x2, y2)
 }
 
-fun segmentsIntersect(p0_x: Int, p0_y: Int, p1_x: Int, p1_y: Int,
-                      p2_x: Int, p2_y: Int, p3_x: Int, p3_y: Int): Boolean {
+fun segmentsIntersect(
+    p0_x: Int, p0_y: Int, p1_x: Int, p1_y: Int,
+    p2_x: Int, p2_y: Int, p3_x: Int, p3_y: Int
+): Boolean {
     val s1_x = (p1_x - p0_x).toFloat()
     val s1_y = (p1_y - p0_y).toFloat()
     val s2_x = (p3_x - p2_x).toFloat()
@@ -30,7 +32,7 @@ fun segmentsIntersect(p0_x: Int, p0_y: Int, p1_x: Int, p1_y: Int,
     val s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y)
     val t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y)
 
-    return (s in 0.0..1.0 && t in 0.0 .. 1.0 )
+    return (s in 0.0..1.0 && t in 0.0..1.0)
 //    {
 //        val i_x = p0_x + (t * s1_x)
 //        val i_y = p0_y + (t * s1_y)

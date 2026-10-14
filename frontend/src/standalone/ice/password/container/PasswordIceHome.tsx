@@ -20,13 +20,13 @@ export const PasswordIceHome = () => {
     const classHidden = hackUiState === HIDDEN ? " hidden_alpha" : ""
 
     return (
-        <div className="row passwordIcePanelRow">
+        <div className="passwordIcePanelRow">
             <div className="col-lg-12">
-                <div className="row">
-                    <div className="col-lg-11">
+                <div className="row align-items-start iceHeaderRow">
+                    <div className="col">
                         <IceTitle name="Rahasy" strength={IceStrength.UNKNOWN}/>
                     </div>
-                    <div className="col-lg-1">
+                    <div className="col-auto">
                         <div className="float-end">
                             <CloseTabButton/>
                         </div>

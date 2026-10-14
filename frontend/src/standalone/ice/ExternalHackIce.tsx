@@ -38,8 +38,8 @@ export const ExternalHackIce = (props: Props) => {
     if (iceType === "") {
         return <div style={{color: "cornsilk"}}>Loading</div>
     }
-        // return <TopLevelError error="Please don't share URLs between players" description="This is circumventing the limitations of the game.
-        //         Off-game hacking is against the spirit of the game."/>
+    // return <TopLevelError error="Please don't share URLs between players" description="This is circumventing the limitations of the game.
+    //         Off-game hacking is against the spirit of the game."/>
 
     if (!iceId) {
         return <TopLevelError error="Ice not found"

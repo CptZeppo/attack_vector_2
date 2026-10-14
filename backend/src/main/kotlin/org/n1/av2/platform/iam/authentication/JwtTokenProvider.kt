@@ -32,17 +32,17 @@ class JwtTokenProvider(
 
     fun generateJwt(userEntity: UserEntity, expiryDate: Date): String {
         return Jwts.builder()
-                .subject(userEntity.id)
-                .issuedAt(Date())
-                .expiration(expiryDate)
-                .signWith(key)
-                .compact()
+            .subject(userEntity.id)
+            .issuedAt(Date())
+            .expiration(expiryDate)
+            .signWith(key)
+            .compact()
     }
 
     fun getUserIdFromJWT(token: String): String {
         val claims = jwtParser
-                .parseSignedClaims(token)
-                .payload
+            .parseSignedClaims(token)
+            .payload
         return claims.subject
     }
 

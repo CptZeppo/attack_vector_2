@@ -6,8 +6,11 @@ import org.n1.av2.hacker.hacker.Hacker
 import org.n1.av2.hacker.hacker.HackerEntityService
 import org.n1.av2.hacker.hackerstate.HackerStateEntityService
 import org.n1.av2.hacker.skill.SkillService
+import org.n1.av2.platform.config.ConfigItem
+import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.SUPPORTED_LANGUAGES
 import org.n1.av2.platform.inputvalidation.ValidationException
 import org.n1.av2.run.runlink.RunLinkEntityService
 import org.n1.av2.script.ScriptService
@@ -30,6 +33,7 @@ class UserAndHackerService(
     private val scriptAccessService: ScriptAccessService,
     private val scriptService: ScriptService,
     private val ramEntityRepo: RamRepository,
+    private val configService: ConfigService,
 ) {
 
     private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
@@ -115,6 +119,7 @@ class UserAndHackerService(
             "name" -> editUserAttribute(user, "name", value)
             "type" -> editUserAttribute(user, "type", value)
             "fontSize" -> editUserAttribute(user, "fontSize", value)
+            "language" -> editUserAttribute(user, "language", value)
             "characterName" -> editHackerAttribute(user, "characterName", value)
             "hackerIcon" -> editHackerAttribute(user, "hackerIcon", value)
             "scriptCredits" -> editHackerAttribute(user, "scriptCredits", value)
@@ -129,6 +134,13 @@ class UserAndHackerService(
         if (field == "fontSize") {
             // You can always change the font size, even for non-changeable users.
             val editedUser = changeFontSize(user, value)
+            userEntityService.save(editedUser)
+            return
+        }
+
+        if (field == "language") {
+            // Language is a personal preference, changeable for any user (GM or the hacker themselves).
+            val editedUser = changeLanguage(user, value)
             userEntityService.save(editedUser)
             return
         }
@@ -201,6 +213,14 @@ class UserAndHackerService(
         return user.copy(preferences = user.preferences.copy(fontSize = size))
     }
 
+    private fun changeLanguage(user: UserEntity, newLanguage: String): UserEntity {
+        if (newLanguage !in SUPPORTED_LANGUAGES) {
+            sendDetailsOfSpecificUser(user.id) // restore correct value in UI
+            throw ValidationException("Unsupported language: $newLanguage")
+        }
+        return user.copy(preferences = user.preferences.copy(language = newLanguage))
+    }
+
     fun delete(userId: String) {
         if (hackerStateEntityService.isOnline(userId)) throw ValidationException("User is online and cannot be deleted.")
         val user = userEntityService.getById(userId)
@@ -229,10 +249,14 @@ class UserAndHackerService(
     }
 
     fun createHackerWithDefaultSkill(user: UserEntity, icon: HackerIcon) {
-        hackerEntityService.createHacker(user, icon, "not set")
-        skillService.createDefaultSkills(user.id)
+        val defaultLanguage = configService.get(ConfigItem.HACKER_DEFAULT_LANGUAGE)
+        val hackerUser = user.copy(preferences = user.preferences.copy(language = defaultLanguage))
+        userEntityService.save(hackerUser)
+
+        hackerEntityService.createHacker(hackerUser, icon, "not set")
+        skillService.createDefaultSkills(hackerUser.id)
 
         val template = userEntityService.getByName(TEMPLATE_USER_NAME)
-        scriptAccessService.copyScriptAccess(template, user)
+        scriptAccessService.copyScriptAccess(template, hackerUser)
     }
 }

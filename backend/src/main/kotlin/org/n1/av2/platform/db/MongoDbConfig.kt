@@ -37,7 +37,7 @@ open class MongoDbConfig(
     private val mongoClient: MongoClient,
     private val timeService: TimeService,
     private val staticConfig: StaticConfig,
-    ) : AbstractMongoClientConfiguration() {
+) : AbstractMongoClientConfiguration() {
 
     override fun mongoClient(): MongoClient {
         return mongoClient

@@ -13,18 +13,21 @@ class SkillWsController(
     private val skillService: SkillService,
 ) {
     class AddSkillCommand(val userId: String, val type: SkillType)
+
     @MessageMapping("/user/skill/add")
     fun addSkill(command: AddSkillCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/user/skill/add", userPrincipal) { skillService.addSkillAndUpdateUi(command.userId, command.type) }
     }
 
     class EditSkillValueCommand(val skillId: SkillId, val value: String)
+
     @MessageMapping("/user/skill/edit")
     fun editSkillValue(command: EditSkillValueCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/user/skill/edit", userPrincipal) { skillService.editSkillValue(command.skillId, command.value) }
     }
 
     class DeleteSkillCommand(val skillId: SkillId)
+
     @MessageMapping("/user/skill/delete")
     fun deleteSkill(command: DeleteSkillCommand, userPrincipal: UserPrincipal) {
         userTaskRunner.runTask("/user/skill/delete", userPrincipal) { skillService.deleteSkill(command.skillId) }

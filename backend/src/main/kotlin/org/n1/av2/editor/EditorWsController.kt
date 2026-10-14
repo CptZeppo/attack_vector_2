@@ -46,7 +46,8 @@ class EditorWsController(
         userTaskRunner.runTask("/editor/editSiteProperty", userPrincipal) { editorService.updateSiteProperties(command) }
     }
 
-    data class DeleteCommand(val siteId: String = "", val nodeId: String = "" )
+    data class DeleteCommand(val siteId: String = "", val nodeId: String = "")
+
     @MessageMapping("/editor/deleteConnections")
     fun deleteConnections(command: DeleteCommand, userPrincipal: UserPrincipal) {
         editorService.validateAccessToSiteById(command.siteId, userPrincipal)
@@ -60,6 +61,7 @@ class EditorWsController(
     }
 
     data class SiteCommand(val siteId: String = "")
+
     @MessageMapping("/editor/snap")
     fun snap(command: SiteCommand, userPrincipal: UserPrincipal) {
         editorService.validateAccessToSiteById(command.siteId, userPrincipal)
@@ -85,6 +87,7 @@ class EditorWsController(
     }
 
     class AddStatusLightOptionCommand(val siteId: String, val nodeId: String, val layerId: String)
+
     @MessageMapping("/editor/addStatusLightOption")
     fun addStatusLightOption(command: AddStatusLightOptionCommand, userPrincipal: UserPrincipal) {
         editorService.validateAccessToSiteById(command.siteId, userPrincipal)
@@ -92,6 +95,7 @@ class EditorWsController(
     }
 
     class DeleteStatusLightOptionCommand(val siteId: String, val nodeId: String, val layerId: String, val optionIndex: Int)
+
     @MessageMapping("/editor/deleteStatusLightOption")
     fun deleteStatusLightOption(command: DeleteStatusLightOptionCommand, userPrincipal: UserPrincipal) {
         editorService.validateAccessToSiteById(command.siteId, userPrincipal)

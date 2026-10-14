@@ -14,6 +14,7 @@ import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.engine.ScheduledTask
 import org.n1.av2.platform.engine.UserTaskRunner
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.util.isOneOf
 import org.n1.av2.run.entity.NodeScanStatus.*
 import org.n1.av2.run.entity.RunEntityService
@@ -44,13 +45,14 @@ class CommandMoveService(
     private val insideTerminalHelper: InsideTerminalHelper,
     private val devCommandHelper: DevCommandHelper,
     private val skillService: SkillService,
+    private val i18n: I18n,
 ) {
 
     fun processCommand(arguments: List<String>, hackerState: HackerStateRunning) {
         if (!insideTerminalHelper.verifyInside(hackerState)) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing [ok]<network id>[/], for example: [b]mv[ok] 01[/].")
+            connectionService.replyTerminalReceive(i18n.t("move.missing-network-id"))
             return
         }
         val networkId = arguments.first()
@@ -71,7 +73,7 @@ class CommandMoveService(
                 reportProtected()
                 return
             } else {
-                connectionService.replyTerminalReceive("[i]Bypassing[/] ICE at ${currentNode.networkId}")
+                connectionService.replyTerminalReceive(i18n.t("move.bypassing-ice", currentNode.networkId))
                 handleMove(toNode, hackerState, true)
             }
         } else {
@@ -95,16 +97,16 @@ class CommandMoveService(
     }
 
     private fun reportAtTargetNode(networkId: String): Boolean {
-        connectionService.replyTerminalReceive("[error]error[/] already at [ok]${networkId}[/].")
+        connectionService.replyTerminalReceive(i18n.t("move.already-at", networkId))
         return false
     }
 
     fun reportNodeNotFound(networkId: String) {
-        connectionService.replyTerminalReceive("[error]error[/] node [ok]${networkId}[/] not found.")
+        connectionService.replyTerminalReceive(i18n.t("move.node-not-found", networkId))
     }
 
     fun reportNoPath(networkId: String): Boolean {
-        connectionService.replyTerminalReceive("[error]error[/] no path from current node to [ok]${networkId}[/].")
+        connectionService.replyTerminalReceive(i18n.t("move.no-path", networkId))
         return false
     }
 
@@ -122,7 +124,7 @@ class CommandMoveService(
     }
 
     private fun reportProtected(): Boolean {
-        connectionService.replyTerminalReceive("[warn b]blocked[/] ICE in current node is blocking your move.")
+        connectionService.replyTerminalReceive(i18n.t("move.blocked-by-ice"))
         return false
     }
 
@@ -189,8 +191,9 @@ class CommandMoveService(
 
         val node = nodeEntityService.getById(nodeId)
         val nodeName = (node.layers[0] as OsLayer).nodeName
-        val nodeNameText = if (nodeName.isNotBlank()) "[/]: $nodeName" else ""
-        connectionService.replyTerminalReceive("Entered node [ok]${node.networkId}$nodeNameText")
+        val enteredText = if (nodeName.isNotBlank()) i18n.t("move.entered-node-named", node.networkId, nodeName)
+        else i18n.t("move.entered-node", node.networkId)
+        connectionService.replyTerminalReceive(enteredText)
 
         triggerLayersAtArrive(state.siteId, nodeId, runId)
 
@@ -217,7 +220,7 @@ class CommandMoveService(
         if (!insideTerminalHelper.verifyInside(hackerState)) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing [ok]<network id>[/], for example: [b]mv[ok] 01[/].")
+            connectionService.replyTerminalReceive(i18n.t("move.missing-network-id"))
             return
         }
         val networkId = arguments.first()

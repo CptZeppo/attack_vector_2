@@ -37,7 +37,7 @@ class WebSocketConfig(
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry) {
 
-        fun determineUser(notLoggedInUserName: String ): Principal {
+        fun determineUser(notLoggedInUserName: String): Principal {
             // If the user is logged in, the UserPrincipal has already been set when the http-request passed through the JwtAuthentication filter. The JWT was taken from the cookie.
             val authentication = SecurityContextHolder.getContext().authentication
 

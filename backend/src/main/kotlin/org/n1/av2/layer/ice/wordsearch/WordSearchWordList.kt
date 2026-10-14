@@ -13,7 +13,7 @@ class WordSearchWordList(private val random: Random = Random) {
     private val wordsBySize: Map<Int, List<String>>
 
     init {
-        val path  = "/ice/word_search/wordlist.txt"
+        val path = "/ice/word_search/wordlist.txt"
         val words = WordSearchWordList::class.java.getResourceAsStream(path)
             ?.bufferedReader()
             ?.readLines()

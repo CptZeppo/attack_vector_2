@@ -6,7 +6,6 @@ import {Scan, UpdateNodeStatusAction} from "./run/reducer/ScanReducer"
 import {Site} from "./run/reducer/SiteReducer"
 import {HackerPresence} from "./run/reducer/HackerPresencesReducer"
 import {Timings} from "../common/model/Ticks"
-import {delayTicks} from "../common/util/Util"
 import {SERVER_FLASH_PATROLLER,} from "./run/timer/TimersReducer"
 import {prepareToEnterRun} from "./home/HackerHome"
 import {SERVER_TERMINAL_RECEIVE, TERMINAL_CLEAR, TERMINAL_RECEIVE} from "../common/terminal/TerminalReducer"
@@ -19,6 +18,7 @@ import {terminalManager} from "../common/terminal/TerminalManager";
 import {HIDE_NODE_INFO} from "./run/reducer/InfoNodeIdReducer";
 import {avEncodedUrl} from "../common/util/PathEncodeUtils";
 import {NodeScanType} from "./run/model/NodeScanTypes";
+import {translate, TranslationKey} from "../common/i18n/i18n";
 
 export const SERVER_HACKER_START_ATTACK = "SERVER_HACKER_START_ATTACK"
 export const SERVER_HACKER_MOVE_START = "SERVER_HACKER_MOVE_START"
@@ -156,6 +156,10 @@ export const initRunServerActions = (store: Store) => {
         })
     }
 
+    // Translate flavor text to the current hacker's language (read from the store at fire time).
+    const tt = (key: TranslationKey, ...args: (string | number)[]) =>
+        translate(store.getState().currentUser?.preferences?.language || "en", key, ...args)
+
     webSocketConnection.addAction(SERVER_OPEN_EDITOR, (data: { id: string }) => {
         window.open("/edit/" + data.id, data.id)
     })
@@ -223,22 +227,22 @@ export const initRunServerActions = (store: Store) => {
             const speedFast = data.timings["fast"]
 
             if (data.quick) {
-                echo(10, "[info]Persona established, hack started.")
+                echo(10, tt("attack.persona-established"))
                 echo(0, "")
             }
             else {
                 echo(speedMedium, "")
-                echo(speedMedium, "Persona v2.3 booting")
-                echo(speedFast, "- unique ID: " + personaId)
-                echo(speedFast, "- Matching fingerprint with OS deamon")
-                echo(speedFast, "  - [ok]ok[/] Suppressing persona signature")
-                echo(speedFast, "  - [ok]ok[/] Connection bandwidth adjusted")
-                echo(speedFast, "  - [ok]ok[/] Content masked.")
-                echo(speedSlow, "  - [ok]ok[/] Operating speed reduced to mimic OS deamon")
-                echo(speedSlow, "  - [ok]ok[/] Network origin obfuscated ")
-                echo(speedMedium, "- Persona creation [info]complete")
+                echo(speedMedium, tt("attack.booting"))
+                echo(speedFast, tt("attack.unique-id", personaId))
+                echo(speedFast, tt("attack.matching-fingerprint"))
+                echo(speedFast, tt("attack.suppress-signature"))
+                echo(speedFast, tt("attack.bandwidth-adjusted"))
+                echo(speedFast, tt("attack.content-masked"))
+                echo(speedSlow, tt("attack.speed-reduced"))
+                echo(speedSlow, tt("attack.origin-obfuscated"))
+                echo(speedMedium, tt("attack.persona-complete"))
                 echo(0, "")
-                echo(speedFast, "Connection established.")
+                echo(speedFast, tt("attack.connection-established"))
                 echo(0, "")
             }
 

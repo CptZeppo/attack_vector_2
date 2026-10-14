@@ -5,6 +5,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.layer.Layer
 import org.n1.av2.layer.ice.common.IceLayer
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.site.entity.Node
 import org.n1.av2.site.entity.NodeEntityService
 import org.springframework.stereotype.Service
@@ -13,11 +14,12 @@ import org.springframework.stereotype.Service
 class InsideTerminalHelper(
     private val connectionService: ConnectionService,
     private val nodeEntityService: NodeEntityService,
+    private val i18n: I18n,
 ) {
 
     fun verifyInside(hackerState: HackerStateRunning): Boolean {
         if (hackerState.activity != HackerActivity.INSIDE) {
-            connectionService.replyTerminalReceive("[warn]You are outside[/] - First, start the attack with: [b]attack[/]")
+            connectionService.replyTerminalReceive(i18n.t("terminal.outside-start-attack"))
             return false
         }
         return true
@@ -45,18 +47,22 @@ class InsideTerminalHelper(
     private fun reportLayerUnknown(node: Node, layerInput: String, command: String): Layer? {
         val layerCount = node.layers.size
         if (layerCount == 1) {
-            connectionService.replyTerminalReceive("[error]layer error[/] - Layer number [primary]${layerInput}[/] not found.",
-                "This node has only one layer, the only valid option is: [b]${command} [primary]0[/].")
+            connectionService.replyTerminalReceive(
+                i18n.t("layer.not-found", layerInput),
+                i18n.t("layer.only-one-option", command)
+            )
         } else {
-            connectionService.replyTerminalReceive("[error]layer error[/] - Layer number [primary]${layerInput}[/] not found.",
-                "This node has ${layerCount} layers, so use a number between [primary]0[/] and [primary]${layerCount - 1}[/].",
-                "Use [b]view[/] to see the layers and their numbers.")
+            connectionService.replyTerminalReceive(
+                i18n.t("layer.not-found", layerInput),
+                i18n.t("layer.choose-range", layerCount, layerCount - 1),
+                i18n.t("layer.use-view")
+            )
         }
         return null
     }
 
     private fun reportBlockingIce(blockingIceLayer: Layer): Layer? {
-        connectionService.replyTerminalReceive("[warn b]blocked[/] - ICE (${blockingIceLayer.name}) blocks access to this layer. Hack the ICE first: [b]hack[/] [primary]${blockingIceLayer.level}")
+        connectionService.replyTerminalReceive(i18n.t("layer.blocked-by-ice", blockingIceLayer.name, blockingIceLayer.level))
         return null
     }
 

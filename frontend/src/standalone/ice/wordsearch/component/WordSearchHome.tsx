@@ -28,23 +28,23 @@ export const WordSearchHome = () => {
     setTimeout(moveIt, 2)
 
     return (
-        <div className="row icePanelRow">
+        <div className="icePanelRow iceFitPending">
             <div className="col-lg-12">
-                <div className="row">
-                    <div className="col-lg-3">
+                <div className="row align-items-start iceHeaderRow">
+                    <div className="col-auto iceTitleCol">
                         <IceTitle name="Jaal" strength={puzzle.strength}/>
                     </div>
-                    <div className="col-lg-8" style={{paddingTop: "4px"}}>
+                    <div className="col iceTerminalCol" style={{paddingTop: "4px"}}>
                         <Terminal terminalState={displayTerminal} height={84}/>
                     </div>
-                    <div className="col-lg-1">
+                    <div className="col-auto iceCloseCol">
                         <div className="float-end">
                             <CloseTabButton/>
                         </div>
                     </div>
                 </div>
 
-                <div className={"row transition_alpha_fast" + classShowCanvas}>
+                <div className={"row transition_alpha_fast" + classShowCanvas} style={{position: "relative"}}>
                     <div className="col-lg-12">
                         <div>
                             <canvas id="wordSearchCanvas" style={{
@@ -54,7 +54,7 @@ export const WordSearchHome = () => {
                             }}/>
                         </div>
                     </div>
-                    <div id="letterGrid" className="iceWsGrid transition_alpha_fast" ref={puzzleRef}>
+                    <div id="letterGrid" className={"iceWsGrid transition_alpha_fast" + classShowCanvas} ref={puzzleRef}>
                         <WordSearchPuzzle />
                     </div>
                 </div>

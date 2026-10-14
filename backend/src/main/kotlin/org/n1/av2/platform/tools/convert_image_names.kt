@@ -11,22 +11,22 @@ val allNames = TreeSet<String>()
  */
 
 val map = hashMapOf(
-        "box2.png" to "data_store.png",
-        "cube.png" to "syscon.png",
-        "puzzle3-ps.png" to "passcode_store.png",
-        "shape-square-frame.png" to "transit_1.png",
-        "shapes-circle-frame.png" to "transit_2.png",
-        "shapes-diamond-frame.png" to "transit_3.png",
-        "shapes-hexagon-frame.png" to "transit_4.png",
-        "tile2.png" to "resource_store.png",
-        "snowflake4-sc37.png" to "unhackable.png",
-        "flower3.png" to "manual_1.png",
-        "flower13-sc36.png" to "manual_2.png",
-        "flower-cauliflower.png" to "manual_3.png",
-        "spinner8-sc36.png" to "ice_1.png",
-        "spinner2-sc30.png" to "ice_2.png",
-        "spinner3-sc36.png" to "ice_3.png",
-        "spinner9-sc36.png" to "ice_4.png"
+    "box2.png" to "data_store.png",
+    "cube.png" to "syscon.png",
+    "puzzle3-ps.png" to "passcode_store.png",
+    "shape-square-frame.png" to "transit_1.png",
+    "shapes-circle-frame.png" to "transit_2.png",
+    "shapes-diamond-frame.png" to "transit_3.png",
+    "shapes-hexagon-frame.png" to "transit_4.png",
+    "tile2.png" to "resource_store.png",
+    "snowflake4-sc37.png" to "unhackable.png",
+    "flower3.png" to "manual_1.png",
+    "flower13-sc36.png" to "manual_2.png",
+    "flower-cauliflower.png" to "manual_3.png",
+    "spinner8-sc36.png" to "ice_1.png",
+    "spinner2-sc30.png" to "ice_2.png",
+    "spinner3-sc36.png" to "ice_3.png",
+    "spinner9-sc36.png" to "ice_4.png"
 )
 
 //fun main(args: Array<String>) {
@@ -42,8 +42,7 @@ fun process(file: File) {
         val newFile = File(file.parentFile, map[file.name] ?: error("no mapping for ${file.name}"))
         println("renaming ${file} to ${newFile}")
         file.renameTo(newFile)
-    }
-    else {
+    } else {
         val newFile = File(file.parentFile, file.name.lowercase())
         println("renaming ${file} to ${newFile}")
         file.renameTo(newFile)

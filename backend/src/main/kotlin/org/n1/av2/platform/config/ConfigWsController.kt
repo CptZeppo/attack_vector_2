@@ -24,6 +24,7 @@ class ConfigWsController(
         val item: ConfigItem,
         val value: String
     )
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @MessageMapping("/admin/config/set")
     fun setConfig(command: SetConfigItemCommand, userPrincipal: UserPrincipal) {

@@ -49,7 +49,7 @@ class TangleService(
         val testingMode = configService.getAsBoolean(ConfigItem.DEV_TESTING_MODE)
         val creation = TangleCreator(testingMode).create(layer.strength)
 
-         val id = createId("tangle", tangleIceStatusRepo::findById)
+        val id = createId("tangle", tangleIceStatusRepo::findById)
         val iceTangleStatus = TangleIceStatus(
             id = id,
             layerId = layer.id,
@@ -83,7 +83,7 @@ class TangleService(
         val tangleStatus = tangleIceStatusRepo.findById(command.iceId).getOrElse { error("Ice not found for \"${command.iceId}\"") }
 
         val oldPoint = tangleStatus.points.find { it.id == command.pointId } ?: error("Point not found for id: \"${command.pointId}\"")
-        val newPoint = oldPoint.copy(x = x, y =  y)
+        val newPoint = oldPoint.copy(x = x, y = y)
 
         tangleStatus.points.remove(oldPoint)
         tangleStatus.points.add(newPoint)
@@ -144,7 +144,7 @@ class TangleService(
 
     private fun connected(x: Int, y: Int, segment: TangleLineSegment): Boolean {
         return (x == segment.x1 && y == segment.y1) ||
-                (x == segment.x2 && y == segment.y2)
+            (x == segment.x2 && y == segment.y2)
     }
 
     fun resetIceByLayerId(layerId: String) {
@@ -155,7 +155,7 @@ class TangleService(
     }
 
     fun revealClusters(status: TangleIceStatus) {
-        val updatedStatus = status.copy (
+        val updatedStatus = status.copy(
             clustersRevealed = true
         )
         tangleIceStatusRepo.save(updatedStatus)

@@ -45,6 +45,7 @@ class TarService(
 
     @Suppress("unused")
     class TarEnter(val iceId: String, val totalUnits: Int, val unitsHacked: Int, val strength: IceStrength, val unitsPerSecond: Int, val quickPlaying: Boolean)
+
     fun enter(iceId: String) {
         val tarIceStatus = tarIceStatusRepo.findById(iceId).getOrElse { error("Netwalk not found for: ${iceId}") }
 
@@ -65,11 +66,12 @@ class TarService(
 
         val newUnitsHacked = tarIceStatus.unitsHacked + units
         val hacked = (newUnitsHacked >= tarIceStatus.totalUnits)
-        val newStatus  = tarIceStatus.copy(unitsHacked = newUnitsHacked, hacked = hacked)
+        val newStatus = tarIceStatus.copy(unitsHacked = newUnitsHacked, hacked = hacked)
         tarIceStatusRepo.save(newStatus)
 
         @Suppress("unused")
         class TarStatusUpdate(val unitsHacked: Int)
+
         val message = TarStatusUpdate(newUnitsHacked)
         connectionService.toIce(iceId, ServerActions.SERVER_TAR_UPDATE, message)
 

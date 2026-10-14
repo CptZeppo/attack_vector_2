@@ -6,7 +6,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
-import org.n1.av2.run.terminal.MISSING_SKILL_RESPONSE
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.script.Script
 import org.n1.av2.script.ScriptService
 import org.n1.av2.script.effect.ScriptEffectTypeLookup
@@ -26,17 +26,18 @@ class CommandScriptService(
     private val ramService: RamService,
     private val skillService: SkillService,
     private val configService: ConfigService,
+    private val i18n: I18n,
 ) {
 
     fun processDownloadScript(arguments: List<String>) {
         if (!configService.getAsBoolean(ConfigItem.HACKER_SCRIPT_LOAD_DURING_RUN)) {
-            connectionService.replyTerminalReceive("Downloading scripts during a run is not supported.")
+            connectionService.replyTerminalReceive(i18n.t("script.download-not-supported"))
             return
         }
         if (!checkHasScriptsSkill()) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("Missing [primary]<script code>[/] for example /download-script [primary]1234-abcd[/].")
+            connectionService.replyTerminalReceive(i18n.t("script.download-missing-code"))
             return
         }
         val scriptCode = arguments.first()
@@ -47,7 +48,7 @@ class CommandScriptService(
         if (!checkHasScriptsSkill()) return
 
         if (arguments.isEmpty()) {
-            connectionService.replyTerminalReceive("[b]run[/] [primary]<script code>[/]      -- for example: [b]run[primary] 1234-abcd")
+            connectionService.replyTerminalReceive(i18n.t("script.run-missing-code"))
             return
         }
         val scriptCode = arguments.first()
@@ -59,7 +60,7 @@ class CommandScriptService(
     private fun checkHasScriptsSkill(): Boolean {
         val hasScriptSkill = skillService.currentUserHasSkill(SkillType.SCRIPT_RAM)
         if (!hasScriptSkill) {
-            connectionService.replyTerminalReceive(MISSING_SKILL_RESPONSE)
+            connectionService.replyTerminalReceive(i18n.t("terminal.missing-skill"))
             return false
         }
         return true
@@ -73,13 +74,13 @@ class CommandScriptService(
         if (processErrors(executions)) return
 
         if (executions.isEmpty()) {
-            connectionService.replyTerminalReceive("Script executed successfully, but it has no effects.")
+            connectionService.replyTerminalReceive(i18n.t("script.no-effects"))
         } else {
             executions.forEach { it.executionMethod() }
 
             // Manually unlock terminal in case no effect returned any text to the terminal (and thus unlocking it),
             // except when an execution specifically tells us to keep it locked.
-            if (executions.none { it.terminalState == TerminalState.KEEP_LOCKED } ) {
+            if (executions.none { it.terminalState == TerminalState.KEEP_LOCKED }) {
                 connectionService.replyTerminalSetLocked(false)
             }
         }

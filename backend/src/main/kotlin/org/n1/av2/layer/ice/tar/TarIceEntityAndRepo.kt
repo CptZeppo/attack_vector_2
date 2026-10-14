@@ -11,13 +11,13 @@ import org.springframework.stereotype.Repository
 data class TarIceStatus(
     @Id val id: String,
     @Indexed val layerId: String,
-    val hacked : Boolean,
+    val hacked: Boolean,
     val strength: IceStrength,
     val totalUnits: Int,
     val unitsHacked: Int = 0
 )
 
 @Repository
-interface TarIceStatusRepo: CrudRepository<TarIceStatus, String> {
+interface TarIceStatusRepo : CrudRepository<TarIceStatus, String> {
     fun findByLayerId(layerId: String): TarIceStatus?
 }

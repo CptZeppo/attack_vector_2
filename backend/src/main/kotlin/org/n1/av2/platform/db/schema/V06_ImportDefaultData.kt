@@ -37,8 +37,7 @@ class V06_ImportDefaultData(
         val created = tutorialService.importTutorialSite()
         if (created) {
             logger.info { "Imported default tutorial site." }
-        }
-        else {
+        } else {
             logger.info { "There is already a tutorial site, leaving it unchanged." }
         }
 
@@ -47,8 +46,8 @@ class V06_ImportDefaultData(
     fun createDefaultHackers() {
         val users = mutableListOf<UserEntity?>()
         users.add(defaultUserService.createDefaultHacker("hacker", HackerIcon.CROCODILE))
-        users.add(defaultUserService.createDefaultHacker("Stalker",HackerIcon.BEAR))
-        users.add(defaultUserService.createDefaultHacker("Paradox",HackerIcon.BULL))
+        users.add(defaultUserService.createDefaultHacker("Stalker", HackerIcon.BEAR))
+        users.add(defaultUserService.createDefaultHacker("Paradox", HackerIcon.BULL))
         users.add(defaultUserService.createDefaultHacker("Angler", HackerIcon.SHARK))
 
         val createdCount = users.filterNotNull().size

@@ -33,8 +33,9 @@ export const AdminPageChooser = () => {
     if (currentUser.type === UserType.NO_DATA) return <></> // waiting for currentUser to be received
 
     return (
-        <div className="container-fluid" data-bs-theme="dark">
-            <div className="row">
+        <div className="container-fluid adminConsole" data-bs-theme="dark">
+            {/* decorative colour bars - desktop only (on mobile they just stack into ugly empty strips) */}
+            <div className="row d-none d-lg-flex">
                 <div className="col-lg-2">
                     <span className="text">&nbsp;</span>
                 </div>

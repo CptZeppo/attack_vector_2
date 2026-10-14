@@ -53,6 +53,8 @@ class RunCanvas {
     hacking = false
     shutdown = false
 
+    private fitHandler = () => this.fit()
+
 
     init(userId: string, dispatch: Dispatch) {
 
@@ -69,6 +71,12 @@ class RunCanvas {
         fabric.Object.prototype.originY = 'center'
 
         this.canvas.selection = false
+
+        // Make the map responsive: fit the whole logical map into the available area (no scrollbars).
+        window.removeEventListener("resize", this.fitHandler)
+        window.addEventListener("resize", this.fitHandler)
+        this.fit()
+        setTimeout(() => this.fit(), 50)
 
         this.canvas.on('selection:created', (event) => {
             this.canvasObjectSelected(event)
@@ -125,6 +133,29 @@ class RunCanvas {
         this.canvas.renderAll()
     }
 
+    /**
+     * Resize the canvas to fill its container and zoom so the whole logical map (CANVAS_WIDTH x
+     * CANVAS_HEIGHT) fits inside, centered. Node coordinates stay in logical space; fabric maps
+     * pointer events through the viewport transform, so clicking nodes keeps working.
+     */
+    fit() {
+        if (!this.canvas) return
+        const container = document.getElementById("canvas-container")
+        if (!container) return
+        const width = container.clientWidth
+        const height = container.clientHeight
+        if (width <= 0 || height <= 0) return
+
+        this.canvas.setWidth(width)
+        this.canvas.setHeight(height)
+
+        const zoom = Math.min(width / CANVAS_WIDTH, height / CANVAS_HEIGHT)
+        const offsetX = (width - CANVAS_WIDTH * zoom) / 2
+        const offsetY = (height - CANVAS_HEIGHT * zoom) / 2
+        this.canvas.setViewportTransform([zoom, 0, 0, zoom, offsetX, offsetY])
+        this.canvas.requestRenderAll()
+    }
+
     enterSite(actionData: SiteAndScan) {
         this.clearState()
 
@@ -154,11 +185,16 @@ class RunCanvas {
         nodes.forEach((nodeData: NodeI) => {
             this.nodeDataById[nodeData.id] = nodeData
             const nodeScan = scan.nodeScanById[nodeData.id]
+            // Defensive: a node absent from the run's scan map (e.g. added to the site after this run
+            // was created) has no scan entry. Skip it instead of dereferencing undefined (which used to
+            // NPE and blank the whole map). The backend now recreates run scans on structural site edits,
+            // so this should not happen in practice, but a stale run must not crash the render.
+            if (!nodeScan) return
             nodeData.status = nodeScan.status
             nodeData.distance = nodeScan.distance
         })
         nodes.forEach(node => {
-            if (node.status !== NodeScanStatus.UNDISCOVERED_0) {
+            if (node.status && node.status !== NodeScanStatus.UNDISCOVERED_0) {
                 this.addNodeDisplay(node)
             }
         })
