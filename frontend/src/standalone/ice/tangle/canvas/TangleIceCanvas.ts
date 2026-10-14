@@ -7,13 +7,6 @@ import {Dispatch, Store} from "redux";
 import {Canvas} from "fabric/fabric-impl";
 import {TangleLine, TanglePoint} from "../reducer/TangleIceReducer";
 import {ice} from "../../../StandaloneGlobals";
-import {installIceCanvasAutoFit} from "../../common/iceCanvasFit";
-
-// How far (in on-SCREEN pixels) a tap/click may land from a point's centre and still grab it.
-// Converted to canvas coordinates per event, so the grab area stays finger-sized regardless of
-// how much iceCanvasFit scaled the 1576x828 canvas down (on a phone ~0.24x, where the default
-// fabric hit-test — the exact radius-6 circle — leaves a ~3px touch target).
-const GRAB_RADIUS_SCREEN_PX = 24
 
 class TangleIceCanvas {
 
@@ -22,7 +15,6 @@ class TangleIceCanvas {
     pointDisplayById: {[ key: string]: TanglePointDisplay} = {}
     store: Store = null as unknown as Store
     dispatch: Dispatch = null as unknown as Dispatch
-    autoFitCleanup: (() => void) | null = null
 
     init(puzzleData: EnterTanglePuzzle, dispatch: Dispatch, store: Store) {
         this.dispatch = dispatch;
@@ -34,9 +26,6 @@ class TangleIceCanvas {
             backgroundColor: "#aaa",
         });
         this.canvas = canvas
-
-        if (this.autoFitCleanup) this.autoFitCleanup()
-        this.autoFitCleanup = installIceCanvasAutoFit("untangleCanvas")
 
         fabric.Object.prototype.originX = "center";
         fabric.Object.prototype.originY = 'center';
@@ -76,10 +65,6 @@ class TangleIceCanvas {
         });
         canvas.selection = false;
 
-        // Nearest-point target finding with a finger-sized grab radius (see GRAB_RADIUS_SCREEN_PX).
-        // Also resolves overlapping points better than fabric's default (nearest wins, not topmost).
-        canvas.findTarget = (e: Event): fabric.Object | undefined => this.findGrabTarget(e)
-
         const {points, lines} = puzzleData;
 
         this.pointDisplayById = {};
@@ -107,25 +92,6 @@ class TangleIceCanvas {
         toDisplay.addLine(lineDisplay);
 
         lineDisplay.show();
-    }
-
-    findGrabTarget(e: Event): fabric.Object | undefined {
-        const pointer = this.canvas.getPointer(e)
-        const canvasWidth = this.canvas.getWidth()
-        const rect = this.canvas.getElement().getBoundingClientRect()
-        const displayScale = (rect.width && canvasWidth) ? rect.width / canvasWidth : 1
-
-        let best: TanglePointDisplay | null = null
-        let bestDistance = GRAB_RADIUS_SCREEN_PX / displayScale
-        Object.values(this.pointDisplayById).forEach(pointDisplay => {
-            const icon = pointDisplay.icon
-            const distance = Math.hypot(pointer.x - icon.left!, pointer.y - icon.top!)
-            if (distance <= bestDistance) {
-                bestDistance = distance
-                best = pointDisplay
-            }
-        })
-        return best ? (best as TanglePointDisplay).icon : undefined
     }
 
     canvasSelectionCreated(event: any) {

@@ -11,4 +11,3 @@ http-client.log-request: true
 
 development: true
 
-defaultLanguage: "fr"

@@ -5,7 +5,6 @@ import {NetwalkCellDisplay, PADDING_LEFT, PADDING_TOP} from "./NetwalkCellDispla
 import {webSocketConnection} from "../../../../common/server/WebSocketConnection";
 import {CellType, NetwalkCell, NetwalkRotateUpdate, Point, ServerEnterIceNetwalk} from "../NetwalkServerActionProcessor";
 import {ice} from "../../../StandaloneGlobals";
-import {installIceCanvasAutoFit} from "../../common/iceCanvasFit";
 
 type CellById = { [id: string]: NetwalkCellDisplay }
 
@@ -14,7 +13,6 @@ class NetwalkCanvas {
     canvas: Canvas = null as unknown as Canvas
     store: Store = null as unknown as Store
     dispatch: Dispatch = null as unknown as Dispatch
-    autoFitCleanup: (() => void) | null = null
 
     cellByLocation: CellById = {}
 
@@ -50,9 +48,6 @@ class NetwalkCanvas {
         this.gridHeight = this.cellSize * data.cellGrid.length
 
         this.canvas = this.createCanvas()
-
-        if (this.autoFitCleanup) this.autoFitCleanup()
-        this.autoFitCleanup = installIceCanvasAutoFit("netwalkCanvas")
 
         fabric.Object.prototype.originX = "center";
         fabric.Object.prototype.originY = 'center';

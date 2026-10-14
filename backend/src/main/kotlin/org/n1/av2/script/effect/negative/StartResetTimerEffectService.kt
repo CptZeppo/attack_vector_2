@@ -32,7 +32,7 @@ class StartResetTimerEffectService(
 
     override fun playerDescription(effect: ScriptEffect) = i18n.t("start-reset-timer.description-player", toHumanTime(effect.value!!))
 
-    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(messageService, effect)
+    override fun validate(effect: ScriptEffect) = ScriptEffectInterface.validateDuration(i18n, effect)
 
     override fun prepareExecution(effect: ScriptEffect, argumentTokens: List<String>, hackerState: HackerStateRunning): ScriptExecution {
         scriptEffectHelper.checkAtNonShutdownSite(hackerState)?.let { return ScriptExecution(it) }

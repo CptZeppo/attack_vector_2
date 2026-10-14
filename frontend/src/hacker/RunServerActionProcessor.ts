@@ -6,9 +6,7 @@ import {Scan, UpdateNodeStatusAction} from "./run/reducer/ScanReducer"
 import {Site} from "./run/reducer/SiteReducer"
 import {HackerPresence} from "./run/reducer/HackerPresencesReducer"
 import {Timings} from "../common/model/Ticks"
-import {delayTicks} from "../common/util/Util"
-import {SERVER_FLASH_PATROLLER, SERVER_START_TIMER, TimerEffect} from "./run/timer/TimersReducer"
-import {playSfx} from "../common/sound/Sfx"
+import {SERVER_FLASH_PATROLLER,} from "./run/timer/TimersReducer"
 import {prepareToEnterRun} from "./home/HackerHome"
 import {SERVER_TERMINAL_RECEIVE, TERMINAL_CLEAR, TERMINAL_RECEIVE} from "../common/terminal/TerminalReducer"
 import {Schedule} from "../common/util/Schedule"
@@ -257,21 +255,11 @@ export const initRunServerActions = (store: Store) => {
         runCanvas.disconnect(action.userId)
     })
 
-    // Tripwire tripped: the shutdown countdown starts (intrusion detected). The same action also fires
-    // for the restart countdown once the site goes down (effect SHUTDOWN_FINISH), so gate on the effect
-    // to only sound the alarm for the intrusion countdown. Timers seeded on run entry come via
-    // SERVER_ENTERED_RUN, not this action, so entering mid-countdown does not re-trigger the alarm.
-    webSocketConnection.addAction(SERVER_START_TIMER, (data: { effect: TimerEffect }) => {
-        if (data.effect === TimerEffect.SHUTDOWN_START) playSfx("tripwireAlarm")
-    })
-
     webSocketConnection.addAction(SERVER_SITE_SHUTDOWN_START, (action: AnyAction ) => {
-        playSfx("siteShutdown")
         runCanvas.siteShutdownStart()
     })
 
     webSocketConnection.addAction(SERVER_SITE_SHUTDOWN_FINISH, (action: AnyAction ) => {
-        playSfx("siteOnline")
         runCanvas.siteShutdownFinish()
     })
 
@@ -280,7 +268,6 @@ export const initRunServerActions = (store: Store) => {
     })
 
     webSocketConnection.addAction(SERVER_HACKER_MOVE_ARRIVE, (data: MoveArriveAction) => {
-        if (data.userId === currentUser.id) playSfx("moveArrive")
         runCanvas.moveArrive(data)
     })
 
@@ -299,7 +286,6 @@ export const initRunServerActions = (store: Store) => {
     })
 
     webSocketConnection.addAction(SERVER_FLASH_PATROLLER, (data: FlashPatrollerAction) => {
-        playSfx("patrollerWarning")
         runCanvas.flashTracingPatroller(data.nodeId)
     })
 

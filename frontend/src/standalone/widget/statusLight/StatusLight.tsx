@@ -2,7 +2,6 @@ import React from "react";
 import {useSelector} from "react-redux";
 import {StatusLightState} from "./StatusLightReducers";
 import {getReadableTextColor} from "./contrast-color";
-import {useMobileViewport} from "../../../common/util/mobile";
 import {useTranslate} from "../../../common/i18n/i18n";
 
 /**
@@ -16,7 +15,6 @@ import {useTranslate} from "../../../common/i18n/i18n";
  * phone/tablet (see mobile.ts / docs/development/dev-notes.md); layout is fluid (vmin) so it fills any display 1:1.
  */
 export const StatusLight = () => {
-    useMobileViewport()
     const t = useTranslate()
     const state: StatusLightState = useSelector((state: StatusLightState) => state)
 

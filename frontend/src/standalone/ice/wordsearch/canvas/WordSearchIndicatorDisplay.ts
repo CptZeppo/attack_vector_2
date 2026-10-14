@@ -1,11 +1,5 @@
 import {fabric} from "fabric";
 import {Canvas, Line} from "fabric/fabric-impl";
-import {isIceMobile} from "../../common/iceMobile";
-
-// The desktop width renders as a ~1px hairline once iceCanvasFit scales the grid down on a phone
-// (weak = 15x15 -> ~0.6x); the mobile width compensates (same idea as the Tangle line widths).
-const STROKE_WIDTH = 2
-const STROKE_WIDTH_MOBILE = 6
 
 export class WordSearchIndicatorDisplay {
 
@@ -21,12 +15,11 @@ export class WordSearchIndicatorDisplay {
         this.x1 = x
         this.y1 = y
 
-        const mobile = isIceMobile()
         this.line = new fabric.Line(
             [x,y,x,y], {
                 stroke: "#31708f",
-                strokeWidth: mobile ? STROKE_WIDTH_MOBILE : STROKE_WIDTH,
-                strokeDashArray: mobile ? [10, 10] : [4, 4],
+                strokeWidth: 2,
+                strokeDashArray: [4, 4],
                 selectable: false,
                 hoverCursor: 'default',
                 opacity: 0.8,

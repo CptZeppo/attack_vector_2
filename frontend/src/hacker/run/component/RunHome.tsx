@@ -17,7 +17,6 @@ import {useTranslate} from "../../../common/i18n/i18n";
 const TerminalAndScanResultPanel = (infoNodeId: string | null, terminal: TerminalState, submit: () => void) => {
 
     const timerCount = useSelector((state: HackerRootState) => state.run.timers.length)
-    const uploadCount = useSelector((state: HackerRootState) => state.run.uploads.length)
     const adjustedTimerCount = timerCount > 0 ? timerCount : 1
 
     if (infoNodeId) {

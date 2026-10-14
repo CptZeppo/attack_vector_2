@@ -1,6 +1,5 @@
 import {useParams} from "react-router-dom";
 import {RequiresRole} from "../common/user/RequiresRole";
-import {EnsureMobileGuest} from "../common/user/EnsureMobileGuest";
 import {SiteHackIce} from "./ice/SiteHackIce";
 import {ExternalHackIce} from "./ice/ExternalHackIce";
 import {AppSelector} from "./app/AppSelector";
@@ -8,7 +7,6 @@ import {TopLevelError} from "../common/component/TopLevelError";
 import React from "react";
 import {WidgetSelector} from "./widget/WidgetSelector";
 import {decodePath} from "../common/util/PathEncodeUtils";
-import {StandaloneSiteCountdown} from "./common/StandaloneSiteCountdown";
 
 
 export const Standalone = () => {
@@ -23,10 +21,7 @@ export const Standalone = () => {
         case "ice":
             return <Ice route={type} id={id} />
         case "app":
-            // Player-facing surface: auto-provision a mobile guest if the visitor is not logged in.
-            return <EnsureMobileGuest>
-                <StandaloneSiteCountdown layerId={id}><AppSelector type={type} layerId={id}/></StandaloneSiteCountdown>
-            </EnsureMobileGuest>
+            return <RequiresRole requires={"ROLE_USER"}><AppSelector type={type} layerId={id}/></RequiresRole>
         case "widget":
             return <WidgetSelector type={type} layerId={id}/>
         default:
@@ -44,10 +39,7 @@ const Ice = ({route, id}: IceProps) => {
         case "siteHack":
             return <RequiresRole requires="ROLE_HACKER"><SiteHackIce iceId={id} nextUrl={null}/></RequiresRole>
         case "externalAccess":
-            // Player-facing puzzle surface: auto-provision a mobile guest if the visitor is not logged in.
-            return <EnsureMobileGuest>
-                <StandaloneSiteCountdown layerId={id}><ExternalHackIce layerId={id}/></StandaloneSiteCountdown>
-            </EnsureMobileGuest>
+            return <RequiresRole requires="ROLE_HACKER"><ExternalHackIce layerId={id}/></RequiresRole>
         default:
             return <TypeError error={`Unknown route: ${route}`} />
     }

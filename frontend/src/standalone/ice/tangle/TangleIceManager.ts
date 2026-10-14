@@ -1,6 +1,7 @@
 import {ICE_DISPLAY_TERMINAL_ID} from "../../../common/terminal/ActiveTerminalIdReducer";
 import {GenericIceManager} from "../common/GenericIceManager";
 import {tangleIceCanvas} from "./canvas/TangleIceCanvas";
+import {notify} from "../../../common/util/Notification";
 import {delay} from "../../../common/util/Util";
 import {ICE_TANGLE_BEGIN, TangleLine, TanglePoint} from "./reducer/TangleIceReducer";
 import {TERMINAL_CLEAR} from "../../../common/terminal/TerminalReducer";
@@ -9,7 +10,7 @@ export interface EnterTanglePuzzle {
     strength: string,
     points: TanglePoint[],
     lines: TangleLine[],
-    clusters: Number,
+    clusters: number,
     hacked: boolean,
     clustersRevealed: boolean,
     quickPlaying: boolean,
@@ -26,6 +27,12 @@ export interface TanglePointMoved {
 class TangleIceManager extends GenericIceManager {
 
     enter(puzzle: EnterTanglePuzzle) {
+        if (puzzle.hacked) {
+            this.enterHacked()
+            return
+        }
+
+
         delay(() => {
             tangleIceCanvas.init(puzzle, this.dispatch, this.store)
         })
@@ -68,6 +75,7 @@ class TangleIceManager extends GenericIceManager {
     }
 
     serverSentIceHacked() {
+        notify({type: "ok", title: "Result", message: "Ice hacked"})
         this.displayTerminal(0, "")
         this.displayTerminal(20, this.t("ice.tangle.decryption-complete"))
         this.displayTerminal(40, this.t("ice.grants-access"))

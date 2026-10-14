@@ -1,9 +1,7 @@
 // Hacker-facing UI labels - English (the source of truth: every key lives here).
 // Czech overrides live in cs.ts; missing keys fall back to these English values.
 // Use {0}, {1}, ... for interpolated arguments (same convention as the backend).
-export const en = {
-    //TODO retirer les cles qui ne sont plus utilisées
-
+export const fr = {
     // shared
     "common.ram": "RAM",
     "common.name": "Nom",

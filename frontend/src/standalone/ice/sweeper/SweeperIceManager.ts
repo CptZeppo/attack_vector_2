@@ -6,12 +6,11 @@ import {TERMINAL_CLEAR} from "../../../common/terminal/TerminalReducer";
 import {SWEEPER_BEGIN, SWEEPER_RESET_START, SWEEPER_RESET_STOP} from "./reducer/SweeperUiStateReducer";
 import {SweeperEnterData, SweeperModifyAction, SweeperModifyData} from "./SweeperServerActionProcessor";
 import {serverCellsToGameCells, serverModifiersToGameModifiers, SweeperCellModifier, SweeperCellType,} from "./logic/SweeperLogic";
-import {ice, layer} from "../../StandaloneGlobals";
+import {ice} from "../../StandaloneGlobals";
 import {webSocketConnection} from "../../../common/server/WebSocketConnection";
 import {currentUser} from "../../../common/user/CurrentUser";
 import {notify} from "../../../common/util/Notification";
-import {avEncodedStandaloneUrl} from "../../../common/util/PathEncodeUtils";
-import {playSfx} from "../../../common/sound/Sfx";
+import {avEncodedUrl} from "../../../common/util/PathEncodeUtils";
 
 
 class SweeperIceManager extends GenericIceManager {
@@ -23,6 +22,11 @@ class SweeperIceManager extends GenericIceManager {
     userBlocked: boolean = false
 
     enter(sweeperEnterData: SweeperEnterData) {
+        if (sweeperEnterData.hacked) {
+            this.enterHacked()
+            return
+        }
+
         this.cells = serverCellsToGameCells(sweeperEnterData.cells)
         this.modifiers = serverModifiersToGameModifiers(sweeperEnterData.modifiers)
 
@@ -127,7 +131,6 @@ class SweeperIceManager extends GenericIceManager {
         this.displayTerminal(5, "");
         this.displayTerminal(5, this.t("ice.sweeper.user-blocked-warning", userName));
         if (currentUser.id === userId) {
-            playSfx("sweeperExplosion")
             this.userBlocked = true
             notify({message: this.t("ice.sweeper.you-blocked"), type: 'ok'})
             sweeperCanvas.changeUserBlocked(true)
@@ -158,10 +161,8 @@ class SweeperIceManager extends GenericIceManager {
     completeReset(userName: string, newIceId: string) {
         this.displayTerminal(30, this.t("ice.sweeper.reset-completed", userName));
         this.schedule.run(0, () => {
-            // A standalone (external-access) hacker must stay on the external URL of this layer — the
-            // new ice is fetched by layerId there. Only the in-run window uses the siteHack ice URL.
-            const path = this.externalHack ? `ice/externalAccess/${layer.id}` : `ice/siteHack/${newIceId}`
-            window.open(avEncodedStandaloneUrl(path), "_self")
+            const url = avEncodedUrl(`ice/siteHack/${newIceId}`)
+            window.open(url, "_self")
         })
     }
 }

@@ -6,8 +6,6 @@ import {LETTERS_SELECTED} from "../reducer/WordSearchStateReducer";
 import {webSocketConnection} from "../../../../common/server/WebSocketConnection";
 import {ServerEnterIceWordSearch} from "../WordSearchServerActionProcessor";
 import {ice} from "../../../StandaloneGlobals";
-import {installIceCanvasAutoFit} from "../../common/iceCanvasFit";
-import {isIceMobile} from "../../common/iceMobile";
 
 const MARGIN_TOP = 5
 const MARGIN_LEFT = 5
@@ -27,11 +25,8 @@ class WordSearchCanvas {
     canvas: Canvas = null as unknown as Canvas
     store: Store = null as unknown as Store
     dispatch: Dispatch = null as unknown as Dispatch
-    autoFitCleanup: (() => void) | null = null
 
     cellSize: number = 0
-    rows = 0
-    columns = 0
 
     letterCount = 0
     previousLetterPosition: Position | null = null
@@ -46,15 +41,10 @@ class WordSearchCanvas {
 
         const rows = puzzleData.letterGrid.length
         const columns = puzzleData.letterGrid[0].length
-        this.rows = rows
-        this.columns = columns
 
         this.cellSize = (rows <= 20) ? 40 : 30
 
         this.canvas = this.createCanvas(columns, rows)
-
-        if (this.autoFitCleanup) this.autoFitCleanup()
-        this.autoFitCleanup = installIceCanvasAutoFit("wordSearchCanvas", "transform")
 
         fabric.Object.prototype.originX = "center";
         fabric.Object.prototype.originY = 'center';
@@ -125,18 +115,9 @@ class WordSearchCanvas {
         }
 
         const pointer = this.canvas.getPointer(event);
+        this.indicatorVisual = new WordSearchIndicatorDisplay(this.canvas, pointer.x, pointer.y)
+
         this.letterStartPosition = this.determineLetterPosition(pointer.x, pointer.y)
-
-        if (isIceMobile()) {
-            // Anchor the indicator on the start letter's centre, so the snapped line (see
-            // touchMoveSnapped) runs exactly along the letters it selects.
-            const startCenterX = MARGIN_LEFT + (this.letterStartPosition.x + 0.5) * this.cellSize
-            const startCenterY = MARGIN_TOP + (this.letterStartPosition.y + 0.5) * this.cellSize
-            this.indicatorVisual = new WordSearchIndicatorDisplay(this.canvas, startCenterX, startCenterY)
-        } else {
-            this.indicatorVisual = new WordSearchIndicatorDisplay(this.canvas, pointer.x, pointer.y)
-        }
-
         const key = `${this.letterStartPosition.x}:${this.letterStartPosition.y}`
         this.lettersSelected = [key]
         this.updateLettersSelected()
@@ -149,12 +130,6 @@ class WordSearchCanvas {
         if (this.indicatorVisual == null) return
 
         const pointer = this.canvas.getPointer(event);
-
-        if (isIceMobile()) {
-            this.touchMoveSnapped(pointer.x, pointer.y)
-            return
-        }
-
         this.indicatorVisual.moved(pointer.x, pointer.y)
         const letterPosition = this.determineLetterPosition(pointer.x, pointer.y)
 
@@ -180,56 +155,6 @@ class WordSearchCanvas {
                 this.lettersSelected.push(key)
             }
         }
-        this.updateLettersSelected()
-    }
-
-    /**
-     * Touch selection with direction snapping (mobile only; the desktop mouse path is untouched).
-     *
-     * The desktop selection only forms when the pointer is EXACTLY on the start letter's row,
-     * column or 45-degree diagonal — anything else collapses the selection to the start letter.
-     * With a finger on a fit-scaled grid (weak = 15x15 -> ~25px cells on a phone) that exactness
-     * is not attainable: the selection flickers and releasing off-line sends nothing. So on touch
-     * we snap the drag vector to the nearest of the 8 valid directions and select as many letters
-     * as the finger has travelled along it (clamped to the grid), the same "finger-sized tolerance"
-     * idea as the Tangle grab radius. The indicator line snaps to the last selected letter, so it
-     * always shows exactly what a release will submit.
-     */
-    private touchMoveSnapped(pointerX: number, pointerY: number) {
-        const start = this.letterStartPosition!!
-        const startCenterX = MARGIN_LEFT + (start.x + 0.5) * this.cellSize
-        const startCenterY = MARGIN_TOP + (start.y + 0.5) * this.cellSize
-        const dx = pointerX - startCenterX
-        const dy = pointerY - startCenterY
-
-        // Nearest of the 8 directions (N/NE/E/SE/S/SW/W/NW), by angle octant.
-        const octant = ((Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) % 8) + 8) % 8
-        const sx = [1, 1, 0, -1, -1, -1, 0, 1][octant]
-        const sy = [0, 1, 1, 1, 0, -1, -1, -1][octant]
-
-        // Letters travelled = the drag projected onto the snapped direction, in letter steps
-        // (a diagonal letter step is cellSize * sqrt2 long, and (sx, sy) has length sqrt2).
-        const stepLength = this.cellSize * ((sx !== 0 && sy !== 0) ? 2 : 1)
-        let steps = Math.max(0, Math.round((dx * sx + dy * sy) / stepLength))
-
-        // Stay within the grid.
-        if (sx > 0) steps = Math.min(steps, this.columns - 1 - start.x)
-        if (sx < 0) steps = Math.min(steps, start.x)
-        if (sy > 0) steps = Math.min(steps, this.rows - 1 - start.y)
-        if (sy < 0) steps = Math.min(steps, start.y)
-
-        const selected = [`${start.x}:${start.y}`]
-        for (let walk = 1; walk <= steps; walk++) {
-            selected.push(`${start.x + sx * walk}:${start.y + sy * walk}`)
-        }
-
-        if (selected.join("|") === this.lettersSelected.join("|")) return
-        this.lettersSelected = selected
-
-        const endX = MARGIN_LEFT + (start.x + sx * steps + 0.5) * this.cellSize
-        const endY = MARGIN_TOP + (start.y + sy * steps + 0.5) * this.cellSize
-        this.indicatorVisual!!.moved(endX, endY)
-
         this.updateLettersSelected()
     }
 

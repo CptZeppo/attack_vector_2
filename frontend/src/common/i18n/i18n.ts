@@ -3,13 +3,14 @@ import Cookies from "js-cookie"
 import {User} from "../users/CurrentUserReducer"
 import {en} from "./en"
 import {cs} from "./cs"
+import {fr} from "./fr"
 
-export const DEFAULT_LANGUAGE = "en"
+export const DEFAULT_LANGUAGE = "fr"
 const LANGUAGE_COOKIE = "language"
 
 export type TranslationKey = keyof typeof en
 
-const translations: Record<string, Partial<Record<TranslationKey, string>>> = {en, cs}
+const translations: Record<string, Partial<Record<TranslationKey, string>>> = {en, cs, fr}
 
 const interpolate = (template: string, args: (string | number)[]): string =>
     template.replace(/\{(\d+)}/g, (match, index) => {

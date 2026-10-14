@@ -1,5 +1,6 @@
 package org.n1.av2.script
 
+import jakarta.annotation.PostConstruct
 import org.n1.av2.frontend.model.NotyMessage
 import org.n1.av2.frontend.model.NotyType
 import org.n1.av2.hacker.hacker.HackerEntityService
@@ -23,7 +24,7 @@ import org.n1.av2.script.type.ScriptTypeId
 import org.n1.av2.script.type.ScriptTypeService
 import org.springframework.context.annotation.Configuration
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
+
 
 @Configuration
 class ScriptServiceInit(

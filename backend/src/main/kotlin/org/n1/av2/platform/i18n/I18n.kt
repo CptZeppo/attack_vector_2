@@ -51,9 +51,6 @@ class I18n(
     private val userEntityService: UserEntityService,
 ) {
 
-    @Value("\${defaultLanguage}")
-    val defaultLanguage: String = "en"
-
     fun t(key: String, vararg args: Any): String = t(key, currentLocale(), *args)
 
     fun t(key: String, locale: Locale, vararg args: Any): String {
@@ -79,6 +76,6 @@ class I18n(
 
     private fun defaultLanguage(): String {
         val configured = configService.get(ConfigItem.HACKER_DEFAULT_LANGUAGE)
-        return if (configured in SUPPORTED_LANGUAGES) configured else defaultLanguage
+        return if (configured in SUPPORTED_LANGUAGES) configured else Locale.ENGLISH.language
     }
 }

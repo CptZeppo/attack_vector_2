@@ -3,22 +3,16 @@ import {TangleRoot} from "./tangle/TangleRoot";
 import {PasswordRoot} from "./password/PasswordRoot";
 import {WordSearchRoot} from "./wordsearch/WordSearchRoot";
 import {NetwalkRoot} from "./netwalk/NetwalkRoot";
-import {SlidingPuzzleRoot} from "./slidingpuzzle/SlidingPuzzleRoot";
-import {NETWALK_ICE, PASSWORD_ICE, SLIDINGPUZZLE_ICE, SWEEPER_ICE, TANGLE_ICE, TAR_ICE, UPLOAD_ICE, WORD_SEARCH_ICE} from "../../common/enums/LayerTypes";
+import {NETWALK_ICE, PASSWORD_ICE, TANGLE_ICE, TAR_ICE, WORD_SEARCH_ICE} from "../../common/enums/LayerTypes";
 import {TarRoot} from "./tar/TarRoot";
-import {UploadRoot} from "./upload/UploadRoot";
-import {SweeperRoot} from "./sweeper/SweeperRoot";
 import {TopLevelError} from "../../common/component/TopLevelError";
-import {layer, standalone} from "../StandaloneGlobals";
-import {avEncodedStandaloneUrl} from "../../common/util/PathEncodeUtils";
+import {layer} from "../StandaloneGlobals";
 
 interface Props {
     layerId: string,
 }
 
 export const ExternalHackIce = (props: Props) => {
-
-    standalone.externalHack = true
 
     const [iceType, setIceType] = useState("")
     const [iceId, setIceId] = useState("")
@@ -30,13 +24,6 @@ export const ExternalHackIce = (props: Props) => {
             const response: Response = await fetch(`/api/ice/${props.layerId}`)
             const text: string = await response.text()
             const responseObject = JSON.parse(text)
-            if (responseObject.redirectLayerId) {
-                // A higher-level ICE on this node is still unhacked: layers are hacked top-down,
-                // so send the hacker to that puzzle first instead of letting this one be played
-                // out of order.
-                document.location.href = avEncodedStandaloneUrl(`ice/externalAccess/${responseObject.redirectLayerId}`)
-                return
-            }
             setIceType(responseObject.type)
             setIceId(responseObject.iceId)
         }
@@ -51,8 +38,8 @@ export const ExternalHackIce = (props: Props) => {
     if (iceType === "") {
         return <div style={{color: "cornsilk"}}>Loading</div>
     }
-        // return <TopLevelError error="Please don't share URLs between players" description="This is circumventing the limitations of the game.
-        //         Off-game hacking is against the spirit of the game."/>
+    // return <TopLevelError error="Please don't share URLs between players" description="This is circumventing the limitations of the game.
+    //         Off-game hacking is against the spirit of the game."/>
 
     if (!iceId) {
         return <TopLevelError error="Ice not found"
@@ -63,10 +50,7 @@ export const ExternalHackIce = (props: Props) => {
     if (iceType === PASSWORD_ICE) return <PasswordRoot iceId={iceId} externalHack={true}/>
     if (iceType === WORD_SEARCH_ICE) return <WordSearchRoot iceId={iceId} externalHack={true}/>
     if (iceType === NETWALK_ICE) return <NetwalkRoot iceId={iceId} externalHack={true}/>
-    if (iceType === SLIDINGPUZZLE_ICE) return <SlidingPuzzleRoot iceId={iceId} externalHack={true}/>
     if (iceType === TAR_ICE) return <TarRoot iceId={iceId} externalHack={true}/>
-    if (iceType === UPLOAD_ICE) return <UploadRoot iceId={iceId} externalHack={true}/>
-    if (iceType === SWEEPER_ICE) return <SweeperRoot iceId={iceId} externalHack={true}/>
 
     if (iceType === "CONNECT_ERROR") return <TopLevelError error="Connection error"
                                                            description={`(Failed to connect to AV server, try again)`}/>
