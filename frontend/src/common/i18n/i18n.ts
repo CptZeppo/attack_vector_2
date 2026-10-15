@@ -5,7 +5,7 @@ import {en} from "./en"
 import {cs} from "./cs"
 import {fr} from "./fr"
 
-export const DEFAULT_LANGUAGE = "en"
+export const DEFAULT_LANGUAGE = "fr"
 const LANGUAGE_COOKIE = "language"
 
 export type TranslationKey = keyof typeof en
