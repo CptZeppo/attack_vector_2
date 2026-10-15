@@ -108,7 +108,7 @@ export const MenuBar = () => {
                             <ul className="navbar-nav">
                                 <MenuItem requiresRole="ROLE_USER" targetPage={Page.ME} label={"{" + userName + "}"}/>
                                 <li className="nav-item">
-                                    <a className="nav-link" href="/login" onClick={(event) => logout(event)}>ꕻ
+                                    <a className="nav-link" href="/#" onClick={(event) => logout(event)}>ꕻ
                                         {t("nav.logout")}</a>
                                 </li>
                             </ul>
