@@ -49,10 +49,10 @@ export const ConfigHome = () => {
     }
 
     return (
-        <div className="row configHome">
-            <div className="col-lg-1 d-none d-lg-block">
+        <div className="row">
+            <div className="col-lg-1">
             </div>
-            <div className="col-lg-5 configEditorCol">
+            <div className="col-lg-5">
                 <div>
                     <h3 className="text-info">Configuration</h3><br/>
                     {configState.currentItem === null ? <div className="text">Select an item from the list to edit it</div> : <></>}
@@ -62,7 +62,7 @@ export const ConfigHome = () => {
                 </div>
 
             </div>
-            <div className="col-lg-6 rightPane configListCol">
+            <div className="col-lg-6 rightPane">
                 <div className="rightPanel">
                     <table className="table table-sm text-muted text" id="sitesTable">
                         <thead>

@@ -23,9 +23,7 @@ const TerminalAndScanResultPanel = (infoNodeId: string | null, terminal: Termina
         return (<NodeScanInfo/>)
     }
 
-    // Responsive: fill the viewport height minus the bottom navbar, timers, upload bars and margins.
-    const reserved = 847 - (adjustedTimerCount * 24) - 23
-    const terminalHeight = `calc(100vh - ${reserved}px)`
+    const terminalHeight = 847 - (adjustedTimerCount * 24) - 23
 
     return <>
         <Timers/>
@@ -56,12 +54,12 @@ export const RunHome = () => {
         <>
             <ScriptPanel/>
             <div className="row">
-                <div className="col-lg-5">
+                <div className="col-lg-4">
                     {TerminalAndScanResultPanel(infoNodeId, terminal, submit)}
                 </div>
-                <div className="col-lg-7">
+                <div className="col-lg-8">
                     <div className="row">
-                        <div className="col-lg-12 d-flex justify-content-between align-items-center">
+                        <div className="col-lg-12">
                             <span className="text">{t("run.site-label")} {siteName}</span>
                         </div>
                     </div>

@@ -16,9 +16,6 @@ class NetwalkManager extends GenericIceManager {
         this.dispatch({type: TERMINAL_CLEAR, terminalId: ICE_DISPLAY_TERMINAL_ID})
 
         if (data.hacked) {
-            // Already solved: reveal the connected grid (persisted rotations are the solution),
-            // then report + auto-advance to the next layer.
-            this.schedule.dispatch(0, {type: NETWALK_BEGIN})
             this.enterHacked()
             return
         }

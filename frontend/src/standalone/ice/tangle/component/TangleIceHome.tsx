@@ -15,17 +15,17 @@ export const TangleIceHome = () => {
     const classHidden = ice.uiState === HIDDEN ? " hidden_alpha" : ""
 
     return (
-        <div className="icePanelRow iceFitPending">
+        <div className="row icePanelRow">
             <div className="col-lg-12">
-                <div className="row align-items-start iceHeaderRow">
-                    <div className="col-auto">
+                <div className="row">
+                    <div className="col-lg-3">
                         <IceTitle name="Gaanth" strength={ice.strength}/>
                     </div>
                     <Clusters clusters={ice.clusters} classHidden={classHidden}/>
-                    <div className="col iceTerminalCol" style={{paddingTop: "4px"}}>
+                    <div className="col-lg-6" style={{paddingTop: "4px"}}>
                         <Terminal terminalState={displayTerminal} height={84}/>
                     </div>
-                    <div className="col-auto">
+                    <div className="col-lg-1">
                         <div className="float-end">
                             <CloseTabButton/>
                         </div>
@@ -51,10 +51,10 @@ export const TangleIceHome = () => {
 const Clusters = ({clusters, classHidden}: { clusters: number, classHidden: string }) => {
     const t = useTranslate()
     if (clusters === 1) {
-        return <></>
+        return <div className="col-lg-2">&nbsp;</div>
     }
     return (
-        <div className="col-auto">
+        <div className="col-lg-2">
             <h4 className={"text-center text-success transition_alpha_fast" + classHidden}>{t("ice.tangle.clusters-label")}<br/><span
                 className="text-info">{clusters}</span></h4>
         </div>

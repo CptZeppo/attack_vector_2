@@ -40,34 +40,6 @@ export const MenuBar = () => {
     const currentUser = useSelector((state: HackerRootState) => state.currentUser)
     const t = useTranslate()
 
-    // While a hacker is connected to a site (the RUN view) the bottom menu bar is hidden so players
-    // can't wander off or log out mid-game. It's revealed on click of a discreet, barely-visible glyph
-    // in the bottom-right corner (someone who knows it's there can bring the bar back). Only hidden for
-    // hackers — GM/admin keep their bar for authoring/testing.
-    const [barRevealed, setBarRevealed] = React.useState(false)
-    const hideBarInRun = currentPage === Page.RUN && currentUser.type === UserType.HACKER
-
-    if (hideBarInRun && !barRevealed) {
-        return (
-            <span
-                onClick={() => setBarRevealed(true)}
-                style={{
-                    position: "fixed",
-                    right: "5px",
-                    bottom: "1px",
-                    zIndex: 1030,
-                    opacity: 0.1,
-                    color: "#6f6",
-                    fontSize: "13px",
-                    padding: "6px 8px",
-                    cursor: "default",
-                    userSelect: "none",
-                }}
-            >ꕻ</span>
-        )
-    }
-
-
     const hackersCanCreateSites = hasSkill(currentUser, HackerSkillType.CREATE_SITE)
     const hackerHasScriptsSkill = hasSkill(currentUser, HackerSkillType.SCRIPT_RAM)
     const hackerHasScriptsCreditsSkill = hasSkill(currentUser, HackerSkillType.SCRIPT_CREDITS)

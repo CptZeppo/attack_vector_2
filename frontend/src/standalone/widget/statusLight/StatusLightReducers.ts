@@ -9,13 +9,11 @@ export interface StatusLightOption {
 }
 
 export interface StatusLightState {
-    switchLabel: string,
     currentOption: number | null,
     options: StatusLightOption[],
 }
 
 export const defaultState = {
-    switchLabel: "",
     currentOption: null,
     options: [ { text: "", color: "grey" }, { text: "", color: "grey" } ]
 }

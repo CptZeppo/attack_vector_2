@@ -74,7 +74,7 @@ export const DevLogin = () => {
             <Banner hiddenAdminLogin={true}/>
             <div className="row text">
                 <div className="d-flex justify-content-center">
-                    <strong>Log in as</strong><br/>
+                    <strong>Login as</strong><br/>
                 </div>
             </div>
             <br/>
