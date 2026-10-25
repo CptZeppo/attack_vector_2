@@ -159,11 +159,11 @@ class OpenIdConnectService(
             )
             hackerEntityService.save(updatedHacker)
         }
-
         if (openIdConnectUserInfos.useTemplatedSkills) {
             skillService.createDefaultSkills(user.id)
         }
-        skillService.addSkillsForUser(user, openIdConnectUserInfos.skills)
+
+        openIdConnectUserInfos.skills.forEach { skillService.addSkillForUser(user.id, it) }
     }
 
 
