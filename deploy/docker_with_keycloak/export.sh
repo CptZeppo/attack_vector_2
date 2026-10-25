@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Building and exporting docker files to run on another device (ie. a Raspberry Pi 3)
+ Building and exporting docker files to run on another device (ie. a Raspberry Pi 3)
 mkdir export
 
 echo 'Copy env and conf'
@@ -52,3 +52,18 @@ docker compose down attack_vector_2
 echo 'Loading AV2 docker image'
 docker load -i av2image.tar
 docker compose up" > ./export/update.sh
+
+
+echo 'Creating a update_all.sh file'
+echo "#!/bin/bash
+
+echo 'Stoping all containers'
+docker compose down
+
+for f in *.tar; do
+    echo \"loading \$f\"
+    docker load -i \$f
+done
+
+echo 'Starting all containers'
+docker compose up" > ./export/update_all.sh
