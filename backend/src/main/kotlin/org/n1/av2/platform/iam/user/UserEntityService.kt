@@ -1,5 +1,7 @@
 package org.n1.av2.platform.iam.user
 
+import org.apache.tomcat.util.http.parser.AcceptLanguage
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.inputvalidation.ValidationException
 import org.n1.av2.platform.util.createId
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -70,7 +72,7 @@ class UserEntityService(
         return userEntityRepo.findByNameIgnoreCase("system") ?: error("System user not found")
     }
 
-    fun createUser(userName: String, type: UserType, externalId: String? = null, role: UserTag = UserTag.REGULAR): UserEntity {
+    fun createUser(userName: String, type: UserType, externalId: String? = null, role: UserTag = UserTag.REGULAR, language: String): UserEntity {
         if (findByNameIgnoreCase(userName) != null) {
             throw ValidationException("User with name $userName already exists.")
         }
@@ -80,7 +82,7 @@ class UserEntityService(
             type = type,
             externalId = externalId,
             tag = role,
-            preferences = UserPreferences(13)
+            preferences = UserPreferences(13, language)
         )
         save(user)
         return user

@@ -74,7 +74,7 @@ class I18n(
 
     private fun defaultLocale(): Locale = localeForLanguage(defaultLanguage())
 
-    private fun defaultLanguage(): String {
+    fun defaultLanguage(): String {
         val configured = configService.get(ConfigItem.HACKER_DEFAULT_LANGUAGE)
         return if (configured in SUPPORTED_LANGUAGES) configured else Locale.FRENCH.language
     }

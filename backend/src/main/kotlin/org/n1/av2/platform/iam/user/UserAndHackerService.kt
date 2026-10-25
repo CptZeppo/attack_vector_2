@@ -10,6 +10,7 @@ import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.i18n.SUPPORTED_LANGUAGES
 import org.n1.av2.platform.inputvalidation.ValidationException
 import org.n1.av2.run.runlink.RunLinkEntityService
@@ -34,6 +35,7 @@ class UserAndHackerService(
     private val scriptService: ScriptService,
     private val ramEntityRepo: RamRepository,
     private val configService: ConfigService,
+    private val i18n: I18n
 ) {
 
     private val validator: Validator = Validation.buildDefaultValidatorFactory().validator
@@ -63,7 +65,7 @@ class UserAndHackerService(
     }
 
     fun createFromUserManagementScreen(name: String, externalId: String? = null) {
-        val user = userEntityService.createUser(name, UserType.HACKER, externalId)
+        val user = userEntityService.createUser(name, UserType.HACKER, externalId, language = i18n.defaultLanguage())
         createHackerWithDefaultSkill(user, HackerIcon.KOALA)
         sendUsersOverview()
         sendDetailsOfSpecificUser(user.id)
@@ -242,7 +244,7 @@ class UserAndHackerService(
         }
 
         val name = userEntityService.findFreeUserName("user")
-        val user = userEntityService.createUser(name, UserType.HACKER, externalId)
+        val user = userEntityService.createUser(name, UserType.HACKER, externalId, language = i18n.defaultLanguage())
         createHackerWithDefaultSkill(user, HackerIcon.FROG)
 
         return user

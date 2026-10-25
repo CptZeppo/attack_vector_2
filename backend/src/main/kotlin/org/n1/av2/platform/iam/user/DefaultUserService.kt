@@ -5,6 +5,7 @@ import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType.SCAN
 import org.n1.av2.hacker.skill.SkillType.SEARCH_SITE
 import org.n1.av2.platform.db.DbSchemaVersioning
+import org.n1.av2.platform.i18n.I18n
 import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Service
@@ -14,6 +15,7 @@ class DefaultUserService(
     private val userEntityService: UserEntityService,
     private val hackerEntityService: HackerEntityService,
     private val skillService: SkillService,
+    private val i18n: I18n
 ) {
     /** Important to be after the ContextRefreshedEvent to give [DbSchemaVersioning] a chance to run first */
     @EventListener(ApplicationStartedEvent::class)
@@ -37,7 +39,7 @@ class DefaultUserService(
         val existingUser = userEntityService.findByNameIgnoreCase(name)
         if (existingUser != null) return null // no user created
 
-        return userEntityService.createUser(name, type, null, role)
+        return userEntityService.createUser(name, type, null, role, i18n.defaultLanguage())
     }
 
     fun createDefaultHacker(name: String, icon: HackerIcon, role: UserTag = UserTag.REGULAR): UserEntity? {

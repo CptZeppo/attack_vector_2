@@ -8,6 +8,7 @@ import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.hacker.skill.SkillType.*
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.HackerIcon
 import org.n1.av2.platform.iam.user.UserEntity
 import org.n1.av2.platform.iam.user.UserEntityService
@@ -47,6 +48,7 @@ class OpenIdConnectService(
     private val httpClient: HttpClient,
     private val jwtDecoderProvider: OpenIdConnectJwtDecoderProvider,
     private val jsonMapper: JsonMapper,
+    private val i18n: I18n
 ) {
     fun getLoginUrl(redirectUri: String): String {
         val baseUrl = configService.get(ConfigItem.LARP_SPECIFIC_OPENID_CONNECT_URL)
@@ -142,7 +144,7 @@ class OpenIdConnectService(
         }
 
         val name = userEntityService.findFreeUserName(userInfos.userName)
-        return userEntityService.createUser(name, userInfos.type, userInfos.externalId)
+        return userEntityService.createUser(name, userInfos.type, userInfos.externalId, language = i18n.defaultLanguage())
     }
 
 
@@ -188,10 +190,7 @@ class OpenIdConnectService(
     }
 
     private fun hasRole(jwt: Jwt, clientId: String, roleName: String): Boolean {
-        if (roleName.isBlank()) {
-            return false
-        }
-        return roleName in getRolesFromToken(jwt, clientId)
+        return roleName.isNotBlank() && roleName in getRolesFromToken(jwt, clientId)
     }
 
     private fun getRolesFromToken(jwt: Jwt, clientId: String): Set<String> {
@@ -215,6 +214,13 @@ class OpenIdConnectService(
     }
 
     private fun mapSkills(jwt: Jwt, clientId: String): List<SkillType> {
+        val skills = HashSet<SkillType>()
+        skills.addAll(mapSkillsFromRole(jwt, clientId))
+        skills.addAll(mapSkillsFromAttributes(jwt))
+        return skills.toList()
+    }
+
+    private fun mapSkillsFromRole(jwt: Jwt, clientId: String): List<SkillType> {
         if (hasRole(jwt, clientId, "SITE_ADMIN")) {
             return listOf(SEARCH_SITE, SCAN, CREATE_SITE)
         }
@@ -224,6 +230,16 @@ class OpenIdConnectService(
         }
 
         return listOf()
+    }
+
+    private fun mapSkillsFromAttributes(jwt: Jwt):  List<SkillType> {
+        val resourceSkills = jwt.getClaimAsStringList("SKILLS") ?: return listOf()
+        val allSkills = SkillType.entries
+
+        return resourceSkills.stream()
+            .map { ressource -> allSkills.find { skill -> ressource.equals(skill.name, true) }}
+            .filter { s -> s != null }
+            .toList().filterNotNull()
     }
 }
 

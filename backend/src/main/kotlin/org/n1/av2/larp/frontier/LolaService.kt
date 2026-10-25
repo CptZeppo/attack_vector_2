@@ -8,6 +8,7 @@ import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.db.DbSchemaVersioning
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.*
 import org.n1.av2.run.RunService
 import org.n1.av2.run.runlink.RunLinkService
@@ -26,6 +27,7 @@ class LolaService(
     private val hackerStateEntityService: HackerStateEntityService,
     private val userEntityService: UserEntityService,
     private val configService: ConfigService,
+    private val i18n: I18n
 ) {
 
     /** Important to be after the ContextRefreshedEvent to give [DbSchemaVersioning] a chance to run first */
@@ -55,7 +57,7 @@ class LolaService(
 
     fun createLolaUser() {
         if (userEntityService.findByNameIgnoreCase(LOLA_USER_NAME) != null) return
-        val lolaUser = userEntityService.createUser(LOLA_USER_NAME, UserType.HACKER, null, UserTag.EXTERNAL_SYSTEM)
+        val lolaUser = userEntityService.createUser(LOLA_USER_NAME, UserType.HACKER, null, UserTag.EXTERNAL_SYSTEM, i18n.defaultLanguage())
         hackerEntityService.createHacker(lolaUser, HackerIcon.BRAIN, LOLA_USER_NAME)
     }
 

@@ -4,6 +4,7 @@ import org.n1.av2.hacker.hacker.HackerEntityService
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.hacker.skill.SkillType.*
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.HackerIcon
 import org.n1.av2.platform.iam.user.UserEntity
 import org.n1.av2.platform.iam.user.UserEntityService
@@ -42,6 +43,7 @@ class FrontierService(
     private val userEntityService: UserEntityService,
     private val hackerEntityService: HackerEntityService,
     private val skillService: SkillService,
+    private val i18n: I18n
 ) {
 
     fun frontierLogin(frontierInfo: FrontierUserAndCharacterInfo): UserEntity {
@@ -59,11 +61,11 @@ class FrontierService(
         }
 
         if (hackerInfo.isGm) {
-            return userEntityService.createUser(hackerInfo.frontierExternalReference, UserType.GM, hackerInfo.frontierExternalReference)
+            return userEntityService.createUser(hackerInfo.frontierExternalReference, UserType.GM, hackerInfo.frontierExternalReference, language = i18n.defaultLanguage())
         }
 
         val name = userEntityService.findFreeUserName(hackerInfo.characterName!!)
-        val user = userEntityService.createUser(name, UserType.HACKER, hackerInfo.frontierExternalReference)
+        val user = userEntityService.createUser(name, UserType.HACKER, hackerInfo.frontierExternalReference, language = i18n.defaultLanguage())
         hackerEntityService.createHacker(user, HackerIcon.FROG, hackerInfo.characterName)
 
         return user

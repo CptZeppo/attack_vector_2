@@ -26,6 +26,7 @@ import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.HackerIcon
 import org.n1.av2.platform.iam.user.UserEntity
 import org.n1.av2.platform.iam.user.UserEntityService
@@ -58,6 +59,7 @@ class OpenIdConnectServiceTest {
     private val hackerEntityService = mockk<HackerEntityService>()
     private val skillService = mockk<SkillService>()
     private val httpClient = mockk<HttpClient>()
+    private val i18n = mockk<I18n>()
 
     private lateinit var service: OpenIdConnectService
 
@@ -87,6 +89,7 @@ class OpenIdConnectServiceTest {
             httpClient,
             OpenIdConnectJwtDecoderProvider(configService),
             JsonMapper.builder().build(),
+            i18n
         )
     }
 
@@ -127,7 +130,7 @@ class OpenIdConnectServiceTest {
 
         assertThatThrownBy { service.login("auth-code", "http://localhost/callback") }.isInstanceOf(JwtException::class.java)
 
-        verify(exactly = 0) { userEntityService.createUser(any(), any(), any(), any()) }
+        verify(exactly = 0) { userEntityService.createUser(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -136,7 +139,7 @@ class OpenIdConnectServiceTest {
 
         assertThatThrownBy { service.login("auth-code", "http://localhost/callback") }.isInstanceOf(JwtException::class.java)
 
-        verify(exactly = 0) { userEntityService.createUser(any(), any(), any(), any()) }
+        verify(exactly = 0) { userEntityService.createUser(any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -189,7 +192,7 @@ class OpenIdConnectServiceTest {
     private fun givenNoExistingUserOrHacker() {
         every { userEntityService.findByExternalId(any()) } returns null
         every { userEntityService.findFreeUserName(any()) } answers { firstArg() }
-        every { userEntityService.createUser(any(), any(), any(), any()) } answers {
+        every { userEntityService.createUser(any(), any(), any(), any(), any()) } answers {
             UserEntity(id = "user-1", name = firstArg(), type = secondArg(), externalId = thirdArg())
         }
         every { hackerEntityService.findForUserOrNull(any()) } returns null
