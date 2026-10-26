@@ -7,6 +7,8 @@ export const cs: Partial<Record<keyof typeof en, string>> = {
     "common.name": "Název",
     "common.effects": "Efekty",
     "common.action": "Akce",
+    "common.yes": "ano",
+    "common.no": "žádný",
     "status.available": "Dostupné",
     "status.received-today": "Dnes obdrženo",
 

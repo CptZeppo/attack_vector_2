@@ -8,24 +8,31 @@ interface Props {
 }
 
 // English descriptions - used by the GM script editor (which stays English).
-export const strengthDescription = (strength: IceStrength) => {
-    switch (strength) {
-        case IceStrength.VERY_WEAK :
-            return "Very weak"
-        case IceStrength.WEAK:
-            return "Weak"
-        case IceStrength.AVERAGE:
-            return "Average"
-        case IceStrength.STRONG:
-            return "Strong"
-        case IceStrength.VERY_STRONG:
-            return "Very strong"
-        case IceStrength.ONYX:
-            return "Onyx"
-        default:
-            return ""
+export const strengthDescription = (strength: IceStrength, t: (key: TranslationKey) => string) => {
+    const key = strengthKey[strength]
+    if (!key) {
+        return ""
     }
+    return t(key);
+}
 
+export function toIceStrength(strength: "VERY_WEAK" | "WEAK" | "AVERAGE" | "STRONG" | "VERY_STRONG" | "ONYX" | undefined): IceStrength {
+    switch (strength) {
+        case "VERY_WEAK":
+            return IceStrength.VERY_WEAK;
+        case "WEAK":
+            return IceStrength.WEAK;
+        case "AVERAGE":
+            return IceStrength.AVERAGE;
+        case "STRONG":
+            return IceStrength.STRONG;
+        case "VERY_STRONG":
+            return IceStrength.VERY_STRONG;
+        case "ONYX":
+            return IceStrength.ONYX;
+        default:
+            return IceStrength.UNKNOWN;
+    }
 }
 
 const strengthKey: Record<IceStrength, TranslationKey | null> = {

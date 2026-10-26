@@ -5,6 +5,7 @@ import {DropDownSaveInput} from "../../../common/component/DropDownSaveInput";
 import {webSocketConnection} from "../../../common/server/WebSocketConnection";
 import {iceSimpleName, IceType, iceTypeDefaultSorter} from "../../../common/enums/LayerTypes";
 import React from "react";
+import {useTranslate} from "../../../common/i18n/i18n";
 
 export const HackIceByStrengthRows = ({scriptType, effect}: { scriptType: ScriptType, effect: Effect }) => {
     return <>
@@ -16,12 +17,13 @@ export const HackIceByStrengthRows = ({scriptType, effect}: { scriptType: Script
 }
 
 const IceStrengthRow = ({scriptType, effect}: { scriptType: ScriptType, effect: Effect }) => {
+    const t = useTranslate()
     const strengthInput = effect.value?.split(":")[0] || "WEAK"
     const excludesIceTypes = effect.value?.split(":")[1] || "PASSWORD_ICE,TAR_ICE"
 
     const options = (Object.values(IceStrength) as IceStrength[])
         .sort((a, b) => iceStrengthValue[b] - iceStrengthValue[a])
-        .map(strength => <option value={strength}>{strengthDescription(strength)}</option>)
+        .map(strength => <option value={strength}>{strengthDescription(strength, t)}</option>)
 
     return <div className="row form-group text" data-row="script-effect-ice-strength">
         <div className="col-lg-1">&nbsp;</div>

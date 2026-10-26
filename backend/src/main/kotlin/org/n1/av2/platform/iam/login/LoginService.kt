@@ -1,5 +1,6 @@
 package org.n1.av2.platform.iam.login
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.Cookie
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
@@ -22,6 +23,7 @@ class LoginService(
     private val loginProtectionService: LoginProtectionService,
     private val openIdConnectService: OpenIdConnectService
 ) {
+    private val logger = KotlinLogging.logger {}
 
     fun login(userName: String, password: String, ipAddress: String): List<Cookie> {
         loginProtectionService.preventBruteForce(ipAddress)
@@ -65,8 +67,13 @@ class LoginService(
     }
 
     fun openIdConnectLogin(code: String, redirectUri: String): List<Cookie> {
-        val user = openIdConnectService.login(code, redirectUri) ?: return emptyList()
-        return addCookies(user)
+        try {
+            val user = openIdConnectService.login(code, redirectUri) ?: return emptyList()
+            return addCookies(user)
+        } catch (e: Exception) {
+            logger.error(e) { "Error during login openIdConnectLogin" }
+            return emptyList()
+        }
     }
 
     fun addCookies(userEntity: UserEntity): List<Cookie> {

@@ -22,7 +22,8 @@ const interpolate = (template: string, args: (string | number)[]): string =>
 export const translate = (language: string, key: TranslationKey, ...args: (string | number)[]): string => {
     const table = translations[language] ?? translations[DEFAULT_LANGUAGE]
     const template = table[key] ?? en[key] ?? (key as string)
-    return interpolate(template, args)
+    console.log(template)
+    return template ? interpolate(template, args) : `${key}`
 }
 
 /**

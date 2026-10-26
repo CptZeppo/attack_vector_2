@@ -37,7 +37,7 @@ class CommandViewService(
             val blocked = (layer.level < blockingIceLevel)
 
             val hacked = if (layer is IceLayer && layer.hacked) i18n.t("view.hacked-suffix") else ""
-            val iceSuffix = if (layer is IceLayer) " ICE" else ""
+            val iceSuffix = if (layer is IceLayer) " ICE " else ""
             if (blocked) {
                 lines.add(i18n.t("view.layer-shielded", layer.level))
             } else {

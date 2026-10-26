@@ -7,8 +7,9 @@ import {NodeScanStatus} from "../../../../common/enums/NodeStatus"
 import {Pad} from "../../../../common/component/Pad"
 import {HackerRootState} from "../../../HackerRootReducer";
 import {NodeI} from "../../../../common/sites/SiteModel";
+import {TranslationKey, useTranslate} from "../../../../common/i18n/i18n";
 
-const statusText = (status: NodeScanStatus) => {
+const statusText = (status: NodeScanStatus, t: (key: TranslationKey) => string) => {
     switch (status) {
         case NodeScanStatus.UNCONNECTABLE_1:
             return "0/3"
@@ -17,9 +18,9 @@ const statusText = (status: NodeScanStatus) => {
         case NodeScanStatus.ICE_PROTECTED_3:
             return "2/3"
         case NodeScanStatus.FULLY_SCANNED_4:
-            return "3/3 (complete)"
+            return "3/3 " + t("scan.status.complete")
         default:
-            return "status unknown: " + status
+            return t("scan.status.unknown") + status
     }
 }
 
@@ -39,6 +40,7 @@ const stateSelector = (state: HackerRootState) => {
 export const NodeScanInfo = () => {
 
     const {node, status}: { node: NodeI | null, status: NodeScanStatus | null } = useSelector(stateSelector)
+    const t = useTranslate()
 
     if (node === null || status === null) {
         return <></>
@@ -62,8 +64,8 @@ export const NodeScanInfo = () => {
                     <div className="col-lg-12">
                         <div className="d-flex justify-content-between">
                             <div className="">
-                                Scan info on <span className="networkId">{networkId}</span><Pad length={10} textValue={networkId}/>
-                                <span className="text-muted">scan progress: {statusText(status)}</span><br/>
+                                {t("scan.info")}Scan info on <span className="networkId">{networkId}</span><Pad length={10} textValue={networkId}/>
+                                <span className="text-muted">{t("scan.info.progress", statusText(status, t))}</span><br/>
                                 <br/>
                                 <NodeNameElement node={node} status={status}/>
                                 <NodeScanInfoByStatus node={node} status={status}/>
@@ -80,7 +82,7 @@ export const NodeScanInfo = () => {
     )
 }
 
-const NodeNameElement = ({node, status}: { node: NodeI, status: NodeScanStatus}) => {
+const NodeNameElement = ({node, status}: { node: NodeI, status: NodeScanStatus }) => {
     if (status !== NodeScanStatus.ICE_PROTECTED_3 && status !== NodeScanStatus.FULLY_SCANNED_4) {
         return <></>
     }

@@ -17,6 +17,7 @@ import org.n1.av2.layer.other.script.ScriptInteractionLayer
 import org.n1.av2.layer.other.text.TextLayer
 import org.n1.av2.layer.other.timeradjuster.TimerAdjusterLayer
 import org.n1.av2.layer.other.tripwire.TripwireLayer
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.util.createId
 import org.n1.av2.platform.util.createLayerId
 import org.n1.av2.site.entity.enums.LayerType
@@ -40,6 +41,7 @@ const val NODE_MAX_Y = CANVAS_HEIGHT - MARGIN - MARGIN_BOTTOM_FOR_PLAYER
 class NodeEntityService(
     private val nodeRepo: NodeRepo,
     private val themeService: ThemeService,
+    private val i18n: I18n
 ) {
 
     fun createNode(command: AddNode): Node {
@@ -216,8 +218,8 @@ class NodeEntityService(
             LayerType.TAR_ICE -> TarIceLayer(layerId, level, defaultName)
             LayerType.SWEEPER_ICE -> SweeperIceLayer(layerId, level, defaultName)
             LayerType.OS -> error("Cannot add OS")
-            LayerType.STATUS_LIGHT -> createStatusLightLayer(layerId, LayerType.STATUS_LIGHT, level, defaultName, "Status", "off", "on")
-            LayerType.LOCK -> createStatusLightLayer(layerId, LayerType.LOCK, level, defaultName, "Lock status", "locked", "unlocked")
+            LayerType.STATUS_LIGHT -> createStatusLightLayer(layerId, LayerType.STATUS_LIGHT, level, defaultName, i18n.t("light.status"), i18n.t("light.off"), i18n.t("light.on"))
+            LayerType.LOCK -> createStatusLightLayer(layerId, LayerType.LOCK, level, defaultName, i18n.t("lock.status"), i18n.t("lock.locked"), i18n.t("lock.unlocked"))
             LayerType.KEYSTORE -> KeyStoreLayer(layerId, level, defaultName)
             LayerType.TRIPWIRE -> TripwireLayer(layerId, level, defaultName)
             LayerType.TIMER_ADJUSTER -> TimerAdjusterLayer(layerId, level, defaultName)

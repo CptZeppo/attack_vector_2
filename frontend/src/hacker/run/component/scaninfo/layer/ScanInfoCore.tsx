@@ -1,8 +1,10 @@
 import React from "react";
 import {LayerDetails} from "../../../../../common/sites/SiteModel";
+import {useTranslate} from "../../../../../common/i18n/i18n";
 export const ScanInfoCore = ({layer}: {layer: LayerDetails}) => {
-    const reveal = layer.revealNetwork ? "yes" : "no"
+    const t = useTranslate()
+    const reveal = layer.revealNetwork ? t( "common.yes") : t( "common.no")
     return (
-        <> - reveal network: <span className="text-info" >{reveal}</span></>
+        <> - {t("scan.core")} <span className="text-info" >{reveal}</span></>
     )
 }

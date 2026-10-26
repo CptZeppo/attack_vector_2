@@ -25,23 +25,18 @@ export const Timers = () => {
 const TimerDisplay = (props: TimerState) => {
     const t = useTranslate()
     const textColor = props.effect === TimerEffect.SHUTDOWN_START ? "text-warning" : "text-info"
+    const typeText = props.effect === TimerEffect.SHUTDOWN_START ? "timers.tripwire" : "timers.shutdown"
 
     return <div className="row">
         <div className="col-lg-12">
             <span className="text">
                 <span className={`timer ${textColor}`}>{formatTimeInterval(props.secondsLeft)}</span>
-                &nbsp;{t(typeText(props))} [{props.target}] ➜ {props.effectDescription}
+                &nbsp;{t(typeText)} [{props.target}] ➜ {props.effectDescription}
             </span>
         </div>
     </div>
 }
 
-const typeText = (timer: TimerState) => {
-    switch (timer.effect) {
-        case TimerEffect.SHUTDOWN_START: return "timers.tripwire"
-        case TimerEffect.SHUTDOWN_FINISH: return "timers.shutdown"
-    }
-}
 
 const EmptyTimerDisplay = () => {
 

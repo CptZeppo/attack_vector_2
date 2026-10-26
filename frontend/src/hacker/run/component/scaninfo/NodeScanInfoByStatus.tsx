@@ -2,35 +2,38 @@ import React from "react"
 import {NodeScanStatus} from "../../../../common/enums/NodeStatus"
 import {NodeScanInfoLayers} from "./NodeScanInfoLayers"
 import {NodeI} from "../../../../common/sites/SiteModel";
+import {TranslationKey, useTranslate} from "../../../../common/i18n/i18n";
 
-function renderUnconnectable() {
+function renderUnconnectable(t: (key: TranslationKey) => string) {
     return <>
-        No information node discovered yet.<br/>
+        {t("scan.unconnectable")}<br/>
     </>
 }
-function renderConnectable() {
+
+function renderConnectable(t: (key: TranslationKey) => string) {
     return <>
-        No information about layers discovered yet.<br/>
+        {t("scan.connectable.1")}<br/>
         <br/>
-        No information about additional neighbouring nodes discovered yet.<br/>
+        {t("scan.connectable.2")}<br/>
     </>
 }
 
-function renderError(node: NodeI, status: NodeScanStatus) {
-    return <>Unknown node status: {status} for node: {node.id}.<br/></>
+function renderError(node: NodeI, status: NodeScanStatus, t: (key: TranslationKey, ...args: (string | number)[]) => string) {
+    return <>{t("scan.error", status, node.id)}<br/></>
 }
 
-export const NodeScanInfoByStatus = ({node, status}: {node: NodeI, status: NodeScanStatus}) => {
+export const NodeScanInfoByStatus = ({node, status}: { node: NodeI, status: NodeScanStatus }) => {
+    const t = useTranslate()
     switch (status) {
         case NodeScanStatus.UNCONNECTABLE_1:
-            return renderUnconnectable()
+            return renderUnconnectable(t)
         case NodeScanStatus.CONNECTABLE_2:
-            return renderConnectable()
+            return renderConnectable(t)
         case NodeScanStatus.ICE_PROTECTED_3:
             return <NodeScanInfoLayers node={node} allLayersRevealed={false}/>
         case NodeScanStatus.FULLY_SCANNED_4:
             return <NodeScanInfoLayers node={node} allLayersRevealed={true}/>
         default:
-            return renderError(node, status)
+            return renderError(node, status, t)
     }
 }

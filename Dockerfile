@@ -47,9 +47,10 @@ RUN mvn clean package -DskipTests
 FROM gcr.io/distroless/java21-debian12
 
 EXPOSE 8080
-#COPY backend/target/app.jar /app.jar
+
+COPY backend/target/*.jar /app.jar
 # To delegate building the jar to docker, comment the line above and uncomment the line below
-COPY --from=build-backend /backend/target/*.jar app.jar
+#COPY --from=build-backend /backend/target/*.jar app.jar
 
 WORKDIR /
 

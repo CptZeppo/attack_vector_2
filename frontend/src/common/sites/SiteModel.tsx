@@ -2,6 +2,7 @@ import {LayerType} from "../enums/LayerTypes";
 import {NodeScanStatus} from "../enums/NodeStatus";
 import {TimerAdjustmentRecurring, TimerAdjustmentType} from "../model/layer/LayerTimerAdjuster";
 import {StatusLightOption} from "../../standalone/widget/statusLight/StatusLightReducers";
+import {IceStrength} from "../model/IceStrength";
 
 export const TRANSIT_1 = "transit_1"
 export const TRANSIT_2 = "transit_2"

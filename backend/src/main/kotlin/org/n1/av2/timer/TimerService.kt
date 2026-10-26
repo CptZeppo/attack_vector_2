@@ -115,7 +115,7 @@ class TimerService(
 
         connectionService.replyTerminalReceive(i18n.t("timer.triggered-reset", timerSourceMessage, durations.effective.toHumanTime()))
         reportAdjustment(i18n.t("timer.adjust.stealth-skill"), i18n.t("timer.adjust.low-stealth-skill"), durations.stealthAdjustment)
-        reportAdjustment(i18n.t("timer.adjust.decreased-alertness "), i18n.t("timer.adjust.increased-alertness"), durations.alertnessAdjustment)
+        reportAdjustment(i18n.t("timer.adjust.decreased-alertness"), i18n.t("timer.adjust.increased-alertness"), durations.alertnessAdjustment)
     }
 
     private fun informClientsOfTimer(action: ServerActions, timer: Timer) {
