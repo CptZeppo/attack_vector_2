@@ -39,6 +39,12 @@ class SkillService(
         return userHasSkill(currentUserService.userId, type)
     }
 
+    fun userHasTrait(userId: String, traitKey: String): Boolean {
+        return skillRepo.findByUserId(userId).any { skill ->
+            skill.type == SkillType.TRAIT && skill.value != null && traitKeyOf(skill.value).equals(traitKey, ignoreCase = true)
+        }
+    }
+
     fun findSkillsForUser(userId: String): List<Skill> {
         return skillRepo.findByUserId(userId)
     }
@@ -49,12 +55,12 @@ class SkillService(
         return values.maxOrNull()
     }
 
-    fun addSkillAndUpdateUi(userId: String, type: SkillType) {
-        addSkillForUser(userId, type)
+    fun addNewSkillAndUpdateUi(userId: String, type: SkillType) {
+        val id = createId("skill", skillRepo::findById)
+        skillRepo.save(Skill(id, userId, type, type.defaultValue))
         type.processUpdate(userId, type.defaultValue, applicationContext)
         userAndHackerService.sendDetailsOfSpecificUser(userId)
     }
-
 
     fun editSkillValue(skillId: SkillId, valueInput: String) {
         val skill = getSkill(skillId)
@@ -69,7 +75,7 @@ class SkillService(
     }
 
 
-    fun deleteSkill(skillId: SkillId) {
+    fun deleteSkillAndNotifyUser(skillId: SkillId) {
         val skill = getSkill(skillId)
 
         skillRepo.delete(skill)
@@ -99,13 +105,23 @@ class SkillService(
         }
     }
 
-    fun addSkillsForUser(user: UserEntity, types: List<SkillType>) {
+    fun updateSkillsForUser(user: UserEntity, types: List<SkillType>) {
         types.forEach { type ->
-            addSkillForUser(user.id, type)
+            addOrUpdateSkillForUser(user.id, type)
         }
     }
 
-    fun addSkillForUser(userId: String, type: SkillType, valueInput: String? = null) {
+    fun updateSkillsForUser(user: UserEntity, skills: Map<SkillType, String>) {
+        val currentSkills = findSkillsForUser(user.id)
+        currentSkills.forEach { skill -> skillRepo.deleteById(skill.id)}
+
+        skills.forEach { (type, value) ->
+            addOrUpdateSkillForUser(user.id, type, value)
+        }
+    }
+
+
+    fun addOrUpdateSkillForUser(userId: String, type: SkillType, valueInput: String? = null) {
         val id = skillRepo.findFirstByTypeAndUserId(type, userId)?.id
             ?: createId("skill", skillRepo::findById)
         val value = valueInput ?: type.defaultValue

@@ -14,6 +14,8 @@ enum class LayerType(
     KEYSTORE,
     TRIPWIRE,
     TIMER_ADJUSTER,
+    DAEMON,
+    NETWORK_SWITCH,
     LOCK,
     STATUS_LIGHT,
     CORE,

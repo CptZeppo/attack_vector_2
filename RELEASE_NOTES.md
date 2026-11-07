@@ -1,3 +1,24 @@
+# Release notes AV 2.22.0 (7 November 2026)
+
+## Features
+- New layer: Daemon. Shows a text to a hacker that enters the node. Can be set to trigger only for the first hacker, once per hacker, or on every entry.
+- New skill: Trait. A trait of the hacker character with meaning in the game, for example "insider: Former corporate insider". GMs and players can look it up
+  and react to it, and Daemon layers can be set to only trigger for hackers with a specific trait. The hacker only sees the text, not the key.
+- New layer: Network switch. Makes the hacker choose one of two or more routes leaving the node, forcing hackers to make a choice. Optionally the network switch can be unlocked via a Core layer.
+- Minesweeper ICE supports chording: left- or middle-click a revealed number that has a matching number of flags around it to reveal all its other neighbours.
+
+## Bugfixes
+- Adding a second Weaken skill to a hacker no longer replaces the first one.
+- Fixed copy/paste on macOS
+
+# Release notes AV 2.21.0 (27 October 2026)
+Integration with Keycloak added by Théo Henry. You can use this to run AttackVector with every hacker and GM having a 
+separate login with password.
+
+This also allows running AttackVector from Docker and Docker compose. If you want to make changes to the source 
+code and run it, this also makes that easier.
+
+
 # Release notes AV 2.20.6 (13 October 2026)
 (skipped a few patch versions for testing purposes)
 

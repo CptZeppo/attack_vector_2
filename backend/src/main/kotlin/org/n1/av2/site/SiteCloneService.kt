@@ -10,7 +10,10 @@ import org.n1.av2.layer.ice.tangle.TangleIceLayer
 import org.n1.av2.layer.ice.tar.TarIceLayer
 import org.n1.av2.layer.ice.wordsearch.WordSearchIceLayer
 import org.n1.av2.layer.other.core.CoreLayer
+import org.n1.av2.layer.other.core.CoreLinkedLayer
+import org.n1.av2.layer.other.daemon.DaemonLayer
 import org.n1.av2.layer.other.keystore.KeyStoreLayer
+import org.n1.av2.layer.other.networkswitch.NetworkSwitchLayer
 import org.n1.av2.layer.other.os.OsLayer
 import org.n1.av2.layer.other.script.ScriptCreditsLayer
 import org.n1.av2.layer.other.script.ScriptInteractionLayer
@@ -93,6 +96,11 @@ class SiteCloneService(
 
         layersBySourceLayerId.values.forEach { layer ->
             updateLayersDependingOnOtherLayers(layer, layersBySourceLayerId, sourceSiteId, siteId)
+            if (layer is NetworkSwitchLayer) {
+                layer.routes = layer.routes.mapNotNull { route ->
+                    nodesBySourceId[route.nodeId]?.let { route.copy(nodeId = it.id) }
+                }.toMutableList()
+            }
         }
 
         nodesBySourceId.values.forEach { nodeEntityService.save(it) }
@@ -123,6 +131,8 @@ class SiteCloneService(
             is StatusLightLayer -> StatusLightLayer(id, sourceLayer)
             is TripwireLayer -> TripwireLayer(id, sourceLayer)
             is TimerAdjusterLayer -> TimerAdjusterLayer(id, sourceLayer)
+            is DaemonLayer -> DaemonLayer(id, sourceLayer)
+            is NetworkSwitchLayer -> NetworkSwitchLayer(id, sourceLayer)
             is NetwalkIceLayer -> NetwalkIceLayer(id, sourceLayer)
             is PasswordIceLayer -> PasswordIceLayer(id, sourceLayer)
             is TangleIceLayer -> TangleIceLayer(id, sourceLayer)
@@ -139,7 +149,7 @@ class SiteCloneService(
         layer: Layer, layersBySourceLayerId: Map<String, Layer>,
         sourceSiteId: String, targetSiteId: String
     ) {
-        if (layer is TripwireLayer && layer.coreLayerId != null) {
+        if (layer is CoreLinkedLayer && layer.coreLayerId != null) {
             val isSameSiteRef = (layer.coreSiteId == null || layer.coreSiteId == sourceSiteId)
             if (isSameSiteRef) {
                 layer.coreLayerId = layersBySourceLayerId[layer.coreLayerId]?.id

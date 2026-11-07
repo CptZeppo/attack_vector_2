@@ -103,8 +103,9 @@ class JwtAuthenticationFilter(
                     it.startsWith("/devLogin") ||
                     it.startsWith("/adminLogin") ||
                     it.startsWith("/login") ||
-                    it.startsWith("/openapi/")
-                )
+                    it.startsWith("/openapi/") ||
+                    it.startsWith("/favicon.ico")
+                    )
         }
     }
 

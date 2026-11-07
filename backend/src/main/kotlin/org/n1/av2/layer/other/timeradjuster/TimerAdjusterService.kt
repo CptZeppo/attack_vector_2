@@ -1,5 +1,6 @@
 package org.n1.av2.layer.other.timeradjuster
 
+import org.n1.av2.layer.model.TriggerRecurrence
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.i18n.I18n
@@ -69,11 +70,7 @@ class TimerAdjusterService(
     }
 
     fun triggersAdjustment(layer: TimerAdjusterLayer, status: TimerAdjusterStatusEntity): Boolean {
-        return when (layer.recurring) {
-            TimerAdjustmentRecurring.FIRST_ENTRY_ONLY -> status.enteredUserIds.isEmpty()
-            TimerAdjustmentRecurring.EVERY_ENTRY -> true
-            TimerAdjustmentRecurring.EACH_HACKER_ONCE -> !status.enteredUserIds.contains(currentUserService.userId)
-        }
+        return layer.recurring.triggers(status.enteredUserIds, currentUserService.userId)
     }
 
     fun adjustTimer(siteId: String, layer: TimerAdjusterLayer) {

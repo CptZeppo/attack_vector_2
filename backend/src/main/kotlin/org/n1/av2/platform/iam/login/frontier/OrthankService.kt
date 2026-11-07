@@ -1,6 +1,7 @@
 package org.n1.av2.platform.iam.login.frontier
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.Cookie
 import org.n1.av2.platform.config.ConfigItem
 import org.n1.av2.platform.config.ConfigService
@@ -9,12 +10,20 @@ import org.springframework.stereotype.Service
 import tools.jackson.core.type.TypeReference
 import tools.jackson.databind.json.JsonMapper
 
+class FrontierV3HackingSkills(
+    val hacker: Int = 0,
+    val architect: Int = 0,
+    val elite: Int = 0
+)
+
 @Service
 class OrthankService(
     private val configService: ConfigService,
     private val httpClient: HttpClient,
     private val jsonMapper: JsonMapper,
 ) {
+
+    private val logger = KotlinLogging.logger {}
 
     class CharacterInfo(
         @JsonProperty("character_name") var characterName: String,
@@ -25,7 +34,7 @@ class OrthankService(
 
     fun getFrontierHackerInfo(cookies: Array<Cookie>): FrontierUserAndCharacterInfo? {
         val userInfo = getUserInfo(cookies)
-        if (userInfo.accountId == "0") {
+        if (userInfo == null || userInfo.accountId == "0") {
             return null
         }
         if (userInfo.gm) {
@@ -44,16 +53,27 @@ class OrthankService(
         )
     }
 
-    private fun getUserInfo(cookies: Array<Cookie>): FrontierUserAndGroupInfo {
+    private fun getUserInfo(cookies: Array<Cookie>): FrontierUserAndGroupInfo? {
         class IdAndGroupResponse(var id: String, var groups: List<String>?) {
             constructor() : this("", emptyList())
         }
 
-        val idAndGroupsText = httpClient.get("https://ic.eosfrontier.space/assets/idandgroups.php", emptyMap(), cookies)
-        val idAndGroups = jsonMapper.readValue(idAndGroupsText, IdAndGroupResponse::class.java)
-        val gm = idAndGroups.groups?.contains(FRONTIER_GM_GROUP) ?: false
+        val idAndGroupsText = try {
+            httpClient.get("https://ic.eosfrontier.space/assets/idandgroups.php", emptyMap(), cookies)
+        }
+        catch (_: Exception) {
+            return null
+        }
+        logger.info { "Response from idandgrousps: $idAndGroupsText" }
+        try {
+            val idAndGroups = jsonMapper.readValue(idAndGroupsText, IdAndGroupResponse::class.java)
+            val gm = idAndGroups.groups?.contains(FRONTIER_GM_GROUP) ?: false
 
-        return FrontierUserAndGroupInfo(idAndGroups.id, gm)
+            return FrontierUserAndGroupInfo(idAndGroups.id, gm)
+        }
+        catch (_: Exception) {
+            return null
+        }
     }
 
     private fun orthankToken(): String {
@@ -69,11 +89,6 @@ class OrthankService(
         return playerInfo
     }
 
-    class FrontierV3HackingSkills(
-        val hacker: Int = 0,
-        val architect: Int = 0,
-        val elite: Int = 0
-    )
 
     // Using: https://github.com/eosfrontier/orthanc/tree/master/v2/chars_all
     fun getPlayerSkills(characterId: String): FrontierV3HackingSkills {

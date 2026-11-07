@@ -2,6 +2,7 @@ package org.n1.av2.script.effect.helper
 
 import org.n1.av2.hacker.hackerstate.HackerStateRepo
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
+import org.n1.av2.layer.other.networkswitch.NetworkSwitchService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
@@ -29,6 +30,7 @@ class JumpEffectHelper(
     private val commandMoveService: CommandMoveService,
     private val currentUserService: CurrentUserService,
     private val hackerStateRepo: HackerStateRepo,
+    private val networkSwitchService: NetworkSwitchService,
     private val i18n: I18n,
 ) {
 
@@ -38,8 +40,12 @@ class JumpEffectHelper(
         currentNodeId: String,
         targetNodeId: String,
         hackerState: HackerStateRunning,
-        targetDescription: String
+        targetDescription: String,
+        pendingIsOpen: Boolean,
     ): ScriptExecution {
+        if (!networkSwitchService.isReachable(siteId, targetNodeId, pendingIsOpen)) {
+            return ScriptExecution("[error]Jump aborted:[/] no route to ${targetDescription}, dropped by a network switch.")
+        }
         val blockedType = JumpBlockedType.valueOf(effect.value!!)
         return when (blockedType) {
             JumpBlockedType.IGNORE_ICE -> jumpIgnoringIce(currentNodeId, targetNodeId, hackerState, targetDescription)

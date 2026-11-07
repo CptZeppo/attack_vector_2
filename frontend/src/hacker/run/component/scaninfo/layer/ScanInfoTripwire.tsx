@@ -21,13 +21,13 @@ export const ScanInfoShutdownAccelerator = ({layer}: { layer: LayerDetails }) =>
     )
 }
 
-const recurrence = (recurring: TimerAdjustmentRecurring, t: (key: TranslationKey) => string) => {
+const recurrence = (recurring: TriggerRecurrence, t: (key: TranslationKey) => string) => {
     switch (recurring) {
-        case TimerAdjustmentRecurring.FIRST_ENTRY_ONLY:
+        case TriggerRecurrence.FIRST_ENTRY_ONLY:
             return <> &nbsp; &nbsp; &nbsp; - {t("scan.info.tripwire.only-one")}</>
-        case TimerAdjustmentRecurring.EVERY_ENTRY:
+        case TriggerRecurrence.EVERY_ENTRY:
             return <> &nbsp; &nbsp; &nbsp; - {t("scan.info.tripwire.on-evry-entry")}</>
-        case TimerAdjustmentRecurring.EACH_HACKER_ONCE:
+        case TriggerRecurrence.EACH_HACKER_ONCE:
             return <> &nbsp; &nbsp; &nbsp; - {t("scan.info.tripwire.on-each-hacker")}</>
         default:
             return <></>

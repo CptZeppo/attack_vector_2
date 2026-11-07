@@ -16,7 +16,7 @@ class SkillWsController(
 
     @MessageMapping("/user/skill/add")
     fun addSkill(command: AddSkillCommand, userPrincipal: UserPrincipal) {
-        userTaskRunner.runTask("/user/skill/add", userPrincipal) { skillService.addSkillAndUpdateUi(command.userId, command.type) }
+        userTaskRunner.runTask("/user/skill/add", userPrincipal) { skillService.addNewSkillAndUpdateUi(command.userId, command.type) }
     }
 
     class EditSkillValueCommand(val skillId: SkillId, val value: String)
@@ -30,7 +30,7 @@ class SkillWsController(
 
     @MessageMapping("/user/skill/delete")
     fun deleteSkill(command: DeleteSkillCommand, userPrincipal: UserPrincipal) {
-        userTaskRunner.runTask("/user/skill/delete", userPrincipal) { skillService.deleteSkill(command.skillId) }
+        userTaskRunner.runTask("/user/skill/delete", userPrincipal) { skillService.deleteSkillAndNotifyUser(command.skillId) }
     }
 
 }

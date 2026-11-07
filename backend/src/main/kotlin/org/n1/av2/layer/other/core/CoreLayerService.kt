@@ -1,5 +1,6 @@
 package org.n1.av2.layer.other.core
 
+import org.n1.av2.layer.other.networkswitch.NetworkSwitchService
 import org.n1.av2.layer.other.tripwire.TripwireLayer
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.i18n.I18n
@@ -21,6 +22,7 @@ class CoreLayerService(
     private val timerEntityService: TimerEntityService,
     private val timerService: TimerService,
     private val sitePropertiesEntityService: SitePropertiesEntityService,
+    private val networkSwitchService: NetworkSwitchService,
     private val i18n: I18n,
 ) {
 
@@ -32,13 +34,23 @@ class CoreLayerService(
             hackingDetails.add(i18n.t("core.revealed-network"))
         }
 
-        val timers = stopTimers(runId, layer)
-        timers.forEach { timer ->
+        val stoppedTimers = stopTimers(runId, layer)
+        stoppedTimers.forEach { timer ->
             if (timer.targetSiteId == timer.siteId) {
                 hackingDetails.add(i18n.t("core.stopped-timer-local"))
             } else {
                 val siteProperties = sitePropertiesEntityService.getBySiteId(timer.targetSiteId)
                 hackingDetails.add(i18n.t("core.stopped-timer-remote", siteProperties.name))
+            }
+        }
+
+        val run = runEntityService.getByRunId(runId)
+        networkSwitchService.unlockSwitchesForCore(layer.id).forEach { unlocked ->
+            if (unlocked.siteId == run.siteId) {
+                hackingDetails.add("- unlocked network switch in node [ok]${unlocked.networkId}")
+            } else {
+                val siteProperties = sitePropertiesEntityService.getBySiteId(unlocked.siteId)
+                hackingDetails.add("- unlocked network switch for remote site: [info]${siteProperties.name}")
             }
         }
 
@@ -49,7 +61,7 @@ class CoreLayerService(
         connectionService.replyTerminalReceive(hackingDetails)
     }
 
-    private fun stopTimers(runId: String, layer: CoreLayer): List<Timer> {
+    private fun stopTimers(runId: String, coreLayer: CoreLayer): List<Timer> {
         val run = runEntityService.getByRunId(runId)
 
         val timersOfSite = timerEntityService.findBySiteId(run.siteId)
@@ -58,7 +70,10 @@ class CoreLayerService(
                 .flatMap { node ->
                     node.layers
                         .filterIsInstance<TripwireLayer>()
-                        .filter { tripwireLayer -> tripwireLayer.coreLayerId == layer.id }
+                        .filter { tripwireLayer ->
+                            timer.layerId == tripwireLayer.id &&
+                            tripwireLayer.coreLayerId == coreLayer.id
+                        }
                 }
 
             val tripwireLayer = tripwires.firstOrNull() ?: return@mapNotNull null // this timer is not reset by this core

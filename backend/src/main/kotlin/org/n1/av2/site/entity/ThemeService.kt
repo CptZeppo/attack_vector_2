@@ -16,6 +16,9 @@ class ThemeService(
         for (layerType in LayerType.entries) {
             map[layerType] = this.i18n.t("layer-name.$layerType")
         }
+        //todo
+        //        LayerType.DAEMON -> "Daemon"
+        //        LayerType.NETWORK_SWITCH -> "Network switch"
         return map
     }
 

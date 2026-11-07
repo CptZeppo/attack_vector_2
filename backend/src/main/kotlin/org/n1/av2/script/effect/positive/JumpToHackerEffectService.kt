@@ -56,7 +56,7 @@ class JumpToHackerEffectService(
         val currentNodeId = hackerState.currentNodeId ?: error(i18n.t("jump-to-hacker.current-node-not-found"))
         val targetNodeId = targetHackerRunState.currentNodeId ?: error(i18n.t("jump-to-hacker.target-node-not-found"))
 
-        return jumpEffectHelper.jump(effect, hackerState.siteId, currentNodeId, targetNodeId, hackerState, userName)
+        return jumpEffectHelper.jump(effect, hackerState.siteId, currentNodeId, targetNodeId, hackerState, userName, pendingIsOpen = true)
 
     }
 }

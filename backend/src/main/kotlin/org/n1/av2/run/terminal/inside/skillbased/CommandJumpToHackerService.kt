@@ -6,6 +6,7 @@ import org.n1.av2.hacker.hackerstate.HackerStateRepo
 import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
+import org.n1.av2.layer.other.networkswitch.NetworkSwitchService
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
@@ -25,6 +26,7 @@ class CommandJumpToHackerService(
     private val hackerStateEntityService: HackerStateEntityService,
     private val hackerStateRepo: HackerStateRepo,
     private val currentUserService: CurrentUserService,
+    private val networkSwitchService: NetworkSwitchService,
     private val i18n: I18n,
 ) {
 
@@ -65,6 +67,11 @@ class CommandJumpToHackerService(
 
         if (hackerState.currentNodeId == targetNodeId) {
             connectionService.replyTerminalReceive(i18n.t("jump.already-same-node"))
+            return
+        }
+
+        if (!networkSwitchService.isReachable(hackerState.siteId, targetNodeId, pendingIsOpen = true)) {
+            connectionService.replyTerminalReceive("[error]Jump aborted:[/] no route to ${targetUser.name}, dropped by a network switch.")
             return
         }
 

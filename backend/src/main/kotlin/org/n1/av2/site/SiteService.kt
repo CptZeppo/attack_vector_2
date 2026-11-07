@@ -5,6 +5,7 @@ import org.n1.av2.editor.SiteEditorStateEntityService
 import org.n1.av2.editor.SiteFull
 import org.n1.av2.editor.SiteValidationService
 import org.n1.av2.layer.other.core.CoreLayer
+import org.n1.av2.layer.other.networkswitch.calculateConnectionStatuses
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.iam.UserPrincipal
@@ -132,7 +133,9 @@ class SiteService(
         val state = siteEditorStateEntityService.getById(siteId)
         val ownerName = userEntityService.getUserName(siteProperties.ownerUserId)
 
-        return SiteFull(siteId, siteProperties, ownerName, nodes, connections, state, startNodeId)
+        val connectionStatusById = calculateConnectionStatuses(nodes, connections)
+
+        return SiteFull(siteId, siteProperties, ownerName, nodes, connections, connectionStatusById, state, startNodeId)
     }
 
     fun findStartNode(nodes: List<Node>): Node? {
@@ -160,11 +163,11 @@ class SiteService(
     fun checkIfAllowedToDelete(siteId: String, userPrincipal: UserPrincipal) {
         checkSiteOwnership(siteId, userPrincipal)
 
-        // Cannot remove site that has a core that is linked to tripwires
+        // Cannot remove site that has a core that is linked to tripwires or network switches in other sites
         val coreLayers = nodeEntityService.findAllCores(siteId)
         coreLayers.forEach { coreLayer ->
             val coreUsage = verifyRemoveCoreLayer(siteId, coreLayer.id, DELETE_SITE_REMOVAL) ?: return@forEach
-            throw ValidationException("Cannot delete site. It contains nodes with cores that are configured to reset tripwires in other sites: $coreUsage. Remove the link from the tripwire(s) to the core(s) on this site first.")
+            throw ValidationException("Cannot delete site. It contains nodes with cores that are configured to reset tripwires or network switches in other sites: $coreUsage. Remove the link from the tripwire(s) or network switch(es) to the core(s) on this site first.")
         }
     }
 
@@ -203,16 +206,16 @@ class SiteService(
         }
 
         val coreUsage = verifyRemoveCoreLayer(siteId, layerId, INTERNAL_REMOVAL) ?: return
-        throw ValidationException("Cannot delete this core. It is used to reset tripewire(s) in: $coreUsage. Remove the link from the tripwire(s) to this core first.")
+        throw ValidationException("Cannot delete this core. It is used to reset tripwire(s) or network switch(es) in: $coreUsage. Remove the link to this core first.")
     }
 
     fun verifyRemoveCoreLayer(siteId: String, layerId: String, type: CoreLayerRemovalType): String? {
-        val nodesWithTripwiresPointingToThisCore = nodeEntityService.findAllTripwiresWithCore(layerId)
+        val nodesLinkedToThisCore = nodeEntityService.findAllNodesLinkedToCore(layerId)
 
-        if (nodesWithTripwiresPointingToThisCore.isEmpty()) return null
-        if (type == DELETE_SITE_REMOVAL && nodesWithTripwiresPointingToThisCore.all { node -> node.siteId == siteId }) return null
+        if (nodesLinkedToThisCore.isEmpty()) return null
+        if (type == DELETE_SITE_REMOVAL && nodesLinkedToThisCore.all { node -> node.siteId == siteId }) return null
 
-        return nodesWithTripwiresPointingToThisCore
+        return nodesLinkedToThisCore
             .distinct()
             .joinToString(", ") { node ->
                 val siteName = sitePropertiesEntityService.getBySiteId(node.siteId).name

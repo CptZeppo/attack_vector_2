@@ -5,6 +5,9 @@ import org.n1.av2.hacker.hackerstate.HackerStateRunning
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
 import org.n1.av2.layer.ice.common.IceLayer
+import org.n1.av2.layer.other.daemon.DaemonLayer
+import org.n1.av2.layer.other.daemon.DaemonService
+import org.n1.av2.layer.other.networkswitch.NetworkSwitchService
 import org.n1.av2.layer.other.os.OsLayer
 import org.n1.av2.layer.other.timeradjuster.TimerAdjusterLayer
 import org.n1.av2.layer.other.timeradjuster.TimerAdjusterService
@@ -45,6 +48,8 @@ class CommandMoveService(
     private val insideTerminalHelper: InsideTerminalHelper,
     private val devCommandHelper: DevCommandHelper,
     private val skillService: SkillService,
+    private val daemonService: DaemonService,
+    private val networkSwitchService: NetworkSwitchService,
     private val i18n: I18n,
 ) {
 
@@ -59,12 +64,14 @@ class CommandMoveService(
         val toNode = nodeEntityService.findByNetworkId(hackerState.siteId, networkId) ?: return reportNodeNotFound(networkId)
 
         if (hackerState.previousNodeId == toNode.id) {
-            // can always go back to previous node, regardless of ice
+            // can always go back to previous node, regardless of ice, unless a network switch just unlocked behind you.
+            if (!checkNetworkSwitch(toNode, hackerState)) return
             handleMove(toNode, hackerState, false)
             return
         }
 
         if (!checkMovePrerequisites(toNode, hackerState, networkId)) return
+        if (!checkNetworkSwitch(toNode, hackerState)) return
 
         requireNotNull(hackerState.currentNodeId)
         val currentNode = nodeEntityService.getById(hackerState.currentNodeId)
@@ -94,6 +101,14 @@ class CommandMoveService(
         connectionEntityService.findConnection(hackerState.currentNodeId, toNode.id) ?: return reportNoPath(networkId)
 
         return true
+    }
+
+    private fun checkNetworkSwitch(toNode: Node, hackerState: HackerStateRunning): Boolean {
+        requireNotNull(hackerState.currentNodeId)
+        val currentNode = nodeEntityService.getById(hackerState.currentNodeId)
+        val error = networkSwitchService.checkMove(currentNode, toNode) ?: return true
+        connectionService.replyTerminalReceive(error)
+        return false
     }
 
     private fun reportAtTargetNode(networkId: String): Boolean {
@@ -162,6 +177,11 @@ class CommandMoveService(
             connectionService.replyTerminalSetLocked(false)
             return
         }
+        if (!networkSwitchService.isReachable(run.siteId, nodeId, pendingIsOpen = true)) {
+            // a network switch dropped the route while the hacker was moving
+            networkSwitchService.disconnectCutOff(hackerState)
+            return
+        }
 
         connectionService.toUser(userId, ServerActions.SERVER_LEAVE_NODE)
 
@@ -210,6 +230,7 @@ class CommandMoveService(
             when (layer) {
                 is TripwireLayer -> tripwireLayerService.hackerArrivesNode(siteId, layer, nodeId, runId)
                 is TimerAdjusterLayer -> timerAdjusterService.hackerArrivesNode(siteId, layer, nodeId, runId)
+                is DaemonLayer -> daemonService.hackerArrivesNode(siteId, layer)
                 else -> {} // do nothing
             }
         }

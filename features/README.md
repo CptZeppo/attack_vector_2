@@ -8,9 +8,10 @@ A structured catalog of every feature in Attack Vector 2, organized by area. Thi
 features/
   features/             ← What the game does (pure functionality)
     authentication.md
-    hacker-home.md
+    hacker.md           ← Hacker pages: home, scripts, market, credits, account
     run-terminal.md     ← All terminal commands
     run-ui.md           ← Canvas, scan panel, script panel, timers
+    layers.md           ← Run behaviour of non-ICE layers (except timer layers)
     ice/                ← One file per ICE type
       password.md
       netwalk.md
@@ -23,7 +24,7 @@ features/
       effects.md        ← All 19 script effect types
       marketplace.md    ← Buying, selling, credits, income
     timers.md
-    skills.md           ← All 11 hacker skill types
+    skills.md           ← All 12 hacker skill types
     gm.md
     editor.md
     admin.md
@@ -50,13 +51,14 @@ Each code reference file maps features to their backend (Kotlin) and frontend (T
 | Area | File(s) | Description |
 |------|---------|-------------|
 | Authentication | `authentication.md` | Login flows, logout, role routing |
-| Hacker Home | `hacker-home.md` | Run listings, start/join runs, preferences |
+| Hacker | `hacker.md` | Hacker home, scripts, market, credits and account pages |
 | Run Terminal | `run-terminal.md` | All terminal commands during a hacking run |
 | Run UI | `run-ui.md` | Canvas, scan info panel, script panel, timers |
+| Layers | `layers.md` | Text, keystore, status light, daemon, script layers, network switch |
 | ICE | `ice/*.md` | 6 puzzle types that protect network nodes |
 | Scripts | `scripts/*.md` | Script types, 19 effects, marketplace |
-| Timers | `timers.md` | Tripwire countdowns, timer adjusters, shutdown |
-| Skills | `skills.md` | 11 hacker skill types |
+| Timers | `timers.md` | Tripwire, timer adjuster and core layers, shutdown |
+| Skills | `skills.md` | 12 hacker skill types |
 | GM | `gm.md` | Site management, user management, statistics |
 | Editor | `editor.md` | Visual site topology editor |
 | Admin | `admin.md` | System configuration, monitoring |

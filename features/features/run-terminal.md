@@ -10,7 +10,7 @@ Scans the site from outside, revealing nodes on the network map.
 
 ## Capabilities
 - Requires the SCAN skill
-- Reveals nodes up to but not past ICE-protected nodes
+- Reveals nodes up to but not past ICE-protected nodes and dropped network switch routes
 - works outside and inside
 
 
@@ -49,8 +49,10 @@ Moves the hacker to an adjacent connected node.
 - Triggers some layers on arrival
 	- tripwire
 	- timer adjuster layers
+	- daemon layers
 - Blocked by unhacked ICE in the current node (unless moving backward)
 - BYPASS skill allows moving through ICE at the start node
+- Blocked by pending or dropped network switch routes (see `layers.md`)
 
 ---
 
@@ -60,7 +62,8 @@ Hacks a layer in the current node.
 
 ## Capabilities
 - ICE layers open an interactive puzzle in a popup window
-- Non-ICE layers (OS, Text, Keystore, Core, Tripwire, etc.) are hacked directly
+- Non-ICE layers (OS, Text, Keystore, Core, Tripwire, etc.) are hacked directly, the effect depends on the layer type (see `layers.md`, `timers.md`)
+- Network switch takes an extra argument: `hack <layer> <route name or network id>`
 
 
 ---
@@ -105,6 +108,7 @@ Teleports to another hacker's current node.
 ## Capabilities
 - Requires the JUMP_TO_HACKER skill
 - Teleports instantly without being blocked by ICE
+- Blocked by dropped network switch routes (pending routes pass)
 
 ---
 
