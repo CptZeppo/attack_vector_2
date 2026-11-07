@@ -2,7 +2,6 @@ package org.n1.av2.platform.iam.login
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.jsonwebtoken.JwtException
 import org.n1.av2.hacker.hacker.HackerEntityService
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.hacker.skill.SkillType
@@ -215,13 +214,6 @@ class OpenIdConnectService(
     }
 
     private fun mapSkills(jwt: Jwt, clientId: String): List<SkillType> {
-        val skills = HashSet<SkillType>()
-        skills.addAll(mapSkillsFromRole(jwt, clientId))
-        skills.addAll(mapSkillsFromAttributes(jwt))
-        return skills.toList()
-    }
-
-    private fun mapSkillsFromRole(jwt: Jwt, clientId: String): List<SkillType> {
         if (hasRole(jwt, clientId, "SITE_ADMIN")) {
             return listOf(SEARCH_SITE, SCAN, CREATE_SITE)
         }
@@ -231,16 +223,6 @@ class OpenIdConnectService(
         }
 
         return listOf()
-    }
-
-    private fun mapSkillsFromAttributes(jwt: Jwt): List<SkillType> {
-        val resourceSkills = jwt.getClaimAsStringList("SKILLS") ?: return listOf()
-        val allSkills = SkillType.entries
-
-        return resourceSkills.stream()
-            .map { ressource -> allSkills.find { skill -> ressource.equals(skill.name, true) } }
-            .filter { s -> s != null }
-            .toList().filterNotNull()
     }
 }
 

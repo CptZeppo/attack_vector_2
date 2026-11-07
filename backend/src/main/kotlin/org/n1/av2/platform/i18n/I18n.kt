@@ -54,7 +54,7 @@ class I18n(
     fun t(key: String, vararg args: Any): String = t(key, currentLocale(), *args)
 
     fun t(key: String, locale: Locale, vararg args: Any): String {
-        return messageSource.getMessage(key, args, locale)
+        return messageSource.getMessage(key, args, locale).replace("\"", "")
     }
 
     /** Translate to the global default language - for broadcasts that are shared by multiple hackers. */
