@@ -1,7 +1,8 @@
 import React from "react";
 import {LayerDetails} from "../../../../../common/sites/SiteModel";
-import {TimerAdjustmentRecurring, TimerAdjustmentType} from "../../../../../common/model/layer/LayerTimerAdjuster";
+import {TimerAdjustmentType} from "../../../../../common/model/layer/LayerTimerAdjuster";
 import {TranslationKey, useTranslate} from "../../../../../common/i18n/i18n";
+import {TriggerRecurrence} from "../../../../../common/model/layer/TriggerRecurrence";
 
 export const ScanInfoTripwire = ({layer}: { layer: LayerDetails }) => {
     const t = useTranslate()

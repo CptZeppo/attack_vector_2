@@ -2,6 +2,7 @@ package org.n1.av2.layer.other.daemon
 
 import org.n1.av2.hacker.skill.SkillService
 import org.n1.av2.platform.connection.ConnectionService
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.platform.iam.user.CurrentUserService
 import org.n1.av2.platform.util.createId
 import org.springframework.stereotype.Service
@@ -12,10 +13,11 @@ class DaemonService(
     private val daemonStatusRepository: DaemonStatusRepository,
     private val currentUserService: CurrentUserService,
     private val skillService: SkillService,
+    private val i18n: I18n,
 ) {
 
     fun hack() {
-        connectionService.replyTerminalReceive("Hacking this layer reveals nothing new.")
+        connectionService.replyTerminalReceive(i18n.t("daemon.nothing-new"))
     }
 
     fun hackerArrivesNode(siteId: String, layer: DaemonLayer) {

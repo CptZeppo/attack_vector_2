@@ -33,9 +33,9 @@ class TimerAdjusterService(
         connectionService.replyTerminalReceive(timeAdjustmentText)
 
         val recurringText = when (layer.recurring) {
-            TimerAdjustmentRecurring.FIRST_ENTRY_ONLY -> i18n.t("timer-adjuster.triggers-once")
-            TimerAdjustmentRecurring.EACH_HACKER_ONCE -> i18n.t("timer-adjuster.triggers-each-hacker")
-            TimerAdjustmentRecurring.EVERY_ENTRY -> i18n.t("timer-adjuster.triggers-every")
+            TriggerRecurrence.FIRST_ENTRY_ONLY -> i18n.t("timer-adjuster.triggers-once")
+            TriggerRecurrence.EACH_HACKER_ONCE -> i18n.t("timer-adjuster.triggers-each-hacker")
+            TriggerRecurrence.EVERY_ENTRY -> i18n.t("timer-adjuster.triggers-every")
         }
         connectionService.replyTerminalReceive(recurringText)
     }

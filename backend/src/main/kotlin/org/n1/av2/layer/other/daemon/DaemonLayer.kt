@@ -24,8 +24,8 @@ class DaemonLayer(
     constructor(id: String, level: Int, name: String, note: String, text: String, requiredTrait: String?, recurring: TriggerRecurrence) :
         this(id, LayerType.DAEMON, level, name, note, text, requiredTrait, recurring)
 
-    constructor(id: String, level: Int, defaultName: String) :
-        this(id, LayerType.DAEMON, level, defaultName, "", "Connection logged.", null, TriggerRecurrence.EACH_HACKER_ONCE)
+    constructor(id: String, level: Int, defaultName: String, defaultText: String) :
+        this(id, LayerType.DAEMON, level, defaultName, "", defaultText, null, TriggerRecurrence.EACH_HACKER_ONCE)
 
     constructor(id: String, toClone: DaemonLayer) :
         this(id, LayerType.DAEMON, toClone.level, toClone.name, toClone.note, toClone.text, toClone.requiredTrait, toClone.recurring)

@@ -9,6 +9,7 @@ import org.n1.av2.layer.other.networkswitch.ConnectionStatus.DROPPED
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ConnectionService.TerminalReceive
 import org.n1.av2.platform.connection.ServerActions
+import org.n1.av2.platform.i18n.I18n
 import org.n1.av2.run.RunService
 import org.n1.av2.run.terminal.TERMINAL_MAIN
 import org.n1.av2.site.entity.Connection
@@ -98,6 +99,7 @@ class NetworkSwitchService(
     private val connectionService: ConnectionService,
     private val hackerStateEntityService: HackerStateEntityService,
     private val runService: RunService,
+    private val i18n: I18n
 ) {
 
     fun hack(layerId: String, arguments: List<String>) {
@@ -108,20 +110,20 @@ class NetworkSwitchService(
 
         val lockedRoute = layer.lockedRouteNodeId?.let { layer.routeFor(it) }
         if (lockedRoute != null) {
-            val lockedText = "[warn]Switch locked.[/] Route fixed to [b]${lockedRoute.name}[/] → [ok]${networkIdByNodeId[lockedRoute.nodeId]}[/]."
+            val lockedText = i18n.t("network-switch.switch-locked", lockedRoute.name, networkIdByNodeId[lockedRoute.nodeId] ?: "")
             connectionService.replyTerminalReceive(listOfNotNull(lockedText, coreForUnlockingText(layer, node.siteId)))
             return
         }
 
         val choice = arguments.firstOrNull()
         if (choice == null) {
-            replyChoices(layer, networkIdByNodeId, "Routing table:")
+            replyChoices(layer, networkIdByNodeId, i18n.t("network-switch.routing-table"))
             return
         }
 
         val route = layer.routes.find { it.name.equals(choice, ignoreCase = true) }
             ?: layer.routes.find { networkIdByNodeId[it.nodeId].equals(choice, ignoreCase = true) }
-            ?: return replyChoices(layer, networkIdByNodeId, "[error]route error[/] no route named [b]${choice}[/]. Routing table:")
+            ?: return replyChoices(layer, networkIdByNodeId, i18n.t("network-switch.route-error", choice))
 
         layer.lockedRouteNodeId = route.nodeId
         nodeEntityService.save(node)
@@ -132,10 +134,10 @@ class NetworkSwitchService(
         val lockedRoute = layer.lockedRouteNodeId?.let { layer.routeFor(it) }
         val line = if (lockedRoute != null) {
             val networkIdByNodeId = nodeEntityService.findBySiteId(node.siteId).associate { it.id to it.networkId }
-            val dropped = layer.routes.filter { it != lockedRoute }.joinToString(", ") { "[ok]${networkIdByNodeId[it.nodeId]}[/]" }
-            "[warn]Topology change[/] switch [ok]${node.networkId}[/] locked to [b]${lockedRoute.name}[/]. Dropped routes: ${dropped}"
+            val dropped = layer.routes.filter { it != lockedRoute }.joinToString(", ") { i18n.t("network-switch.ok", networkIdByNodeId[it.nodeId] ?: "") }
+            i18n.t("network-switch.topology-change-locked", node.networkId, lockedRoute.name, dropped)
         } else {
-            "[warn]Topology change[/] switch [ok]${node.networkId}[/] unlocked. Routes back in standby."
+            i18n.t("network-switch.topology-change-standby", node.networkId)
         }
         connectionService.toSite(node.siteId, ServerActions.SERVER_TERMINAL_RECEIVE, TerminalReceive(TERMINAL_MAIN, arrayOf(line)))
         connectionService.toSite(node.siteId, ServerActions.SERVER_LAYER_CHANGED, "nodeId" to node.id, "layer" to layer)
@@ -162,9 +164,9 @@ class NetworkSwitchService(
     private fun coreForUnlockingText(layer: NetworkSwitchLayer, siteId: String): String? {
         val coreLayerId = layer.coreLayerId ?: return null
         val coreNode = nodeEntityService.findByLayerId(coreLayerId)
-        if (coreNode.siteId == siteId) return "Lock managed by core in node [ok]${coreNode.networkId}"
+        if (coreNode.siteId == siteId) return i18n.t("network-switch.remote-core", coreNode.networkId)
         val siteName = sitePropertiesEntityService.getBySiteId(coreNode.siteId).name
-        return "Lock managed by remote core in node [ok]${coreNode.networkId}[/] in site: [info]${siteName}"
+        return i18n.t("network-switch.remote-core-in-site", coreNode.networkId, siteName)
     }
 
     /**
@@ -200,7 +202,7 @@ class NetworkSwitchService(
             unlockedLayers.forEach { it.lockedRouteNodeId = null }
             nodeEntityService.save(node)
 
-            val lines = arrayOf("[warn]Topology change[/] switch [ok]${node.networkId}[/] unlocked by core. Routes back in standby.")
+            val lines = arrayOf(i18n.t("network-switch.topology-change-unlocked", node.networkId))
             connectionService.toSite(node.siteId, ServerActions.SERVER_TERMINAL_RECEIVE, TerminalReceive(TERMINAL_MAIN, lines))
             unlockedLayers.forEach { layer ->
                 connectionService.toSite(node.siteId, ServerActions.SERVER_LAYER_CHANGED, "nodeId" to node.id, "layer" to layer)
@@ -212,10 +214,9 @@ class NetworkSwitchService(
     }
 
     private fun replyChoices(layer: NetworkSwitchLayer, networkIdByNodeId: Map<String, String>, header: String) {
-        val choices = layer.routes.map { route ->
-            "  [b]hack [primary]${layer.level}[/] ${route.name}[/]  → [ok]${networkIdByNodeId[route.nodeId]}[/]"
+        val choices = layer.routes.map { route -> i18n.t("network-switch.hack", layer.level, route.name, networkIdByNodeId[route.nodeId] ?: "")
         }
-        val warning = "[warn]warning[/] switch firmware locks after first route commit. Uncommitted routes will be dropped."
+        val warning = i18n.t("network-switch.firmware-lock")
         connectionService.replyTerminalReceive(listOf(header) + choices + warning)
     }
 
@@ -251,8 +252,8 @@ class NetworkSwitchService(
     fun checkMove(fromNode: Node, toNode: Node): String? {
         return when (calculateConnectionStatus(fromNode, toNode)) {
             OPEN -> null
-            DROPPED -> "[error]route down[/] route to [ok]${toNode.networkId}[/] was dropped by a network switch."
-            PENDING -> "[warn b]blocked[/] route to [ok]${toNode.networkId}[/] held in standby by a network switch."
+            DROPPED -> i18n.t("network-switch.route-down", toNode.networkId)
+            PENDING -> i18n.t("network-switch.blocked", toNode.networkId)
         }
     }
 

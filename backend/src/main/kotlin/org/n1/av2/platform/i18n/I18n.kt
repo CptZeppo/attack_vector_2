@@ -5,8 +5,8 @@ import org.n1.av2.platform.config.ConfigService
 import org.n1.av2.platform.iam.user.UserEntity
 import org.n1.av2.platform.iam.user.UserEntityService
 import org.n1.av2.platform.iam.user.UserType
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.MessageSource
+import org.springframework.context.NoSuchMessageException
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.ResourceBundleMessageSource
@@ -18,6 +18,8 @@ import java.util.*
 val SUPPORTED_LANGUAGES = setOf("en", "cs", "fr")
 
 fun localeForLanguage(language: String): Locale = Locale.of(language)
+
+val fallbackLocale = Locale.ENGLISH
 
 @Configuration
 class MessageSourceConfig {
@@ -54,7 +56,15 @@ class I18n(
     fun t(key: String, vararg args: Any): String = t(key, currentLocale(), *args)
 
     fun t(key: String, locale: Locale, vararg args: Any): String {
-        return messageSource.getMessage(key, args, locale).replace("\"", "")
+        return getMessage(key, locale, *args).replace("\"", "")
+    }
+
+    private fun getMessage(key: String, locale: Locale, vararg args: Any): String {
+        return try {
+            messageSource.getMessage(key, args, locale)
+        } catch (e: NoSuchMessageException) {
+            messageSource.getMessage(key, args, fallbackLocale)
+        }
     }
 
     /** Translate to the global default language - for broadcasts that are shared by multiple hackers. */

@@ -226,7 +226,7 @@ class NodeEntityService(
             LayerType.KEYSTORE -> KeyStoreLayer(layerId, level, defaultName)
             LayerType.TRIPWIRE -> TripwireLayer(layerId, level, defaultName)
             LayerType.TIMER_ADJUSTER -> TimerAdjusterLayer(layerId, level, defaultName)
-            LayerType.DAEMON -> DaemonLayer(layerId, level, defaultName)
+            LayerType.DAEMON -> DaemonLayer(layerId, level, defaultName, i18n.t("daemon.connection-logged"))
             LayerType.NETWORK_SWITCH -> NetworkSwitchLayer(layerId, level, defaultName)
             LayerType.CORE -> CoreLayer(layerId, level, defaultName)
             LayerType.SCRIPT_INTERACTION -> ScriptInteractionLayer(layerId, level, defaultName)

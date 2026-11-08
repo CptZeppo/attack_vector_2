@@ -41,18 +41,18 @@ class LolaService(
     fun share(lolaUser: UserEntity, runId: String) {
         val lolaHackerState = hackerStateEntityService.retrieveForUserId(lolaUser.id)
         if (lolaHackerState.activity == HackerActivity.OFFLINE) {
-            connectionService.replyTerminalReceive("[info]${lolaUser.name}[/] is not connected to the network.")
+            connectionService.replyTerminalReceive(i18n.t("lola.not-connected", lolaUser.name))
             return
         }
 
         runLinkService.shareRun(runId, lolaUser, false)
 
         if (lolaHackerState.runId == runId) {
-            connectionService.replyTerminalReceive("[info]${lolaUser.name}[/] is already in this run.")
+            connectionService.replyTerminalReceive(i18n.t("lola.already-in-run", lolaUser.name))
             return
         }
         runService.enterRun(lolaUser.id, runId, lolaHackerState.connectionId)
-        connectionService.replyTerminalReceive("Called [info]${lolaUser.name}[/] to this run.")
+        connectionService.replyTerminalReceive(i18n.t("lola.called", lolaUser.name))
     }
 
     fun createLolaUser() {
@@ -68,7 +68,7 @@ class LolaService(
 
         val lolaHackerState = hackerStateEntityService.retrieveForUserId(lolaUser.id)
         if (lolaHackerState.activity == HackerActivity.OFFLINE) {
-            return SpeakResponse(false, "${lolaUser.name} is not connected to the network.")
+            return SpeakResponse(false, i18n.t("lola.not-connected", lolaUser.name))
         }
 
         connectionService.toUser(lolaUser.id, ServerActions.SERVER_SPEAK, text)

@@ -2,7 +2,6 @@ package org.n1.av2.script.access
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.annotation.PostConstruct
-import jakarta.annotation.PostConstruct
 import org.n1.av2.platform.connection.ConnectionService
 import org.n1.av2.platform.connection.ServerActions
 import org.n1.av2.platform.i18n.I18n
